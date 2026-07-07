@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env*.local
+.vercel
+
+# ── 보안: 어떤 엑셀/데이터 파일도 저장소에 올라가지 않는다 ──
+# 기업 데이터는 사용자 PC에서 브라우저로만 로드된다 (서버·저장소 전송 금지)
+*.xlsx
+*.xlsm
+*.xls
+*.csv
+data/
