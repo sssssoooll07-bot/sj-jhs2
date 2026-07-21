@@ -1,0 +1,34 @@
+name: 공고 자동 수집 (매일 08:00 KST)
+
+on:
+  schedule:
+    - cron: "0 23 * * *" # 23:00 UTC = 다음날 08:00 KST
+  workflow_dispatch: {} # 수동 실행도 가능
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 공고 수집 (JNTP + SMTECH)
+        run: node scripts/fetch-announcements.mjs
+
+      - name: 변경 시 커밋 → Vercel 자동 재배포
+        run: |
+          if git diff --quiet public/announcements.json; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/announcements.json
+          git commit -m "공고 자동 수집: $(date -u -d '+9 hours' '+%Y-%m-%d %H:%M KST')"
+          git push

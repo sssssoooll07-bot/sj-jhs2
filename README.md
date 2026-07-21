@@ -35,10 +35,21 @@
 | `/` | 대시보드 — 진행중 과제·특허·마감 임박(공고/법정의무/인증 갱신)·참여율 경고·데이터 품질 검증 |
 | `/projects` | 연구과제·지원사업 목록 + 다년차(차수/참여기관/입금) 상세, 차수합계=총액 자동 검증 |
 | `/patents` | 특허 — 등록완료(등록일 순)/출원중(출원일 순), PCT·연계과제 |
-| `/funding` | 지원사업 공고 + 출처 바로가기(JNTP·SMTECH) |
+| `/funding` | **자동 수집 공고**(JNTP·SMTECH, 매일 08:00) + 엑셀 관리 대상 공고 파이프라인 |
 | `/compliance` | 법정의무 D-day + 연구원별 총 참여율(100% 초과 경고) |
 | `/certifications` | 인증·면허·표창 + 갱신 D-day |
 | `/researchers` | 연구원 로스터(개인정보 최소수집·연구자번호 마스킹) |
+| `/library` | 자료실 — 4대보험 가입자명부·재무제표 등 발급처 바로가기 + 사내 보관함 링크(엑셀 [자료실] 시트) |
+
+## 공고 자동 수집 (매일 08:00 KST)
+
+`.github/workflows/fetch-announcements.yml`이 매일 08:00(KST)에 실행되어:
+
+1. JNTP 공개 API + SMTECH 사업공고 목록에서 **접수중 공고**를 수집하고
+2. `public/announcements.json`에 커밋하면 (공개 공고 정보만 — 기업 데이터 아님)
+3. Vercel이 자동 재배포하여 `/funding` 화면에 반영된다.
+
+한 출처가 장애여도 이전 수집분을 유지하며, GitHub Actions 탭에서 수동 실행(workflow_dispatch)도 가능하다.
 
 ## 엑셀 입력 규칙
 

@@ -33,11 +33,13 @@ export type Funding = {
 };
 export type Compliance = { kind: string; title: string; dueDate: Date | null; recurrence: string | null; note: string | null };
 export type Participation = { name: string; code: string; ratePercent: number; start: Date | null; end: Date | null };
+export type LibraryDoc = { category: string | null; name: string; url: string | null; note: string | null };
 
 export type Data = {
   projects: Project[]; phases: Phase[]; consortium: Consortium[]; disbursements: Disbursement[];
   patents: Patent[]; researchers: Researcher[]; certifications: Certification[];
   funding: Funding[]; compliance: Compliance[]; participations: Participation[];
+  library: LibraryDoc[];
   loadedAt: string;
 };
 
@@ -146,7 +148,12 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
       start: dt(r["시작일"]), end: dt(r["종료일"]),
     }));
 
-  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, loadedAt: new Date().toISOString() };
+  // [자료실] 시트는 선택 사항 — 없으면 빈 목록 (기본 발급처 링크는 화면에 내장)
+  const library: LibraryDoc[] = rows("자료실")
+    .filter((r) => s(r["서류명"]))
+    .map((r) => ({ category: s(r["구분"]), name: s(r["서류명"])!, url: s(r["발급처·링크"]), note: s(r["비고"]) }));
+
+  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, loadedAt: new Date().toISOString() };
 }
 
 const DAY = 86_400_000;

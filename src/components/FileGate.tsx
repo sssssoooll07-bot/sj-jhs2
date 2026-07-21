@@ -54,22 +54,24 @@ export function NeedFile() {
   );
 }
 
-/** 헤더 우측 데이터 상태 표시 + 교체/제거 */
-export function DataStatus() {
+/** 데이터 상태 표시 + 교체/제거 (vertical: 사이드바용 세로 배치) */
+export function DataStatus({ vertical = false }: { vertical?: boolean }) {
   const { data, fileName, remembered, clear, loadFile } = useDataCtx();
   const inputRef = useRef<HTMLInputElement>(null);
   if (!data) return null;
   return (
-    <div className="flex items-center gap-2 text-xs">
-      <span className="hidden text-slate-400 sm:inline" title={remembered ? "이 브라우저에 기억됨" : "이번 세션만"}>
+    <div className={vertical ? "space-y-1.5 text-xs" : "flex items-center gap-2 text-xs"}>
+      <p className="truncate text-slate-400" title={`${fileName}${remembered ? " · 이 브라우저에 기억됨" : ""}`}>
         📄 {fileName} {remembered ? "· 기억됨" : ""}
-      </span>
-      <button onClick={() => inputRef.current?.click()} className="rounded-lg border border-slate-300 px-2 py-1 text-slate-600 hover:bg-slate-50">
-        파일 교체
-      </button>
-      <button onClick={clear} className="rounded-lg border border-red-200 px-2 py-1 text-red-600 hover:bg-red-50">
-        데이터 제거
-      </button>
+      </p>
+      <div className="flex gap-1.5">
+        <button onClick={() => inputRef.current?.click()} className="rounded-lg border border-slate-300 px-2 py-1 text-slate-600 hover:bg-slate-50">
+          파일 교체
+        </button>
+        <button onClick={clear} className="rounded-lg border border-red-200 px-2 py-1 text-red-600 hover:bg-red-50">
+          데이터 제거
+        </button>
+      </div>
       <input
         ref={inputRef}
         type="file"
