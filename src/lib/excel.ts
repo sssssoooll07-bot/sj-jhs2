@@ -32,7 +32,10 @@ export type Funding = {
   sourceUrl: string | null; status: string; rejectReason: string | null; note: string | null;
 };
 export type Compliance = { kind: string; title: string; dueDate: Date | null; recurrence: string | null; note: string | null };
-export type Participation = { name: string; code: string; ratePercent: number; start: Date | null; end: Date | null };
+export type Participation = {
+  name: string; code: string; ratePercent: number; start: Date | null; end: Date | null;
+  role: string | null; isNew: boolean; costType: string | null; costKWon: number | null; note: string | null;
+};
 export type LibraryDoc = { category: string | null; name: string; url: string | null; note: string | null };
 
 export type Data = {
@@ -46,16 +49,24 @@ export type Data = {
 type Row = Record<string, unknown>;
 const s = (v: unknown): string | null => (v === null || v === undefined || v === "" ? null : String(v).trim());
 const n = (v: unknown): number | null => (typeof v === "number" ? v : v ? Number(String(v).replace(/,/g, "")) || null : null);
-// SheetJS는 로컬 타임존 Date를 만들 수 있어 날짜 부분만 취해 UTC 자정으로 정규화한다
+/**
+ * 날짜 정규화 — 뷰어 타임존에 따라 하루가 밀리지 않도록 항상 UTC 자정으로 맞춘다.
+ * 엑셀 날짜 셀은 시리얼 숫자로 읽어 직접 변환한다(25569 = 1899-12-30 ~ 1970-01-01 일수).
+ */
 const dt = (v: unknown): Date | null => {
-  if (v instanceof Date) return new Date(Date.UTC(v.getFullYear(), v.getMonth(), v.getDate()));
+  if (v === null || v === undefined || v === "") return null;
+  if (typeof v === "number") return new Date(Math.round((v - 25569) * 86_400_000));
+  if (v instanceof Date) return new Date(Date.UTC(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate()));
   if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}/.test(v)) return new Date(v.slice(0, 10) + "T00:00:00Z");
   return null;
 };
 const yn = (v: unknown): boolean => String(v ?? "").trim().toUpperCase() === "Y";
+/** 신규여부 등 O/X 표기 (엑셀 서식에 따라 Y도 허용) */
+const ox = (v: unknown): boolean => ["O", "Y"].includes(String(v ?? "").trim().toUpperCase());
 
 export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
-  const wb = XLSX.read(bytes, { type: "array", cellDates: true });
+  // cellDates 미사용: 날짜를 시리얼 숫자로 받아 dt()에서 타임존 영향 없이 변환한다
+  const wb = XLSX.read(bytes, { type: "array" });
   if (!wb.Sheets["과제"]) {
     throw new Error("마스터 데이터 형식이 아닙니다 — [과제] 시트를 찾을 수 없습니다.");
   }
@@ -144,10 +155,12 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
     .map((r) => ({ kind: s(r["종류"]) ?? "", title: s(r["제목"])!, dueDate: dt(r["마감일"]), recurrence: s(r["반복주기"]), note: s(r["비고"]) }));
 
   const participations: Participation[] = rows("참여율")
-    .filter((r) => s(r["연구원 성명"]))
+    .filter((r) => s(r["연구원 성명"]) && s(r["과제코드"])) // 합계·주석 행 제외
     .map((r) => ({
-      name: s(r["연구원 성명"])!, code: s(r["과제코드"]) ?? "", ratePercent: n(r["참여율(%)"]) ?? 0,
+      name: s(r["연구원 성명"])!, code: s(r["과제코드"])!, ratePercent: n(r["참여율(%)"]) ?? 0,
       start: dt(r["시작일"]), end: dt(r["종료일"]),
+      role: s(r["과제내 직위"]), isNew: ox(r["신규여부"]),
+      costType: s(r["인건비 구분"]), costKWon: n(r["인건비(천원)"]), note: s(r["비고"]),
     }));
 
   // [자료실] 시트는 선택 사항 — 없으면 빈 목록 (기본 발급처 링크는 화면에 내장)
@@ -191,6 +204,37 @@ export function collectDeadlines(data: Data, within = 60): Deadline[] {
     if (c.renewable && due) out.push({ source: "인증 갱신", title: c.name, due, dday: daysUntil(due), href: "/certifications" });
   }
   return out.filter((d) => d.dday <= within).sort((a, b) => a.dday - b.dday);
+}
+
+/** 과제별 인건비 현황 — 참여연구원 현황표 기준(현금/현물 구분 집계) */
+export type LaborCost = {
+  code: string; title: string; cashKWon: number; inKindKWon: number; totalKWon: number;
+  /** 현물 인건비와 금액이 일치하는 차수 라벨(없으면 null) — 기업부담(현물) 대사용 */
+  matchedPhaseLabel: string | null;
+  hasPhases: boolean;
+  members: Participation[];
+};
+export function laborCostByProject(data: Data): LaborCost[] {
+  const withCost = data.participations.filter((p) => p.costKWon != null);
+  const codes = [...new Set(withCost.map((p) => p.code))];
+  return codes.map((code) => {
+    const members = withCost.filter((p) => p.code === code);
+    const cash = members.filter((m) => m.costType === "현금").reduce((s, m) => s + (m.costKWon ?? 0), 0);
+    const inKind = members.filter((m) => m.costType === "현물").reduce((s, m) => s + (m.costKWon ?? 0), 0);
+    // 인건비는 해당 연차분이므로 차수 "합계"가 아니라 각 차수와 대조한다
+    const phases = data.phases.filter((ph) => ph.code === code);
+    const matched = phases.find((ph) => Math.abs((ph.inKindKWon ?? 0) - inKind) <= 1);
+    return {
+      code,
+      title: data.projects.find((p) => p.code === code)?.title ?? code,
+      cashKWon: cash,
+      inKindKWon: inKind,
+      totalKWon: cash + inKind,
+      matchedPhaseLabel: matched?.label ?? null,
+      hasPhases: phases.length > 0,
+      members: [...members].sort((a, b) => b.ratePercent - a.ratePercent),
+    };
+  });
 }
 
 /** 연구원별 총 참여율(오늘 기준, 진행중 과제) */
