@@ -6,11 +6,6 @@ import { useDataCtx } from "@/lib/data-context";
 import AutoAnnouncements from "@/components/AutoAnnouncements";
 import Link from "next/link";
 
-const SOURCES = [
-  { name: "전남테크노파크 (JNTP) 지원사업 공고", url: "https://data.jntp.or.kr/jntp/" },
-  { name: "SMTECH 중소기업 기술개발사업 종합관리시스템", url: "https://www.smtech.go.kr/front/main/main.do" },
-];
-
 /** 엑셀에 입력한 관리 대상 공고 (신청 파이프라인) */
 function ManagedFunding() {
   const { data } = useDataCtx();
@@ -67,17 +62,8 @@ function ManagedFunding() {
 export default function FundingPage() {
   return (
     <div className="space-y-5">
-      <AutoAnnouncements />
       <ManagedFunding />
-      <Section title="🔗 공고 출처 바로가기" sub="자동 수집은 아래 두 사이트를 매일 확인합니다">
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          {SOURCES.map((s) => (
-            <a key={s.url} href={s.url} target="_blank" rel="noreferrer" className="text-blue-700 hover:underline">
-              {s.name} ↗
-            </a>
-          ))}
-        </div>
-      </Section>
+      <AutoAnnouncements />
     </div>
   );
 }
