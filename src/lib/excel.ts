@@ -20,7 +20,7 @@ export type Patent = {
   claims: number | null; citations: number | null; isPCT: boolean; examStatus: string | null;
   note: string | null; projectCode: string | null;
 };
-export type Researcher = { name: string; position: string | null; degree: string | null; major: string | null; university: string | null; gradYear: string | null; researcherNo: string | null; company: string | null; note: string | null };
+export type Researcher = { name: string; position: string | null; degree: string | null; major: string | null; university: string | null; gradYear: string | null; researcherNo: string | null; company: string | null; note: string | null; active: boolean };
 export type Certification = {
   year: string; name: string; category: string; renewable: boolean; validUntil: Date | null;
   renewalDue: Date | null; rndRelated: boolean; issuer: string | null; certNo: string | null;
@@ -117,6 +117,8 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
       name: s(r["성명"])!, position: s(r["직위"]), degree: s(r["최종학위"]), major: s(r["전공"]),
       university: s(r["출신대학"]), gradYear: s(r["졸업연도"]), researcherNo: s(r["국가연구자번호"]),
       company: s(r["소속"]), note: s(r["비고"]),
+      // 재직여부 열이 없으면(구버전 엑셀) 재직으로 간주
+      active: r["재직여부"] === null || r["재직여부"] === undefined ? true : yn(r["재직여부"]),
     }));
 
   const certifications: Certification[] = rows("인증")
