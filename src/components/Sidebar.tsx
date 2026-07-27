@@ -8,6 +8,7 @@ const NAV = [
   { href: "/", label: "대시보드", icon: "▦" },
   { href: "/projects", label: "과제", icon: "⚗" },
   { href: "/patents", label: "특허", icon: "🧾" },
+  { href: "/agreements", label: "협약서", icon: "📜" },
   { href: "/funding", label: "지원사업 공고", icon: "📢" },
   { href: "/compliance", label: "법정의무·참여율", icon: "⚖" },
   { href: "/certifications", label: "인증·면허", icon: "🏅" },

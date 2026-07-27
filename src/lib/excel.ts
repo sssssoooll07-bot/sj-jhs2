@@ -37,12 +37,17 @@ export type Participation = {
   role: string | null; isNew: boolean; costType: string | null; costKWon: number | null; note: string | null;
 };
 export type LibraryDoc = { category: string | null; name: string; url: string | null; note: string | null };
+export type Agreement = {
+  code: string; program: string; fileName: string | null; signedAt: Date | null;
+  totalKWon: number | null; agency: string | null; note: string | null;
+};
 
 export type Data = {
   projects: Project[]; phases: Phase[]; consortium: Consortium[]; disbursements: Disbursement[];
   patents: Patent[]; researchers: Researcher[]; certifications: Certification[];
   funding: Funding[]; compliance: Compliance[]; participations: Participation[];
   library: LibraryDoc[];
+  agreements: Agreement[];
   loadedAt: string;
 };
 
@@ -168,7 +173,16 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
     .filter((r) => s(r["서류명"]))
     .map((r) => ({ category: s(r["구분"]), name: s(r["서류명"])!, url: s(r["발급처·링크"]), note: s(r["비고"]) }));
 
-  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, loadedAt: new Date().toISOString() };
+  // [협약서] 시트 — 과제↔협약서 파일명 매핑 (파일 자체는 브라우저에서만 연다)
+  // 과제코드(P0000-00 형식)만 데이터로 취급 — 하단 안내(※) 행 제외
+  const agreements: Agreement[] = rows("협약서")
+    .filter((r) => /^P\d{4}-/.test(String(r["과제코드"] ?? "").trim()))
+    .map((r) => ({
+      code: s(r["과제코드"])!, program: s(r["사업명"]) ?? "", fileName: s(r["협약서 파일명"]),
+      signedAt: dt(r["협약일"]), totalKWon: n(r["총사업비(천원)"]), agency: s(r["전문/전담기관"]), note: s(r["비고"]),
+    }));
+
+  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, loadedAt: new Date().toISOString() };
 }
 
 const DAY = 86_400_000;
