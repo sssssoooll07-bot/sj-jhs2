@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-07-26T07:56:33.578Z",
+ "fetchedAt": "2026-07-27T10:58:31.776Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -45,28 +45,6 @@
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1099"
   },
   {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "2026년 테크노파크 생산장비 고도화 제2차 지원계획 선정기관 과제접수 공고",
-   "category": "산업기술단지거점기능강화",
-   "summary": null,
-   "applyStart": "2026-07-08",
-   "applyEnd": "2026-07-27",
-   "announcedAt": "2026-07-07",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02866&buclCd=S8012&dtlAncmSn=1&schdSe=MO5005&aplySn=2&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "2026년도 제1차 한국무역보험공사 연계 수출지원프로그램 시행계획 안내",
-   "category": "수출지원프로그램",
-   "summary": null,
-   "applyStart": "2026-07-06",
-   "applyEnd": "2026-07-27",
-   "announcedAt": "2026-07-06",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02873&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "2026년 전남벤처스타트업 보육센터 사업화 지원 모집 공고",
@@ -76,6 +54,28 @@
    "applyEnd": "2026-07-28",
    "announcedAt": "2026-07-14",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1104"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년 테크노파크 생산장비 고도화 제2차 지원계획 선정기관 과제접수 공고",
+   "category": "산업기술단지거점기능강화",
+   "summary": null,
+   "applyStart": "2026-07-08",
+   "applyEnd": "2026-07-28",
+   "announcedAt": "2026-07-07",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02866&buclCd=S8012&dtlAncmSn=1&schdSe=MO5005&aplySn=2&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "「2026년 전라남도 탄소중립 제조혁신 고도화 2단계 사업」 참여기업 추가 모집 공고",
+   "category": "비R&D",
+   "summary": "전라남도 내 탄소저감 가능성이 높은 중소·중견기업을 대상으로 탄소중립 기업진단 및 맞춤형 패키지 기술지원을 통한 저탄소 경영체계 구축",
+   "applyStart": "2026-07-08",
+   "applyEnd": "2026-07-30",
+   "announcedAt": "2026-07-08",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1103"
   },
   {
    "source": "JNTP",
@@ -146,6 +146,17 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "2026 무탄소 전력활용 수소산업육성 기업지원사업(2차)",
+   "category": "비R&D",
+   "summary": "□ 도내 기업이 개발한 수전해시스템 소재·부품·설비에 대해 신뢰성 있는 시험 평가 서비스를 제공하고, 체계적인 수전해시스템 지원체계를 구축하여 수전해 연관기업의 도내 유치를 촉진함으로써 지역 내 청정수소산업 생태계 확립 및 기술 경쟁력 강화를 도모 □ 수소와 타 산업간 융복합을 통해 기후변화대응, 탄소중립 등 에너지 주요 현안을 해결하는 수소 산업 육성·지",
+   "applyStart": "2026-07-27",
+   "applyEnd": "2026-08-07",
+   "announcedAt": "2026-07-27",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1113"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "「2026년 지역수요맞춤형 연구개발사업」벤처·스타트업 실증지원 사업 수행기관 모집 3차 공고",
    "category": "R&D",
    "summary": "연구개발이 완료되어 제작된 시제품 기반, 시장(현장) 테스트 및 검증 결과를 제품에 추가 반영하기 위한 실증 지원",
@@ -210,6 +221,17 @@
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02874&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제1차 한국무역보험공사 연계 수출지원프로그램 시행계획 안내",
+   "category": "수출지원프로그램",
+   "summary": null,
+   "applyStart": "2026-07-06",
+   "applyEnd": "2026-08-10",
+   "announcedAt": "2026-07-06",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02873&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "2026 장성군산업농공단지활성화지원사업 2차 수혜기업 모집공고",
@@ -241,6 +263,28 @@
    "applyEnd": "2026-08-14",
    "announcedAt": "2026-06-30",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02871&buclCd=S9161&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "「2026년도 장성군 시군구연고산업육성사업」 장성군 스마트기계전자산업 활성화 지원사업 참여기업 모집 3차 공고",
+   "category": "비R&D",
+   "summary": "ㅇ (사업목적) 장성군 연고산업을 영위하는 중소기업 육성 및 일자리 창출 지원을 통해 지방소멸 대응 및 지역 경제 활력 제고 ㅇ (사업내용) 장성군 연고산업 분야 중소기업의 사업모델 발굴, 기술사업화를 위한 맞춤형 패키지 지원을 통해 지역 중소기업 경쟁력 강화",
+   "applyStart": "2026-07-27",
+   "applyEnd": "2026-08-19",
+   "announcedAt": "2026-07-27",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1114"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "「2026년도 화순군 시군구연고산업육성사업」 화순군 바이오산업 활성화 지원사업 참여기업 모집 3차 공고",
+   "category": "비R&D",
+   "summary": "ㅇ (사업목적) 지역 연고산업을 영위하는 중소기업 육성 및 일자리 창출 지원을 통해 지방소멸 대응 및 지역 경제 활력 제고 ㅇ (사업내용) 화순군 연고산업 분야 중소기업의 사업모델 발굴, 사업화, 생산성 향상 등 맞춤형 지원을 통해 지역 중소기업 경쟁력 강화",
+   "applyStart": "2026-07-27",
+   "applyEnd": "2026-08-19",
+   "announcedAt": "2026-07-27",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1116"
   },
   {
    "source": "JNTP",
