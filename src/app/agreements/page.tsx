@@ -1,34 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { fmtDate, fmtKWon } from "@/lib/excel";
-import { Badge, Empty, Section } from "@/components/ui";
+import { Empty, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
-
-/** 협약서 원본을 새 탭에서 미리보기(다운로드 버튼 없음). blob URL은 사용 후 해제한다. */
-function ViewButton({ file }: { file: File | null }) {
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
-
-  if (!file) return <span className="text-xs text-slate-400">미로드</span>;
-
-  // hwp 등 브라우저가 못 여는 형식은 안내
-  const viewable = /\.(pdf|png|jpe?g)$/i.test(file.name);
-  if (!viewable) {
-    return <span className="text-xs text-slate-400" title="브라우저에서 직접 열 수 없는 형식(HWP 등)">파일 있음(뷰어 미지원)</span>;
-  }
-  function open() {
-    const u = URL.createObjectURL(file!);
-    setUrl(u);
-    window.open(u, "_blank", "noopener,noreferrer");
-  }
-  return (
-    <button onClick={open} className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-blue-700 hover:bg-blue-50">
-      보기 ↗
-    </button>
-  );
-}
+import DocViewButton from "@/components/DocViewButton";
 
 export default function AgreementsPage() {
   const { count, loadFolder, getFile, clear } = useAgreementFiles();
@@ -103,7 +80,7 @@ export default function AgreementsPage() {
                             <td className="text-xs">{a.agency ?? "—"}</td>
                             <td>
                               <div className="flex items-center gap-2">
-                                <ViewButton file={file} />
+                                <DocViewButton file={file} />
                                 {a.fileName && !file && count > 0 && (
                                   <span className="text-xs text-amber-600" title={a.fileName}>폴더에 없음</span>
                                 )}

@@ -3,11 +3,10 @@
 import { createContext, useCallback, useContext, useState } from "react";
 
 /**
- * 협약서 파일 컨텍스트 — 보안 원칙:
- * 협약서 원본(계약금액·직인·서명 포함)은 서버·GitHub로 전송하지 않는다.
- * 사용자가 이 브라우저에서 협약서 폴더를 선택하면, 그 순간의 File 객체만 메모리에 보관하고
- * 파일명으로 과제와 매칭한다. 새로고침하면 사라지므로 저장소·localStorage에도 남지 않는다.
- * 파일은 blob URL로 "보기"만 제공하며(다운로드 버튼 없음), 폴더를 선택한 본인에게만 보인다.
+ * 로컬 문서 파일 컨텍스트 — 협약서·특허증 등 민감 원본을 브라우저에서만 연다.
+ * 보안 원칙: 파일은 서버·GitHub로 전송하지 않는다. 사용자가 이 브라우저에서
+ * 폴더를 선택하면 그 순간의 File 객체만 메모리에 보관하고, 새로고침하면 사라진다.
+ * 여러 폴더를 선택하면 누적되며(협약서 폴더 + 특허증 폴더), blob URL로 "보기"만 제공한다.
  */
 
 type Ctx = {
@@ -15,6 +14,7 @@ type Ctx = {
   count: number;
   loadFolder: (fileList: FileList) => void;
   getFile: (fileName: string | null) => File | null;
+  getByPattern: (pattern: string | null) => File | null;
   clear: () => void;
 };
 
@@ -26,14 +26,15 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
   const [files, setFiles] = useState<Map<string, File>>(new Map());
 
   const loadFolder = useCallback((fileList: FileList) => {
-    const map = new Map<string, File>();
-    for (const f of Array.from(fileList)) {
-      if (/\.(pdf|hwp|hwpx|docx?|png|jpe?g)$/i.test(f.name)) {
-        // 폴더 선택 시 경로가 붙을 수 있어 파일명만 키로 사용
-        map.set(norm(f.name), f);
+    setFiles((prev) => {
+      const map = new Map(prev); // 기존 로드에 누적
+      for (const f of Array.from(fileList)) {
+        if (/\.(pdf|hwp|hwpx|docx?|png|jpe?g)$/i.test(f.name)) {
+          map.set(norm(f.name), f);
+        }
       }
-    }
-    setFiles(map);
+      return map;
+    });
   }, []);
 
   const getFile = useCallback(
@@ -41,10 +42,24 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
     [files]
   );
 
+  // 파일명에 특정 문자열(등록번호 등)을 포함하는 파일 찾기
+  const getByPattern = useCallback(
+    (pattern: string | null) => {
+      if (!pattern) return null;
+      const p = pattern.trim().toLowerCase();
+      if (!p) return null;
+      for (const [name, file] of files) {
+        if (name.includes(p)) return file;
+      }
+      return null;
+    },
+    [files]
+  );
+
   const clear = useCallback(() => setFiles(new Map()), []);
 
   return (
-    <AgreementCtx.Provider value={{ files, count: files.size, loadFolder, getFile, clear }}>
+    <AgreementCtx.Provider value={{ files, count: files.size, loadFolder, getFile, getByPattern, clear }}>
       {children}
     </AgreementCtx.Provider>
   );

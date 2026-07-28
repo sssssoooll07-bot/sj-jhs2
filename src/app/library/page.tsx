@@ -1,7 +1,11 @@
 "use client";
 
+import { useRef } from "react";
 import { useDataCtx } from "@/lib/data-context";
+import { useAgreementFiles } from "@/lib/agreement-files";
+import { fmtDate } from "@/lib/excel";
 import { Badge, Empty, Section } from "@/components/ui";
+import DocViewButton from "@/components/DocViewButton";
 
 /**
  * 자료실 — 지원사업 신청 시 자주 쓰는 서류의 발급처 바로가기.
@@ -37,6 +41,27 @@ const SECONDARY = [
 export default function LibraryPage() {
   const { data } = useDataCtx();
   const custom = data?.library ?? [];
+  const { files, count, loadFolder, getByPattern } = useAgreementFiles();
+  const certInputRef = useRef<HTMLInputElement>(null);
+
+  // 등록특허(등록일 순) — 특허증 폴더에서 등록번호 또는 특허명으로 매칭
+  const registered = (data?.patents ?? [])
+    .filter((p) => p.status === "등록완료")
+    .sort((a, b) => +(a.registeredAt ?? 0) - +(b.registeredAt ?? 0));
+  const norm = (s: string) => s.replace(/[\s()·∙\-_]/g, "").toLowerCase();
+  const findCert = (regNumber: string | null, title: string): File | null => {
+    const byNum = regNumber ? getByPattern(regNumber) : null; // 파일명에 "10-XXXXXXX" 포함
+    if (byNum) return byNum;
+    // 등록번호가 없거나 미매칭 → 특허명 앞부분(정규화 5자)이 파일명에 포함되는지
+    const prefix = norm(title).slice(0, 5);
+    if (prefix.length >= 4) {
+      for (const [name, file] of files) {
+        if (norm(name).includes(prefix)) return file;
+      }
+    }
+    return null;
+  };
+  const matchedCount = registered.filter((p) => findCert(p.regNumber, p.title)).length;
 
   return (
     <div className="space-y-5">
@@ -87,6 +112,68 @@ export default function LibraryPage() {
             ))}
           </tbody>
         </table>
+      </Section>
+
+      {/* 특허증 — 브라우저 로컬 로드, 보기 전용 */}
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-emerald-800">
+            🏅 특허증 폴더를 선택하면 등록특허별로 자동 연결됩니다.{" "}
+            {count > 0 && <b>{count}개 파일 로드됨 · {matchedCount}/{registered.length}건 매칭</b>}
+          </p>
+          <button
+            onClick={() => certInputRef.current?.click()}
+            className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            특허증 폴더 선택
+          </button>
+          <input
+            ref={certInputRef}
+            type="file"
+            // @ts-expect-error webkitdirectory는 표준 타입에 없음
+            webkitdirectory=""
+            directory=""
+            multiple
+            className="hidden"
+            onChange={(e) => e.target.files && loadFolder(e.target.files)}
+          />
+        </div>
+        <p className="mt-2 text-xs text-emerald-700">
+          특허증 원본은 서버·GitHub에 저장되지 않으며, 폴더를 선택한 본인에게만 보입니다(다운로드 없이 열람만).
+        </p>
+      </div>
+
+      <Section title={`📜 특허증 — 등록특허 ${registered.length}건`} sub="등록번호 순 · 특허 탭의 등록완료 특허와 연결">
+        {registered.length === 0 ? (
+          <Empty message="등록완료 특허가 없습니다." />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table-base">
+              <thead>
+                <tr><th>특허 명칭</th><th>등록번호</th><th>등록일</th><th>특허권자</th><th>특허증</th></tr>
+              </thead>
+              <tbody>
+                {registered.map((p, i) => {
+                  const cert = findCert(p.regNumber, p.title);
+                  return (
+                    <tr key={i} className="hover:bg-slate-50">
+                      <td className="font-medium">{p.title}</td>
+                      <td className="font-mono text-xs">{p.regNumber ?? "—"}</td>
+                      <td className="whitespace-nowrap text-xs">{fmtDate(p.registeredAt)}</td>
+                      <td className="text-xs">{p.owner ?? "—"}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <DocViewButton file={cert} />
+                          {!cert && count > 0 && <span className="text-xs text-amber-600">폴더에 없음</span>}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Section>
 
       <Section
