@@ -9,7 +9,7 @@ export default function Dashboard() {
   return (
     <WithData>
       {(data) => {
-        const deadlines = collectDeadlines(data, 60);
+        const deadlines = collectDeadlines(data, 90);
         const totals = participationTotals(data);
         const over = totals.filter((t) => t.total > 100);
         const active = data.projects.filter((p) => p.status === "진행중");
@@ -21,7 +21,7 @@ export default function Dashboard() {
         const cards = [
           { href: "/projects", label: "진행중 과제", value: `${active.length}건`, sub: `전체 ${data.projects.length}건` },
           { href: "/patents", label: "특허", value: `${registered + filed}건`, sub: `등록 ${registered} · 출원 ${filed}` },
-          { href: "/funding", label: "마감 임박 (60일 내)", value: `${deadlines.length}건`, sub: "공고 신청 · 법정의무 · 인증 갱신" },
+          { href: "/projects", label: "과제 마감 임박 (90일 내)", value: `${deadlines.length}건`, sub: "진행중 과제 수행기간 종료" },
           { href: "/compliance", label: "참여율 경고", value: `${over.length}명`, sub: "합계 100% 초과" },
         ];
 
@@ -38,9 +38,9 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-              <Section title="⏰ 마감 임박" sub="공고 신청 마감 · 법정의무 · 인증 갱신 (D-day 오름차순)">
+              <Section title="⏰ 과제 마감 임박" sub="진행중 과제의 수행기간 종료 (D-day 오름차순) · 공고·법정의무·인증 마감은 각 화면에서 관리">
                 {deadlines.length === 0 ? (
-                  <Empty message="60일 내 마감 항목이 없습니다." />
+                  <Empty message="수행기간 종료가 임박한 과제가 없습니다." />
                 ) : (
                   <ul className="divide-y divide-slate-100">
                     {deadlines.map((d, i) => (
@@ -48,9 +48,9 @@ export default function Dashboard() {
                         <Link href={d.href} className="flex items-center gap-3 py-2 hover:bg-slate-50">
                           <Dday days={d.dday} />
                           <span className="min-w-0 flex-1 truncate text-sm">
-                            <Badge tone="blue">{d.source}</Badge> <span className="ml-1">{d.title}</span>
+                            <Badge tone={d.source === "연구과제" ? "blue" : "violet"}>{d.source}</Badge> <span className="ml-1">{d.title}</span>
                           </span>
-                          <span className="text-xs text-slate-400">{fmtDate(d.due)}</span>
+                          <span className="text-xs text-slate-400">종료 {fmtDate(d.due)}</span>
                         </Link>
                       </li>
                     ))}

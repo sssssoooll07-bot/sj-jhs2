@@ -202,22 +202,26 @@ export function fmtDate(d: Date | null | undefined): string {
   return `${d.getUTCFullYear()}.${String(d.getUTCMonth() + 1).padStart(2, "0")}.${String(d.getUTCDate()).padStart(2, "0")}`;
 }
 
-/** 대시보드용 마감 임박 항목(공고 신청·법정의무·인증 갱신) */
+/**
+ * 대시보드 마감 임박 — 진행중 과제의 수행기간(종료일) 임박만 표시한다.
+ * 공고 신청·법정의무·인증 갱신 마감은 각자 화면에서 관리하고 여기엔 넣지 않는다.
+ * 종료 30일 경과분까지는 정산·보고가 남아있을 수 있어 함께 노출한다.
+ */
 export type Deadline = { source: string; title: string; due: Date; dday: number; href: string };
-export function collectDeadlines(data: Data, within = 60): Deadline[] {
+export function collectDeadlines(data: Data, within = 90): Deadline[] {
   const out: Deadline[] = [];
-  for (const f of data.funding) {
-    if (f.applyDue && ["관심", "검토중", "신청준비"].includes(f.status))
-      out.push({ source: "공고 신청", title: f.title, due: f.applyDue, dday: daysUntil(f.applyDue), href: "/funding" });
+  for (const p of data.projects) {
+    if (p.status === "진행중" && p.endDate) {
+      out.push({
+        source: p.type === "연구과제" ? "연구과제" : "지원사업",
+        title: p.title,
+        due: p.endDate,
+        dday: daysUntil(p.endDate),
+        href: "/projects",
+      });
+    }
   }
-  for (const c of data.compliance) {
-    if (c.dueDate) out.push({ source: "법정의무", title: c.title, due: c.dueDate, dday: daysUntil(c.dueDate), href: "/compliance" });
-  }
-  for (const c of data.certifications) {
-    const due = c.renewalDue ?? c.validUntil;
-    if (c.renewable && due) out.push({ source: "인증 갱신", title: c.name, due, dday: daysUntil(due), href: "/certifications" });
-  }
-  return out.filter((d) => d.dday <= within).sort((a, b) => a.dday - b.dday);
+  return out.filter((d) => d.dday <= within && d.dday >= -30).sort((a, b) => a.dday - b.dday);
 }
 
 /** 과제별 인건비 현황 — 참여연구원 현황표 기준(현금/현물 구분 집계) */
