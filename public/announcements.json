@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-07-28T08:05:59.214Z",
+ "fetchedAt": "2026-07-29T08:11:53.734Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -32,17 +32,6 @@
    "applyEnd": "2026-07-21",
    "announcedAt": "2026-06-30",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02872&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 전남벤처스타트업 보육센터 사업화 지원 모집 공고",
-   "category": "비R&D",
-   "summary": "전남형 청년창업사관학교 입교생의 스케일업 지원을 통한 유망기업 맞춤형 사업화 지원",
-   "applyStart": "2026-07-15",
-   "applyEnd": "2026-07-28",
-   "announcedAt": "2026-07-14",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1104"
   },
   {
    "source": "SMTECH",
@@ -91,23 +80,12 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-06-26",
-   "applyEnd": "2026-07-31",
-   "announcedAt": "2026-06-26",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년도 중소기업 연구인력지원사업(파견) 7월 공고",
    "category": "공공연연구인력파견지원(참여기업접수용)",
    "summary": null,
    "applyStart": "2026-07-01",
    "applyEnd": "2026-07-31",
-   "announcedAt": "2026-02-04",
+   "announcedAt": "2026-08-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=6&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
@@ -120,6 +98,17 @@
    "applyEnd": "2026-07-31",
    "announcedAt": "2026-06-26",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-06-26",
+   "applyEnd": "2026-07-31",
+   "announcedAt": "2026-06-26",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -285,6 +274,17 @@
    "applyEnd": "2026-08-19",
    "announcedAt": "2026-07-27",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1116"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 전남형 스마트공장(기초단계) 보급·확산사업 지원공고",
+   "category": "비R&D",
+   "summary": "전남 소재 제조기업을 대상으로 지방비 60%(도 30, 시군 30)를 지원하여 스마트공장 기초단계 구축 지원",
+   "applyStart": "2026-07-28",
+   "applyEnd": "2026-08-21",
+   "announcedAt": "2026-07-24",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1112"
   },
   {
    "source": "JNTP",
