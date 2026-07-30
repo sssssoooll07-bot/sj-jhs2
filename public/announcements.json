@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-07-27T10:58:31.776Z",
+ "fetchedAt": "2026-07-29T08:11:53.734Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -32,28 +32,6 @@
    "applyEnd": "2026-07-21",
    "announcedAt": "2026-06-30",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02872&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년도 산업 공정부산물의 탄소중립 전환 재자원화 기술 실증지원센터 구축사업 기업지원사업 2차공고",
-   "category": "비R&D",
-   "summary": "산업 공정부산물 재자원화 산업 육성을 위한 실증 기반 활용 재자원화 기술지원",
-   "applyStart": "2026-07-07",
-   "applyEnd": "2026-07-27",
-   "announcedAt": "2026-07-06",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1099"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 전남벤처스타트업 보육센터 사업화 지원 모집 공고",
-   "category": "비R&D",
-   "summary": "전남형 청년창업사관학교 입교생의 스케일업 지원을 통한 유망기업 맞춤형 사업화 지원",
-   "applyStart": "2026-07-15",
-   "applyEnd": "2026-07-28",
-   "announcedAt": "2026-07-14",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1104"
   },
   {
    "source": "SMTECH",
@@ -107,7 +85,7 @@
    "summary": null,
    "applyStart": "2026-07-01",
    "applyEnd": "2026-07-31",
-   "announcedAt": "2026-02-04",
+   "announcedAt": "2026-08-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=6&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
@@ -168,7 +146,7 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
-   "title": "2026년 전남농공단지 기업맞춤형 특화지원사업 수혜기업 2차 모집공고(여수,순천,구례,장흥,영암,함평)",
+   "title": "2026년 전남농공단지 기업맞춤형 특화지원사업 수혜기업 3차 모집공고(여수,순천,구례,장흥,영암,함평)",
    "category": "비R&D",
    "summary": "전남지역 농공단지 입주기업의 경영개선 및 선순환 촉진을 위한 시제품제작, 국내외 판로개척, 마케팅 지원 등의 사업화 특화지원으로 농공단지 입주기업들의 성장을 촉진하고 새로운 일자리 창출에 기여",
    "applyStart": "2026-07-21",
@@ -234,6 +212,17 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "2026년 생분해성 플라스틱 표준개발 및 평가 기반구축 기업지원 사업 2차 공고",
+   "category": "비R&D",
+   "summary": "생분해성 플라스틱 관련 중소·중견기업 대상 생분해 및 바이오플라스틱 관련 산업 활성화",
+   "applyStart": "2026-07-28",
+   "applyEnd": "2026-08-14",
+   "announcedAt": "2026-07-27",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1115"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "2026 장성군산업농공단지활성화지원사업 2차 수혜기업 모집공고",
    "category": "비R&D",
    "summary": "ㅇ (사업목적) 장성군 산업‧농공단지 및 지역산업 육성을 위해 장성군 소재 중소기업들의 기술 및 사업화 경쟁력 강화",
@@ -285,6 +274,28 @@
    "applyEnd": "2026-08-19",
    "announcedAt": "2026-07-27",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1116"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 전남형 스마트공장(기초단계) 보급·확산사업 지원공고",
+   "category": "비R&D",
+   "summary": "전남 소재 제조기업을 대상으로 지방비 60%(도 30, 시군 30)를 지원하여 스마트공장 기초단계 구축 지원",
+   "applyStart": "2026-07-28",
+   "applyEnd": "2026-08-21",
+   "announcedAt": "2026-07-24",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1112"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "전남 지역특화형 스마트공장(식품, 바이오) 구축지원사업(기초) 공고",
+   "category": "비R&D",
+   "summary": "기초단계 스마트공장 구축 지원",
+   "applyStart": "2026-07-28",
+   "applyEnd": "2026-08-21",
+   "announcedAt": "2026-07-28",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1117"
   },
   {
    "source": "JNTP",
