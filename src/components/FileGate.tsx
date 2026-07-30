@@ -17,8 +17,8 @@ function LoginScreen() {
     setLocalErr(null);
     try {
       await signIn(email, password);
-    } catch {
-      setLocalErr("이메일 또는 비밀번호가 올바르지 않습니다.");
+    } catch (e) {
+      setLocalErr(e instanceof Error ? e.message : "로그인에 실패했습니다.");
     } finally {
       setBusy(false);
     }

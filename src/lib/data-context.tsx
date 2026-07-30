@@ -153,7 +153,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const signIn = useCallback(async (email: string, password: string) => {
     if (!auth) throw new Error("Firebase가 설정되지 않았습니다.");
     setError(null);
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+      const code = (e as { code?: string })?.code ?? "";
+      if (code === "auth/operation-not-allowed" || code === "auth/configuration-not-found") {
+        throw new Error("Firebase 콘솔에서 이메일/비밀번호 로그인이 아직 켜지지 않았습니다.");
+      }
+      if (code === "auth/network-request-failed") {
+        throw new Error("네트워크 오류로 로그인하지 못했습니다.");
+      }
+      // invalid-credential / user-not-found / wrong-password
+      throw new Error("이메일 또는 비밀번호가 올바르지 않습니다. (계정은 Firebase 콘솔 Authentication → Users에서 추가)");
+    }
   }, []);
 
   const signOutUser = useCallback(async () => {

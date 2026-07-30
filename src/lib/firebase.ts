@@ -11,13 +11,16 @@ import { getStorage, type FirebaseStorage } from "firebase/storage";
  * 보안: 이 서비스는 '엑셀 마스터 데이터'만 Firebase에 저장한다.
  * 협약서·특허증 원본은 Firebase에 올리지 않고 계속 브라우저 로컬에서만 연다.
  */
+// Firebase 웹 config는 공개용 값이다(Firebase 공식: 클라이언트에 노출되어도 안전).
+// 실제 접근 제어는 Authentication(로그인) + Storage 보안 규칙(storage.rules)이 담당한다.
+// 환경변수가 있으면 우선 사용하고, 없으면 아래 기본값(sj-jhs-deploy1 프로젝트)을 쓴다.
 const cfg = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "AIzaSyBjodHZuwC8AAD5LeFMZ_gfCUTlv1poMCQ",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "sj-jhs-deploy1.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "sj-jhs-deploy1",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "sj-jhs-deploy1.firebasestorage.app",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "22296007232",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "1:22296007232:web:72350a1b92290e189305a5",
 };
 
 export const firebaseEnabled = Boolean(cfg.apiKey && cfg.projectId && cfg.storageBucket && cfg.appId);
