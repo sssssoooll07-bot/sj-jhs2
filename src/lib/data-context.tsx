@@ -1,12 +1,20 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { parseWorkbook, type Data } from "@/lib/excel";
+import { auth, storage, firebaseEnabled, MASTER_PATH } from "@/lib/firebase";
 
 /**
  * 데이터 컨텍스트 — 보안 원칙:
- * 엑셀 파일은 사용자 브라우저 안에서만 읽고 파싱한다. 서버·저장소로 전송하지 않는다.
- * 새로고침 편의를 위해 파일 바이트를 이 브라우저의 localStorage에만 보관한다("이 기기에 기억").
+ * 엑셀 파일은 사용자 브라우저 안에서만 파싱한다.
+ *
+ * Firebase가 설정된 경우(firebaseEnabled): 로그인하면 마스터 엑셀을 Firebase Storage에서
+ *   자동으로 내려받아 표시한다. 매번 파일을 고를 필요가 없다. (관리자는 새 엑셀을 업로드)
+ * Firebase 미설정: 기존처럼 브라우저에서 파일을 선택해 로드한다(서버·저장소 전송 없음).
+ *
+ * 어느 경우든 협약서·특허증 원본은 Firebase에 올리지 않고 로컬에서만 연다.
  */
 
 const STORAGE_KEY = "rlms-lite-file-v1";
@@ -19,15 +27,21 @@ type Ctx = {
   error: string | null;
   loadFile: (file: File, remember: boolean) => Promise<void>;
   clear: () => void;
+  // Firebase 연동
+  firebaseEnabled: boolean;
+  user: User | null;
+  authReady: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOutUser: () => Promise<void>;
+  uploadMaster: (file: File) => Promise<void>;
+  source: "firebase" | "local" | null;
 };
 
 const DataCtx = createContext<Ctx | null>(null);
 
 function b64encode(bytes: Uint8Array): string {
   let out = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) {
-    out += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  }
+  for (let i = 0; i < bytes.length; i += 0x8000) out += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
   return btoa(out);
 }
 function b64decode(b64: string): Uint8Array {
@@ -43,10 +57,51 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [remembered, setRemembered] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [authReady, setAuthReady] = useState(!firebaseEnabled);
+  const [source, setSource] = useState<"firebase" | "local" | null>(null);
 
+  // Firebase Storage에서 마스터 엑셀 자동 로드
+  const loadFromFirebase = useCallback(async () => {
+    if (!storage) return false;
+    try {
+      const url = await getDownloadURL(ref(storage, MASTER_PATH));
+      const res = await fetch(url);
+      if (!res.ok) return false;
+      const buf = await res.arrayBuffer();
+      setData(parseWorkbook(new Uint8Array(buf)));
+      setFileName("신정개발_RLMS_마스터데이터.xlsx (Firebase)");
+      setSource("firebase");
+      return true;
+    } catch {
+      // 아직 업로드된 엑셀이 없거나 권한 없음 → 업로드/파일선택 화면
+      return false;
+    }
+  }, []);
+
+  // 인증 상태 감시 (Firebase 사용 시)
   useEffect(() => {
+    if (!firebaseEnabled || !auth) return;
+    const unsub = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      setAuthReady(true);
+      if (u) {
+        setReady(false);
+        await loadFromFirebase();
+        setReady(true);
+      } else {
+        setData(null);
+        setSource(null);
+        setReady(true);
+      }
+    });
+    return () => unsub();
+  }, [loadFromFirebase]);
+
+  // Firebase 미사용 시: 로컬 기억/개발 파일 자동 로드
+  useEffect(() => {
+    if (firebaseEnabled) return;
     (async () => {
-      // 1) 이 기기에 기억된 파일 복원 (브라우저 밖으로 나가지 않음)
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
@@ -54,22 +109,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           setData(parseWorkbook(b64decode(b64)));
           setFileName(name);
           setRemembered(true);
+          setSource("local");
           setReady(true);
           return;
         }
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
-      // 2) 로컬 개발 편의: 개발 머신의 data/ 폴더 파일 자동 로드 (Vercel에서는 항상 404)
       try {
         const res = await fetch("/api/local-file");
         if (res.ok) {
           const buf = await res.arrayBuffer();
           setData(parseWorkbook(new Uint8Array(buf)));
           setFileName(decodeURIComponent(res.headers.get("x-file-name") ?? "로컬 파일"));
+          setSource("local");
         }
       } catch {
-        /* 무시 — 파일 선택 화면 표시 */
+        /* 파일 선택 화면 */
       }
       setReady(true);
     })();
@@ -83,6 +139,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setData(parsed);
       setFileName(file.name);
       setRemembered(remember);
+      setSource("local");
       if (remember) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: file.name, b64: b64encode(bytes), savedAt: new Date().toISOString() }));
       } else {
@@ -93,15 +150,45 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const signIn = useCallback(async (email: string, password: string) => {
+    if (!auth) throw new Error("Firebase가 설정되지 않았습니다.");
+    setError(null);
+    await signInWithEmailAndPassword(auth, email, password);
+  }, []);
+
+  const signOutUser = useCallback(async () => {
+    if (auth) await signOut(auth);
+    setData(null);
+    setSource(null);
+  }, []);
+
+  // 관리자: 새 마스터 엑셀을 Firebase Storage에 업로드 → 즉시 반영
+  const uploadMaster = useCallback(async (file: File) => {
+    if (!storage) throw new Error("Firebase가 설정되지 않았습니다.");
+    setError(null);
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    parseWorkbook(bytes); // 형식 검증(실패 시 throw)
+    await uploadBytes(ref(storage, MASTER_PATH), bytes, {
+      contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    await loadFromFirebase();
+  }, [loadFromFirebase]);
+
   const clear = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setData(null);
     setFileName(null);
     setRemembered(false);
+    setSource(null);
   }, []);
 
   return (
-    <DataCtx.Provider value={{ data, fileName, remembered, ready, error, loadFile, clear }}>
+    <DataCtx.Provider
+      value={{
+        data, fileName, remembered, ready, error, loadFile, clear,
+        firebaseEnabled, user, authReady, signIn, signOutUser, uploadMaster, source,
+      }}
+    >
       {children}
     </DataCtx.Provider>
   );
