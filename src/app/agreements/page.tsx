@@ -8,7 +8,7 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import DocViewButton from "@/components/DocViewButton";
 
 export default function AgreementsPage() {
-  const { count, cloud, loading, uploading, loadFolder, getByName, clear } = useAgreementFiles();
+  const { count, cloud, loading, uploading, error, loadFolder, getByName, clear } = useAgreementFiles();
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -65,6 +65,7 @@ export default function AgreementsPage() {
                   ? "협약서는 로그인한 사용자만 접근하며, 한 번 업로드하면 이후엔 로그인만 하면 자동으로 보입니다. 다운로드 없이 열람만 지원합니다."
                   : "다운로드 버튼은 제공하지 않습니다. 협약서는 계약금액·직인·서명이 담긴 민감 문서이므로 열람만 지원합니다."}
               </p>
+              {error && <p className="mt-2 text-sm font-medium text-red-600">⚠ {error}</p>}
             </div>
 
             <Section title={`📜 사업별 협약서 — ${rows.length}건`} sub="총사업비·전담기관은 협약서 원본 기준">

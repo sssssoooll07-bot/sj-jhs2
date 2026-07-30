@@ -41,7 +41,7 @@ const SECONDARY = [
 export default function LibraryPage() {
   const { data } = useDataCtx();
   const custom = data?.library ?? [];
-  const { count, cloud, loading, uploading, loadFolder, getByPattern } = useAgreementFiles();
+  const { count, cloud, loading, uploading, error: certError, loadFolder, getByPattern } = useAgreementFiles();
   const certInputRef = useRef<HTMLInputElement>(null);
 
   // 등록특허(등록일 순) — 특허증에서 등록번호 또는 특허명으로 매칭
@@ -144,6 +144,7 @@ export default function LibraryPage() {
             ? "특허증은 로그인한 사용자만 접근하며, 한 번 업로드하면 이후엔 로그인만 하면 자동으로 보입니다(다운로드 없이 열람만)."
             : "특허증 원본은 서버·GitHub에 저장되지 않으며, 폴더를 선택한 본인에게만 보입니다(다운로드 없이 열람만)."}
         </p>
+        {certError && <p className="mt-2 text-sm font-medium text-red-600">⚠ {certError}</p>}
       </div>
 
       <Section title={`📜 특허증 — 등록특허 ${registered.length}건`} sub="등록번호 순 · 특허 탭의 등록완료 특허와 연결">

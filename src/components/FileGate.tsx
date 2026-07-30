@@ -65,7 +65,7 @@ export function NeedFile() {
     if (firebaseEnabled) {
       // 로그인 상태인데 데이터가 없음 = 아직 엑셀 미업로드 → 관리자가 업로드
       setUploading(true);
-      try { await uploadMaster(f); } finally { setUploading(false); }
+      try { await uploadMaster(f); } catch { /* 에러는 error 상태로 표시됨 */ } finally { setUploading(false); }
     } else {
       await loadFile(f, remember);
     }

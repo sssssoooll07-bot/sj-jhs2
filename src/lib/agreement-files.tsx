@@ -27,6 +27,7 @@ type Ctx = {
   cloud: boolean; // Firebase Storage 모드 여부
   loading: boolean;
   uploading: boolean;
+  error: string | null;
   loadFolder: (fileList: FileList, category: Category) => Promise<void>;
   getByName: (name: string | null) => DocRef | null;
   getByPattern: (pattern: string | null) => DocRef | null;
@@ -41,6 +42,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
   const [docs, setDocs] = useState<Map<string, DocRef>>(new Map());
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Firebase 모드: 로그인 상태에서 Storage의 파일 목록을 불러온다(내용은 열 때 지연 로드)
   const refresh = useCallback(async () => {
@@ -78,6 +80,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
       if (firebaseEnabled && storage) {
         // 관리자 업로드: 선택한 폴더의 문서를 Storage에 올린다
         setUploading(true);
+        setError(null);
         try {
           const prefix = category === "patents" ? PATENTS_PREFIX : AGREEMENTS_PREFIX;
           for (const f of files) {
@@ -85,6 +88,11 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
             await uploadBytes(ref(storage, `${prefix}/${f.name}`), bytes);
           }
           await refresh();
+        } catch (e) {
+          const code = (e as { code?: string })?.code ?? "";
+          if (code === "storage/unauthorized") setError("업로드가 거부됐습니다 — Firebase Storage 규칙에 협약서·특허증 경로를 추가하고 게시했는지 확인하세요.");
+          else if (code === "storage/unauthenticated") setError("로그인이 필요합니다.");
+          else setError(e instanceof Error ? e.message : "업로드에 실패했습니다.");
         } finally {
           setUploading(false);
         }
@@ -135,7 +143,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
 
   return (
     <DocCtx.Provider
-      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, loadFolder, getByName, getByPattern, openDoc, clear }}
+      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, openDoc, clear }}
     >
       {children}
     </DocCtx.Provider>

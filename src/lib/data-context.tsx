@@ -178,12 +178,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const uploadMaster = useCallback(async (file: File) => {
     if (!storage) throw new Error("Firebase가 설정되지 않았습니다.");
     setError(null);
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    parseWorkbook(bytes); // 형식 검증(실패 시 throw)
-    await uploadBytes(ref(storage, MASTER_PATH), bytes, {
-      contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    await loadFromFirebase();
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      parseWorkbook(bytes); // 형식 검증(실패 시 throw)
+      await uploadBytes(ref(storage, MASTER_PATH), bytes, {
+        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      await loadFromFirebase();
+    } catch (e) {
+      const code = (e as { code?: string })?.code ?? "";
+      if (code === "storage/unauthorized") {
+        setError("업로드가 거부됐습니다 — Firebase 콘솔 Storage → 규칙에서 최신 규칙을 게시했는지 확인하세요.");
+      } else if (code === "storage/unauthenticated") {
+        setError("로그인이 필요합니다. 다시 로그인해 주세요.");
+      } else if (code.startsWith("storage/")) {
+        setError(`업로드 실패 (${code}). 잠시 후 다시 시도하세요.`);
+      } else {
+        setError(e instanceof Error ? e.message : "엑셀 형식이 올바르지 않습니다.");
+      }
+      throw e;
+    }
   }, [loadFromFirebase]);
 
   const clear = useCallback(() => {
