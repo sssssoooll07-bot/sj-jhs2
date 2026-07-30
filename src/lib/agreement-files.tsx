@@ -1,72 +1,149 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { getBlob, listAll, ref, uploadBytes } from "firebase/storage";
+import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX } from "@/lib/firebase";
 
 /**
- * 로컬 문서 파일 컨텍스트 — 협약서·특허증 등 민감 원본을 브라우저에서만 연다.
- * 보안 원칙: 파일은 서버·GitHub로 전송하지 않는다. 사용자가 이 브라우저에서
- * 폴더를 선택하면 그 순간의 File 객체만 메모리에 보관하고, 새로고침하면 사라진다.
- * 여러 폴더를 선택하면 누적되며(협약서 폴더 + 특허증 폴더), blob URL로 "보기"만 제공한다.
+ * 문서 파일 컨텍스트 — 협약서·특허증 원본을 연다.
+ *
+ * Firebase 사용 시(cloud): 로그인하면 Storage(agreements/, patents/)의 파일 목록을 자동으로 불러오고,
+ *   "보기"를 누를 때만 그 파일을 내려받아 새 탭에서 연다(폴더 선택 불필요, 로그인한 본인만 접근).
+ *   관리자는 폴더를 한 번 업로드하면 이후 모든 로그인 사용자가 본다.
+ * Firebase 미사용: 기존처럼 브라우저에서 폴더를 선택해 로컬 파일로만 연다(서버 전송 없음).
+ *
+ * 어느 경우든 "보기"만 제공한다(다운로드 버튼 없음).
  */
 
+export type Category = "agreements" | "patents";
+
+export type DocRef =
+  | { name: string; kind: "local"; file: File }
+  | { name: string; kind: "firebase"; path: string };
+
 type Ctx = {
-  files: Map<string, File>; // 파일명(소문자) → File
   count: number;
-  loadFolder: (fileList: FileList) => void;
-  getFile: (fileName: string | null) => File | null;
-  getByPattern: (pattern: string | null) => File | null;
+  cloud: boolean; // Firebase Storage 모드 여부
+  loading: boolean;
+  uploading: boolean;
+  loadFolder: (fileList: FileList, category: Category) => Promise<void>;
+  getByName: (name: string | null) => DocRef | null;
+  getByPattern: (pattern: string | null) => DocRef | null;
+  openDoc: (d: DocRef) => Promise<void>;
   clear: () => void;
 };
 
-const AgreementCtx = createContext<Ctx | null>(null);
-
+const DocCtx = createContext<Ctx | null>(null);
 const norm = (name: string) => name.trim().toLowerCase();
 
 export function AgreementFilesProvider({ children }: { children: React.ReactNode }) {
-  const [files, setFiles] = useState<Map<string, File>>(new Map());
+  const [docs, setDocs] = useState<Map<string, DocRef>>(new Map());
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const loadFolder = useCallback((fileList: FileList) => {
-    setFiles((prev) => {
-      const map = new Map(prev); // 기존 로드에 누적
-      for (const f of Array.from(fileList)) {
-        if (/\.(pdf|hwp|hwpx|docx?|png|jpe?g)$/i.test(f.name)) {
-          map.set(norm(f.name), f);
+  // Firebase 모드: 로그인 상태에서 Storage의 파일 목록을 불러온다(내용은 열 때 지연 로드)
+  const refresh = useCallback(async () => {
+    if (!storage) return;
+    setLoading(true);
+    try {
+      const map = new Map<string, DocRef>();
+      for (const prefix of [AGREEMENTS_PREFIX, PATENTS_PREFIX]) {
+        try {
+          const res = await listAll(ref(storage, prefix));
+          for (const item of res.items) {
+            map.set(norm(item.name), { name: item.name, kind: "firebase", path: item.fullPath });
+          }
+        } catch {
+          /* 폴더가 아직 비어있음 */
         }
       }
-      return map;
-    });
+      setDocs(map);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const getFile = useCallback(
-    (fileName: string | null) => (fileName ? files.get(norm(fileName)) ?? null : null),
-    [files]
+  useEffect(() => {
+    if (!firebaseEnabled || !auth) return;
+    return onAuthStateChanged(auth, (u) => {
+      if (u) refresh();
+      else setDocs(new Map());
+    });
+  }, [refresh]);
+
+  const loadFolder = useCallback(
+    async (fileList: FileList, category: Category) => {
+      const files = Array.from(fileList).filter((f) => /\.(pdf|hwp|hwpx|docx?|png|jpe?g)$/i.test(f.name));
+      if (firebaseEnabled && storage) {
+        // 관리자 업로드: 선택한 폴더의 문서를 Storage에 올린다
+        setUploading(true);
+        try {
+          const prefix = category === "patents" ? PATENTS_PREFIX : AGREEMENTS_PREFIX;
+          for (const f of files) {
+            const bytes = new Uint8Array(await f.arrayBuffer());
+            await uploadBytes(ref(storage, `${prefix}/${f.name}`), bytes);
+          }
+          await refresh();
+        } finally {
+          setUploading(false);
+        }
+      } else {
+        // 로컬 모드: 메모리에 누적
+        setDocs((prev) => {
+          const map = new Map(prev);
+          for (const f of files) map.set(norm(f.name), { name: f.name, kind: "local", file: f });
+          return map;
+        });
+      }
+    },
+    [refresh]
   );
 
-  // 파일명에 특정 문자열(등록번호 등)을 포함하는 파일 찾기
+  const getByName = useCallback(
+    (name: string | null) => (name ? docs.get(norm(name)) ?? null : null),
+    [docs]
+  );
+
   const getByPattern = useCallback(
     (pattern: string | null) => {
       if (!pattern) return null;
       const p = pattern.trim().toLowerCase();
       if (!p) return null;
-      for (const [name, file] of files) {
-        if (name.includes(p)) return file;
-      }
+      for (const [name, d] of docs) if (name.includes(p)) return d;
       return null;
     },
-    [files]
+    [docs]
   );
 
-  const clear = useCallback(() => setFiles(new Map()), []);
+  // "보기" — 로컬이든 클라우드든 blob으로 받아 새 탭에서 연다(다운로드 버튼 없음)
+  const openDoc = useCallback(async (d: DocRef) => {
+    let blob: Blob;
+    if (d.kind === "local") {
+      blob = d.file;
+    } else {
+      if (!storage) return;
+      blob = await getBlob(ref(storage, d.path));
+    }
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
+    // 새 탭이 로드된 뒤 해제
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  }, []);
+
+  const clear = useCallback(() => setDocs(new Map()), []);
 
   return (
-    <AgreementCtx.Provider value={{ files, count: files.size, loadFolder, getFile, getByPattern, clear }}>
+    <DocCtx.Provider
+      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, loadFolder, getByName, getByPattern, openDoc, clear }}
+    >
       {children}
-    </AgreementCtx.Provider>
+    </DocCtx.Provider>
   );
 }
 
 export function useAgreementFiles(): Ctx {
-  const ctx = useContext(AgreementCtx);
+  const ctx = useContext(DocCtx);
   if (!ctx) throw new Error("AgreementFilesProvider가 필요합니다.");
   return ctx;
 }

@@ -1,13 +1,20 @@
 rules_version = '2';
 
-// Firebase Storage 보안 규칙 — 마스터 엑셀은 "로그인한 사용자만" 읽고 쓸 수 있다.
-// 협약서·특허증 등 민감 원본은 애초에 여기에 올리지 않는다(로컬 전용).
+// Firebase Storage 보안 규칙 — 모두 "로그인한 사용자만" 읽고 쓸 수 있다.
+// 마스터 엑셀(master/), 협약서(agreements/), 특허증(patents/) — 로그인 없이는 전면 차단.
 service firebase.storage {
   match /b/{bucket}/o {
-    // 마스터 엑셀: 인증된 사용자만 접근
+    // 마스터 엑셀
     match /master/{fileName} {
-      allow read, write: if request.auth != null
-                         && fileName.matches('.*[.]xlsx');
+      allow read, write: if request.auth != null && fileName.matches('.*[.]xlsx');
+    }
+    // 협약서 원본 (PDF/HWP 등)
+    match /agreements/{fileName} {
+      allow read, write: if request.auth != null;
+    }
+    // 특허증 원본
+    match /patents/{fileName} {
+      allow read, write: if request.auth != null;
     }
     // 그 외 경로는 전면 차단
     match /{allPaths=**} {

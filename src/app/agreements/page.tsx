@@ -8,41 +8,47 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import DocViewButton from "@/components/DocViewButton";
 
 export default function AgreementsPage() {
-  const { count, loadFolder, getFile, clear } = useAgreementFiles();
+  const { count, cloud, loading, uploading, loadFolder, getByName, clear } = useAgreementFiles();
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <WithData>
       {(data) => {
         const rows = data.agreements;
-        const matched = rows.filter((a) => getFile(a.fileName)).length;
+        const matched = rows.filter((a) => getByName(a.fileName)).length;
         return (
           <div className="space-y-5">
             <div>
               <h1 className="text-xl font-bold text-slate-900">협약서</h1>
               <p className="mt-1 text-sm text-slate-500">
-                사업별 협약서 원본을 브라우저에서 열람합니다. 파일은 이 서비스·GitHub에 저장되지 않으며,
-                폴더를 선택한 본인에게만 보입니다(서버 전송 없음).
+                {cloud
+                  ? "로그인하면 협약서가 자동으로 연결됩니다. 원본은 로그인한 사용자만 열람할 수 있고, 다운로드 없이 보기만 지원합니다."
+                  : "사업별 협약서 원본을 브라우저에서 열람합니다. 파일은 서버·GitHub에 저장되지 않으며, 폴더를 선택한 본인에게만 보입니다."}
               </p>
             </div>
 
-            {/* 협약서 폴더 로드 */}
+            {/* 협약서 로드/업로드 */}
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <div className="flex flex-wrap items-center gap-3">
                 <p className="text-sm text-emerald-800">
-                  🔒 협약서 폴더를 선택하면 과제별로 자동 연결됩니다. {count > 0 && <b>{count}개 파일 로드됨 · {matched}/{rows.length}건 매칭</b>}
+                  {cloud ? "☁ " : "🔒 "}
+                  {cloud
+                    ? loading
+                      ? "협약서 불러오는 중…"
+                      : `클라우드 협약서 ${count}건 로드됨 · ${matched}/${rows.length}건 매칭`
+                    : "협약서 폴더를 선택하면 과제별로 자동 연결됩니다."}
+                  {!cloud && count > 0 && <b> {count}개 파일 로드됨 · {matched}/{rows.length}건 매칭</b>}
                 </p>
                 <div className="ml-auto flex gap-2">
-                  <button onClick={() => inputRef.current?.click()} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">
-                    협약서 폴더 선택
+                  <button onClick={() => inputRef.current?.click()} disabled={uploading} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                    {uploading ? "업로드 중…" : cloud ? "협약서 폴더 업로드" : "협약서 폴더 선택"}
                   </button>
-                  {count > 0 && (
+                  {!cloud && count > 0 && (
                     <button onClick={clear} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-sm text-emerald-700 hover:bg-emerald-100">
                       로드 해제
                     </button>
                   )}
                 </div>
-                {/* webkitdirectory: 폴더 내 파일을 브라우저 메모리로만 읽음 */}
                 <input
                   ref={inputRef}
                   type="file"
@@ -51,11 +57,13 @@ export default function AgreementsPage() {
                   directory=""
                   multiple
                   className="hidden"
-                  onChange={(e) => e.target.files && loadFolder(e.target.files)}
+                  onChange={(e) => e.target.files && loadFolder(e.target.files, "agreements")}
                 />
               </div>
               <p className="mt-2 text-xs text-emerald-700">
-                다운로드 버튼은 제공하지 않습니다. 협약서는 계약금액·직인·서명이 담긴 민감 문서이므로 열람만 지원합니다.
+                {cloud
+                  ? "협약서는 로그인한 사용자만 접근하며, 한 번 업로드하면 이후엔 로그인만 하면 자동으로 보입니다. 다운로드 없이 열람만 지원합니다."
+                  : "다운로드 버튼은 제공하지 않습니다. 협약서는 계약금액·직인·서명이 담긴 민감 문서이므로 열람만 지원합니다."}
               </p>
             </div>
 
@@ -70,7 +78,7 @@ export default function AgreementsPage() {
                     </thead>
                     <tbody>
                       {rows.map((a, i) => {
-                        const file = getFile(a.fileName);
+                        const doc = getByName(a.fileName);
                         return (
                           <tr key={i} className="hover:bg-slate-50">
                             <td className="whitespace-nowrap font-mono text-xs">{a.code}</td>
@@ -80,10 +88,8 @@ export default function AgreementsPage() {
                             <td className="text-xs">{a.agency ?? "—"}</td>
                             <td>
                               <div className="flex items-center gap-2">
-                                <DocViewButton file={file} />
-                                {a.fileName && !file && count > 0 && (
-                                  <span className="text-xs text-amber-600" title={a.fileName}>폴더에 없음</span>
-                                )}
+                                <DocViewButton doc={doc} />
+                                {a.fileName && !doc && count > 0 && <span className="text-xs text-amber-600" title={a.fileName}>없음</span>}
                               </div>
                             </td>
                             <td className="max-w-64 text-xs text-slate-400">{a.note ?? "—"}</td>

@@ -41,25 +41,20 @@ const SECONDARY = [
 export default function LibraryPage() {
   const { data } = useDataCtx();
   const custom = data?.library ?? [];
-  const { files, count, loadFolder, getByPattern } = useAgreementFiles();
+  const { count, cloud, loading, uploading, loadFolder, getByPattern } = useAgreementFiles();
   const certInputRef = useRef<HTMLInputElement>(null);
 
-  // 등록특허(등록일 순) — 특허증 폴더에서 등록번호 또는 특허명으로 매칭
+  // 등록특허(등록일 순) — 특허증에서 등록번호 또는 특허명으로 매칭
   const registered = (data?.patents ?? [])
     .filter((p) => p.status === "등록완료")
     .sort((a, b) => +(a.registeredAt ?? 0) - +(b.registeredAt ?? 0));
   const norm = (s: string) => s.replace(/[\s()·∙\-_]/g, "").toLowerCase();
-  const findCert = (regNumber: string | null, title: string): File | null => {
+  const findCert = (regNumber: string | null, title: string) => {
     const byNum = regNumber ? getByPattern(regNumber) : null; // 파일명에 "10-XXXXXXX" 포함
     if (byNum) return byNum;
-    // 등록번호가 없거나 미매칭 → 특허명 앞부분(정규화 5자)이 파일명에 포함되는지
+    // 등록번호가 없거나 미매칭 → 특허명 앞부분(정규화 5자)로 매칭
     const prefix = norm(title).slice(0, 5);
-    if (prefix.length >= 4) {
-      for (const [name, file] of files) {
-        if (norm(name).includes(prefix)) return file;
-      }
-    }
-    return null;
+    return prefix.length >= 4 ? getByPattern(prefix) : null;
   };
   const matchedCount = registered.filter((p) => findCert(p.regNumber, p.title)).length;
 
@@ -114,18 +109,24 @@ export default function LibraryPage() {
         </table>
       </Section>
 
-      {/* 특허증 — 브라우저 로컬 로드, 보기 전용 */}
+      {/* 특허증 — 클라우드(로그인) 또는 로컬 폴더, 보기 전용 */}
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-sm text-emerald-800">
-            🏅 특허증 폴더를 선택하면 등록특허별로 자동 연결됩니다.{" "}
-            {count > 0 && <b>{count}개 파일 로드됨 · {matchedCount}/{registered.length}건 매칭</b>}
+            {cloud ? "☁ " : "🏅 "}
+            {cloud
+              ? loading
+                ? "특허증 불러오는 중…"
+                : `클라우드 특허증 ${count}건 로드됨 · ${matchedCount}/${registered.length}건 매칭`
+              : "특허증 폴더를 선택하면 등록특허별로 자동 연결됩니다."}
+            {!cloud && count > 0 && <b> {count}개 파일 로드됨 · {matchedCount}/{registered.length}건 매칭</b>}
           </p>
           <button
             onClick={() => certInputRef.current?.click()}
-            className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
+            disabled={uploading}
+            className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
-            특허증 폴더 선택
+            {uploading ? "업로드 중…" : cloud ? "특허증 폴더 업로드" : "특허증 폴더 선택"}
           </button>
           <input
             ref={certInputRef}
@@ -135,11 +136,13 @@ export default function LibraryPage() {
             directory=""
             multiple
             className="hidden"
-            onChange={(e) => e.target.files && loadFolder(e.target.files)}
+            onChange={(e) => e.target.files && loadFolder(e.target.files, "patents")}
           />
         </div>
         <p className="mt-2 text-xs text-emerald-700">
-          특허증 원본은 서버·GitHub에 저장되지 않으며, 폴더를 선택한 본인에게만 보입니다(다운로드 없이 열람만).
+          {cloud
+            ? "특허증은 로그인한 사용자만 접근하며, 한 번 업로드하면 이후엔 로그인만 하면 자동으로 보입니다(다운로드 없이 열람만)."
+            : "특허증 원본은 서버·GitHub에 저장되지 않으며, 폴더를 선택한 본인에게만 보입니다(다운로드 없이 열람만)."}
         </p>
       </div>
 
@@ -163,7 +166,7 @@ export default function LibraryPage() {
                       <td className="text-xs">{p.owner ?? "—"}</td>
                       <td>
                         <div className="flex items-center gap-2">
-                          <DocViewButton file={cert} />
+                          <DocViewButton doc={cert} />
                           {!cert && count > 0 && <span className="text-xs text-amber-600">폴더에 없음</span>}
                         </div>
                       </td>
