@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-07-30T07:56:25.568Z",
+ "fetchedAt": "2026-07-31T09:35:15.934Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -11,17 +11,6 @@
   }
  ],
  "items": [
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "TIPA ValueUP 프로그램 19기 참여기업 모집 공고",
-   "category": "TIPA ValueUP 프로그램",
-   "summary": null,
-   "applyStart": "2026-06-25",
-   "applyEnd": "2026-07-15",
-   "announcedAt": "2026-06-24",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02868&buclCd=S9141&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
   {
    "source": "SMTECH",
    "agency": "SMTECH",
@@ -43,17 +32,6 @@
    "applyEnd": "2026-07-28",
    "announcedAt": "2026-07-07",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02866&buclCd=S8012&dtlAncmSn=1&schdSe=MO5005&aplySn=2&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "「2026년 전라남도 탄소중립 제조혁신 고도화 2단계 사업」 참여기업 추가 모집 공고",
-   "category": "비R&D",
-   "summary": "전라남도 내 탄소저감 가능성이 높은 중소·중견기업을 대상으로 탄소중립 기업진단 및 맞춤형 패키지 기술지원을 통한 저탄소 경영체계 구축",
-   "applyStart": "2026-07-08",
-   "applyEnd": "2026-07-30",
-   "announcedAt": "2026-07-08",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1103"
   },
   {
    "source": "JNTP",
@@ -91,17 +69,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-06-26",
-   "applyEnd": "2026-07-31",
-   "announcedAt": "2026-06-26",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
    "category": "중소벤처기업부 혁신제품 지정 연장사업",
    "summary": null,
@@ -109,6 +76,17 @@
    "applyEnd": "2026-07-31",
    "announcedAt": "2026-06-26",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-06-26",
+   "applyEnd": "2026-07-31",
+   "announcedAt": "2026-06-26",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -120,6 +98,17 @@
    "applyEnd": "2026-08-03",
    "announcedAt": "2026-07-20",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1107"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "AI·지역산업 정책 기획 과제 지원사업 2차 공고",
+   "category": "비R&D",
+   "summary": "정부의 AI 대전환 정책 및 지역 주도형 AI 사업 기조에 대응하기 위해, 전라남도 산업구조와 AI·데이터 환경을 반영한 전략적 AI·지역산업 정책 기획 과제 지원",
+   "applyStart": "2026-07-31",
+   "applyEnd": "2026-08-07",
+   "announcedAt": "2026-07-31",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1120"
   },
   {
    "source": "JNTP",
@@ -186,6 +175,17 @@
    "applyEnd": "2026-08-07",
    "announcedAt": "2026-06-17",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1086"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026 스마트그린산단 스마트제조 전환지원 참여기업 2차 모집공고",
+   "category": "비R&D",
+   "summary": "(재)전남테크노파크에서는 전남광양 스마트제조 고급인력양성사업의 일환으로, 광양국가산단 및 연계산단 내 입주기업을 대상으로 스마트제조 전환을 촉진하기 위한 스마트제조 전환지원 사업을 다음과 같이 2차 공고하오니, 관련 기업의 많은 신청 바랍니다.",
+   "applyStart": "2026-07-30",
+   "applyEnd": "2026-08-10",
+   "announcedAt": "2026-07-30",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1118"
   },
   {
    "source": "SMTECH",
@@ -256,6 +256,17 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "「2026년 중소기업 밀집지역 위기대응 체계 구축사업」Stand-up 맞춤지원 모집 공고(하반기)",
+   "category": "비R&D",
+   "summary": "◦ (사업목적) 지역중소기업 밀집지역을 상시 모니터링하고 선제적으로 지원 ◦ (지원근거) ｢지역중소기업 육성 및 촉진 등에 관한 법률(이하, 지역중소기업법)｣ 제26조(지역중소기업 위기대응 체계의 구축·운영) ◦ (사업내용) 전남광주통합특별시 내 중소기업 밀집지역 상시 모니터링 및 긴급처방 지원(Stand-up 맞춤지원) ◦ (운영기관) 전남테크노파크 지역",
+   "applyStart": "2026-07-31",
+   "applyEnd": "2026-08-17",
+   "announcedAt": "2026-07-30",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1119"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "「2026년도 장성군 시군구연고산업육성사업」 장성군 스마트기계전자산업 활성화 지원사업 참여기업 모집 3차 공고",
    "category": "비R&D",
    "summary": "ㅇ (사업목적) 장성군 연고산업을 영위하는 중소기업 육성 및 일자리 창출 지원을 통해 지방소멸 대응 및 지역 경제 활력 제고 ㅇ (사업내용) 장성군 연고산업 분야 중소기업의 사업모델 발굴, 기술사업화를 위한 맞춤형 패키지 지원을 통해 지역 중소기업 경쟁력 강화",
@@ -274,6 +285,17 @@
    "applyEnd": "2026-08-19",
    "announcedAt": "2026-07-27",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1116"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "AI 산학연 프로젝트(AI솔루션랩) 지원사업",
+   "category": "R&D",
+   "summary": "기업 스스로 문제를 인지하고, 문제를 해결하기 위한 AI 솔루션 개발에 직접 참여함으로써 지역 AI 산업 경쟁력 강화 및 AI 연구 활성화에 기여하고, AI 도입의 시급·필요성 인식 제고",
+   "applyStart": "2026-07-31",
+   "applyEnd": "2026-08-21",
+   "announcedAt": "2026-07-31",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1121"
   },
   {
    "source": "JNTP",
@@ -344,28 +366,6 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
-   "title": "2026년 IoT기반 화재감시 시스템 보급 수혜기업 모집",
-   "category": "비R&D",
-   "summary": "산업통상자원부와 광양시의 지원을 받아 시행하는 『광양국가산단 통합관제센터 구축사업』과 관련하여 IoT기반 입주기업 화재감시 시스템 보급 수혜기업을 다음과 같이 모집합니다.",
-   "applyStart": "2026-01-22",
-   "applyEnd": "2026-10-31",
-   "announcedAt": "2025-07-03",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=848"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 중대재해 예방관리 플랫폼 보급 수혜기업 모집",
-   "category": "비R&D",
-   "summary": "산업통상자원부와 광양시의 지원을 받아 시행하는 『광양국가산단 통합관제센터 구축사업』과 관련하여 중대재해 예방관리 플랫폼 보급 수혜기업을 다음과 같이 모집합니다.",
-   "applyStart": "2026-01-06",
-   "applyEnd": "2026-10-31",
-   "announcedAt": "2025-07-03",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=849"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
    "title": "2026 여수국가산업단지 스마트그린 AX실증산단 구축사업 모집 재공고(4차)",
    "category": "비R&D",
    "summary": "석유화학산업의 AX를 통하여 고부가가치 산업으로 전환",
@@ -428,17 +428,6 @@
    "applyEnd": "2026-12-31",
    "announcedAt": "2026-02-03",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=945"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 밀집지역 소재 중소기업 한국은행 C2자금 지원대상 확인서 발급 신청 접수",
-   "category": "비R&D",
-   "summary": "□ 한국은행, 시중은행 등과 중소기업 지원기관이 협업하여 지역 내 중소기업의 금융지원 추진 ◦ 전남 밀집 위기 지역 소재 경영상 어려움을 겪는 기업에 금융지원을 위한 체계 마련을 위한 광주전남중기청-한국은행 간 업무협약* 체결",
-   "applyStart": "2026-01-28",
-   "applyEnd": "2026-12-31",
-   "announcedAt": "2026-01-28",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=942"
   }
  ]
 }
