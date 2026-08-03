@@ -31,12 +31,23 @@ type Ctx = {
   loadFolder: (fileList: FileList, category: Category) => Promise<void>;
   getByName: (name: string | null) => DocRef | null;
   getByPattern: (pattern: string | null) => DocRef | null;
-  openDoc: (d: DocRef) => Promise<void>;
+  /** 미리보기용 blob URL을 만든다(다운로드 아님). 호출측이 표시 후 revokeObjectURL 해야 한다. */
+  getViewUrl: (d: DocRef) => Promise<string>;
   clear: () => void;
 };
 
 const DocCtx = createContext<Ctx | null>(null);
 const norm = (name: string) => name.trim().toLowerCase();
+
+/** 확장자로 MIME 추론 — Storage에 contentType이 없으면 브라우저가 바로 다운로드하므로,
+ *  미리보기(인라인)를 위해 blob을 이 MIME로 감싼다. */
+function mimeFor(name: string): string | null {
+  const ext = name.toLowerCase().split(".").pop() ?? "";
+  if (ext === "pdf") return "application/pdf";
+  if (ext === "png") return "image/png";
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  return null;
+}
 
 export function AgreementFilesProvider({ children }: { children: React.ReactNode }) {
   const [docs, setDocs] = useState<Map<string, DocRef>>(new Map());
@@ -124,26 +135,26 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
     [docs]
   );
 
-  // "보기" — 로컬이든 클라우드든 blob으로 받아 새 탭에서 연다(다운로드 버튼 없음)
-  const openDoc = useCallback(async (d: DocRef) => {
+  // "보기" — 로컬이든 클라우드든 blob으로 받아 미리보기용 URL을 만든다.
+  // Storage 파일은 contentType이 없어(octet-stream) 그대로 열면 다운로드되므로 확장자 MIME로 감싼다.
+  const getViewUrl = useCallback(async (d: DocRef): Promise<string> => {
     let blob: Blob;
     if (d.kind === "local") {
       blob = d.file;
     } else {
-      if (!storage) return;
+      if (!storage) throw new Error("스토리지를 사용할 수 없습니다. 다시 로그인해 주세요.");
       blob = await getBlob(ref(storage, d.path));
     }
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank", "noopener,noreferrer");
-    // 새 탭이 로드된 뒤 해제
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    const mime = mimeFor(d.name);
+    if (mime && blob.type !== mime) blob = new Blob([blob], { type: mime });
+    return URL.createObjectURL(blob);
   }, []);
 
   const clear = useCallback(() => setDocs(new Map()), []);
 
   return (
     <DocCtx.Provider
-      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, openDoc, clear }}
+      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, getViewUrl, clear }}
     >
       {children}
     </DocCtx.Provider>
