@@ -9,6 +9,7 @@ export type Project = {
   code: string; title: string; type: string; agency: string | null; period: string | null;
   startDate: Date | null; endDate: Date | null; totalKWon: number | null;
   status: string; role: string | null; company: string | null; progress: string | null; note: string | null;
+  bank: string | null; account: string | null; accountHolder: string | null;
   phaseSumKWon: number; phaseCheck: "OK" | "불일치" | "—";
 };
 export type Phase = { code: string; label: string | null; period: string | null; govKWon: number | null; cashKWon: number | null; inKindKWon: number | null; totalKWon: number };
@@ -102,6 +103,7 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
         period: s(r["총사업기간"]), startDate: dt(r["시작일"]), endDate: dt(r["종료일"]),
         totalKWon: total, status: s(r["진행상태"]) ?? "", role: s(r["역할"]), company: s(r["수행사"]),
         progress: s(r["진행사항"]), note: s(r["비고"]),
+        bank: s(r["은행명"]), account: s(r["계좌번호"]), accountHolder: s(r["예금주"]),
         phaseSumKWon: sum,
         phaseCheck: total === null ? "—" : Math.abs(sum - total) <= 1 ? "OK" : "불일치",
       };

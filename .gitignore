@@ -14,3 +14,8 @@ next-env.d.ts
 *.xls
 *.csv
 data/
+
+# ── 서비스 계정 키(Firebase Admin) — 프로젝트 전체 권한, 절대 커밋 금지 ──
+serviceAccountKey.json
+*serviceAccount*.json
+*-adminsdk-*.json

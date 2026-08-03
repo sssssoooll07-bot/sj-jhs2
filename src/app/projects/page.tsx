@@ -36,6 +36,33 @@ function ProjectTable({ list }: { list: Project[] }) {
   );
 }
 
+/** 과제별 전용통장 — 마스터 [과제] 시트의 은행명·계좌번호·예금주 (로그인 사용자만 열람) */
+function AccountTable({ list }: { list: Project[] }) {
+  const withAcct = list.filter((p) => p.bank || p.account || p.accountHolder);
+  if (withAcct.length === 0)
+    return <Empty message="마스터 [과제] 시트의 은행명·계좌번호·예금주 칸을 채우면 여기에 표시됩니다." />;
+  return (
+    <div className="overflow-x-auto">
+      <table className="table-base">
+        <thead>
+          <tr><th>코드</th><th>과제명</th><th>은행</th><th>계좌번호</th><th>예금주</th></tr>
+        </thead>
+        <tbody>
+          {withAcct.map((p) => (
+            <tr key={p.code} className="hover:bg-slate-50">
+              <td className="whitespace-nowrap font-mono text-xs">{p.code}</td>
+              <td className="font-medium">{p.title}</td>
+              <td className="whitespace-nowrap text-xs">{p.bank ?? "—"}</td>
+              <td className="whitespace-nowrap font-mono text-sm">{p.account ?? "—"}</td>
+              <td className="whitespace-nowrap text-xs">{p.accountHolder ?? "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function Details({ data }: { data: Data }) {
   const detail = (code: string) => ({
     phases: data.phases.filter((x) => x.code === code),
@@ -130,6 +157,9 @@ export default function ProjectsPage() {
             </Section>
             <Section title={`🏭 지원사업 (BIZ_SUPPORT) — ${biz.length}건`}>
               <ProjectTable list={biz} />
+            </Section>
+            <Section title="💳 과제별 전용통장" sub="정부 R&D 전용계좌 — 마스터 [과제] 시트의 은행명·계좌번호·예금주 (로그인 사용자만 열람)">
+              <AccountTable list={data.projects} />
             </Section>
             <Section title="📅 다년차 상세 (차수 · 참여기관 · 입금)" sub="과제코드 기준 연결">
               <Details data={data} />
