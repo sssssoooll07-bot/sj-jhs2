@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-03T00:02:58.527Z",
+ "fetchedAt": "2026-08-04T00:12:34.954Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -9,6 +9,9 @@
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
+ ],
+ "errors": [
+  "SMTECH: fetch failed"
  ],
  "items": [
   {
@@ -54,17 +57,6 @@
    "applyEnd": "2026-07-31",
    "announcedAt": "2026-06-26",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 전남 친환경 HDPE 소형어선 규제자유특구 안착화지원 공고",
-   "category": "비R&D",
-   "summary": "실증제품 상용화를 위한 사업화 지원",
-   "applyStart": "2026-07-20",
-   "applyEnd": "2026-08-03",
-   "announcedAt": "2026-07-20",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1107"
   },
   {
    "source": "JNTP",
@@ -351,6 +343,17 @@
    "applyEnd": "2026-10-31",
    "announcedAt": "2025-07-03",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=848"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 중대재해 예방관리 플랫폼 보급 수혜기업 모집",
+   "category": "비R&D",
+   "summary": "산업통상자원부와 광양시의 지원을 받아 시행하는 『광양국가산단 통합관제센터 구축사업』과 관련하여 중대재해 예방관리 플랫폼 보급 수혜기업을 다음과 같이 모집합니다.",
+   "applyStart": "2026-01-06",
+   "applyEnd": "2026-10-31",
+   "announcedAt": "2025-07-03",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=849"
   },
   {
    "source": "JNTP",
