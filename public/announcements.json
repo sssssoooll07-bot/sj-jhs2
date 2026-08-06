@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-05T00:09:51.763Z",
+ "fetchedAt": "2026-08-06T00:04:08.257Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -9,9 +9,6 @@
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
- ],
- "errors": [
-  "SMTECH: fetch failed"
  ],
  "items": [
   {
@@ -28,17 +25,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-06-26",
-   "applyEnd": "2026-07-31",
-   "announcedAt": "2026-06-26",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년 중소기업 연구인력지원사업(파견) 7월 공고",
    "category": "공공연연구인력파견지원(참여기업접수용)",
    "summary": null,
@@ -46,6 +32,17 @@
    "applyEnd": "2026-07-31",
    "announcedAt": "2026-08-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=6&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-06-26",
+   "applyEnd": "2026-07-31",
+   "announcedAt": "2026-06-26",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "SMTECH",
@@ -156,17 +153,6 @@
    "applyEnd": "2026-08-10",
    "announcedAt": "2026-07-06",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02873&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "2026년도 하반기 중소벤처기업부 혁신제품 신규지정 공고",
-   "category": "중소벤처기업부 혁신제품 지정사업",
-   "summary": null,
-   "applyStart": "2026-07-10",
-   "applyEnd": "2026-08-10",
-   "announcedAt": "2026-07-10",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02874&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -281,6 +267,17 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
+   "title": "2026년 제5차 중소기업 R&D 전담은행 투자지원 추천기업(강원충청권) 모집 공고",
+   "category": "전담은행 투자설명회(IR)",
+   "summary": null,
+   "applyStart": "2026-08-03",
+   "applyEnd": "2026-08-24",
+   "announcedAt": "2026-08-03",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02876&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
    "title": "2026년 중소기업 연구인력지원사업(파견) 8월 공고",
    "category": "공공연연구인력파견지원(참여기업접수용)",
    "summary": null,
@@ -288,6 +285,17 @@
    "applyEnd": "2026-08-31",
    "announcedAt": "2026-08-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=7&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 하반기 중소벤처기업부 혁신제품 신규지정 수정공고",
+   "category": "중소벤처기업부 혁신제품 지정사업",
+   "summary": null,
+   "applyStart": "2026-07-10",
+   "applyEnd": "2026-09-03",
+   "announcedAt": "2026-07-10",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02874&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -376,17 +384,6 @@
    "applyEnd": "2026-11-30",
    "announcedAt": "2026-02-27",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=957"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 3D프린팅 모형설계 및 후가공 수혜자(기업) 모집 공고",
-   "category": "비R&D",
-   "summary": "전남 도내 예비창업자의 아이디어로 만들어진 제품의 실제 구동 가능성 여부에 대한 검토",
-   "applyStart": "2026-04-20",
-   "applyEnd": "2026-12-31",
-   "announcedAt": "2026-04-16",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1017"
   },
   {
    "source": "JNTP",
