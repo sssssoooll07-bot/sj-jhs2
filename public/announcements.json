@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-06T00:04:08.257Z",
+ "fetchedAt": "2026-08-07T01:42:48.647Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -36,17 +36,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-06-26",
-   "applyEnd": "2026-07-31",
-   "announcedAt": "2026-06-26",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
    "category": "중소벤처기업부 혁신제품 지정 연장사업",
    "summary": null,
@@ -54,6 +43,17 @@
    "applyEnd": "2026-07-31",
    "announcedAt": "2026-06-26",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-06-26",
+   "applyEnd": "2026-07-31",
+   "announcedAt": "2026-06-26",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -65,17 +65,6 @@
    "applyEnd": "2026-08-07",
    "announcedAt": "2026-07-31",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1120"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026 무탄소 전력활용 수소산업육성 기업지원사업(2차)",
-   "category": "비R&D",
-   "summary": "□ 도내 기업이 개발한 수전해시스템 소재·부품·설비에 대해 신뢰성 있는 시험 평가 서비스를 제공하고, 체계적인 수전해시스템 지원체계를 구축하여 수전해 연관기업의 도내 유치를 촉진함으로써 지역 내 청정수소산업 생태계 확립 및 기술 경쟁력 강화를 도모 □ 수소와 타 산업간 융복합을 통해 기후변화대응, 탄소중립 등 에너지 주요 현안을 해결하는 수소 산업 육성·지",
-   "applyStart": "2026-07-27",
-   "applyEnd": "2026-08-07",
-   "announcedAt": "2026-07-27",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1113"
   },
   {
    "source": "JNTP",
@@ -164,6 +153,17 @@
    "applyEnd": "2026-08-14",
    "announcedAt": "2026-07-27",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1115"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026 무탄소 전력활용 수소산업육성 기업지원사업(2차)",
+   "category": "비R&D",
+   "summary": "□ 도내 기업이 개발한 수전해시스템 소재·부품·설비에 대해 신뢰성 있는 시험 평가 서비스를 제공하고, 체계적인 수전해시스템 지원체계를 구축하여 수전해 연관기업의 도내 유치를 촉진함으로써 지역 내 청정수소산업 생태계 확립 및 기술 경쟁력 강화를 도모 □ 수소와 타 산업간 융복합을 통해 기후변화대응, 탄소중립 등 에너지 주요 현안을 해결하는 수소 산업 육성·지",
+   "applyStart": "2026-07-27",
+   "applyEnd": "2026-08-14",
+   "announcedAt": "2026-07-27",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1113"
   },
   {
    "source": "JNTP",
