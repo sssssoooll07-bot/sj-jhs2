@@ -87,7 +87,9 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
 
   const loadFolder = useCallback(
     async (fileList: FileList, category: Category) => {
-      const files = Array.from(fileList).filter((f) => /\.(pdf|hwp|hwpx|docx?|png|jpe?g)$/i.test(f.name));
+      // 통장거래내역(bankbook)은 엑셀(xlsx)도 허용 — 화면에서 표로 미리보기한다.
+      const allow = category === "bankbook" ? /\.(pdf|png|jpe?g|xlsx?)$/i : /\.(pdf|hwp|hwpx|docx?|png|jpe?g)$/i;
+      const files = Array.from(fileList).filter((f) => allow.test(f.name));
       if (firebaseEnabled && storage) {
         // 관리자 업로드: 선택한 폴더의 문서를 Storage에 올린다
         setUploading(true);

@@ -1,22 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import { useAgreementFiles, type DocRef } from "@/lib/agreement-files";
 
 /**
  * 문서를 앱 안의 미리보기 창(모달)에서 먼저 보여준다.
- * 바로 다운로드되지 않고, 사용자가 원하면 "다운로드" 버튼으로 저장한다.
- * PDF/이미지는 인라인 표시되며, 로컬/클라우드(Firebase) 모두 blob으로 연다.
+ * - PDF/이미지: 인라인 미리보기
+ * - 엑셀(xlsx): 브라우저에서 파싱해 표(HTML)로 미리보기 — 통장거래내역 등
+ * 바로 다운로드되지 않고, 원하면 "다운로드" 버튼으로 저장한다. 로컬/클라우드 모두 지원.
  */
 export default function DocViewButton({ doc }: { doc: DocRef | null }) {
   const { getViewUrl } = useAgreementFiles();
   const [busy, setBusy] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
+  const [html, setHtml] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  // 미리보기 창이 열려 있는 동안 body 스크롤 잠금 + ESC로 닫기
+  const isOpen = Boolean(url || html);
   useEffect(() => {
-    if (!url) return;
+    if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
@@ -26,25 +29,37 @@ export default function DocViewButton({ doc }: { doc: DocRef | null }) {
       document.body.style.overflow = prev;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url]);
+  }, [isOpen]);
 
   if (!doc) return <span className="text-xs text-slate-400">미로드</span>;
 
-  const viewable = /\.(pdf|png|jpe?g)$/i.test(doc.name);
-  if (!viewable) {
+  const isImage = /\.(png|jpe?g)$/i.test(doc.name);
+  const isExcel = /\.xlsx?$/i.test(doc.name);
+  const isPdf = /\.pdf$/i.test(doc.name);
+  if (!(isImage || isExcel || isPdf)) {
     return (
       <span className="text-xs text-slate-400" title="브라우저에서 직접 열 수 없는 형식(HWP 등)">
         파일 있음(뷰어 미지원)
       </span>
     );
   }
-  const isImage = /\.(png|jpe?g)$/i.test(doc.name);
 
   async function open() {
     setBusy(true);
     setErr(null);
     try {
-      setUrl(await getViewUrl(doc!));
+      const u = await getViewUrl(doc!);
+      if (isExcel) {
+        const buf = await (await fetch(u)).arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array" });
+        const parts = wb.SheetNames.map(
+          (n) => `<h4 class="xl-sheet">${n}</h4>` + XLSX.utils.sheet_to_html(wb.Sheets[n]),
+        );
+        setHtml(parts.join(""));
+        setUrl(u); // 다운로드 버튼용으로 유지
+      } else {
+        setUrl(u);
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "열지 못했습니다.");
     } finally {
@@ -56,6 +71,7 @@ export default function DocViewButton({ doc }: { doc: DocRef | null }) {
       if (u) URL.revokeObjectURL(u);
       return null;
     });
+    setHtml(null);
   }
 
   return (
@@ -71,7 +87,7 @@ export default function DocViewButton({ doc }: { doc: DocRef | null }) {
         {err && <span className="text-xs text-red-600" title={err}>실패</span>}
       </div>
 
-      {url && (
+      {isOpen && (
         <div
           className="fixed inset-0 z-[100] flex flex-col bg-black/70 p-3 sm:p-6"
           onClick={close}
@@ -86,27 +102,34 @@ export default function DocViewButton({ doc }: { doc: DocRef | null }) {
               <p className="truncate text-sm font-medium text-slate-800" title={doc.name}>
                 📄 {doc.name}
               </p>
-              <a
-                href={url}
-                download={doc.name}
-                className="ml-auto rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-              >
-                ⬇ 다운로드
-              </a>
+              {url && (
+                <a
+                  href={url}
+                  download={doc.name}
+                  className="ml-auto rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                >
+                  ⬇ 다운로드
+                </a>
+              )}
               <button
                 onClick={close}
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
+                className={`rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50 ${url ? "" : "ml-auto"}`}
               >
                 닫기 ✕
               </button>
             </div>
-            {isImage ? (
+            {html ? (
+              <div
+                className="flex-1 overflow-auto bg-white p-4 text-xs [&_h4.xl-sheet]:mb-1 [&_h4.xl-sheet]:mt-3 [&_h4.xl-sheet]:font-semibold [&_h4.xl-sheet]:text-slate-500 [&_table]:border-collapse [&_td]:border [&_td]:border-slate-200 [&_td]:px-2 [&_td]:py-1 [&_td]:whitespace-nowrap"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            ) : isImage ? (
               <div className="flex-1 overflow-auto bg-slate-100 p-4 text-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt={doc.name} className="mx-auto max-h-full max-w-full" />
+                <img src={url!} alt={doc.name} className="mx-auto max-h-full max-w-full" />
               </div>
             ) : (
-              <iframe src={url} title={doc.name} className="w-full flex-1 bg-slate-100" />
+              <iframe src={url!} title={doc.name} className="w-full flex-1 bg-slate-100" />
             )}
           </div>
         </div>
