@@ -1,8 +1,11 @@
 "use client";
 
+import { useRef } from "react";
 import { fmtKWon, fmtDate, type Data, type Project } from "@/lib/excel";
 import { Badge, Empty, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
+import { useAgreementFiles } from "@/lib/agreement-files";
+import DocViewButton from "@/components/DocViewButton";
 
 function ProjectTable({ list }: { list: Project[] }) {
   if (list.length === 0) return <Empty message="등록된 과제가 없습니다." />;
@@ -36,29 +39,63 @@ function ProjectTable({ list }: { list: Project[] }) {
   );
 }
 
-/** 과제별 전용통장 — 마스터 [과제] 시트의 은행명·계좌번호·예금주 (로그인 사용자만 열람) */
+/** 과제별 전용통장 — 은행·계좌·예금주 + 통장거래내역 미리보기 (로그인 사용자만 열람) */
 function AccountTable({ list }: { list: Project[] }) {
-  const withAcct = list.filter((p) => p.bank || p.account || p.accountHolder);
-  if (withAcct.length === 0)
-    return <Empty message="마스터 [과제] 시트의 은행명·계좌번호·예금주 칸을 채우면 여기에 표시됩니다." />;
+  const { getByPattern, loadFolder, uploading, cloud } = useAgreementFiles();
+  const bankRef = useRef<HTMLInputElement>(null);
+  // 계좌 정보가 있거나, 파일명에 과제코드가 든 거래내역이 있는 과제만 표시
+  const rows = list.filter((p) => p.bank || p.account || p.accountHolder || getByPattern(p.code));
+
   return (
-    <div className="overflow-x-auto">
-      <table className="table-base">
-        <thead>
-          <tr><th>코드</th><th>과제명</th><th>은행</th><th>계좌번호</th><th>예금주</th></tr>
-        </thead>
-        <tbody>
-          {withAcct.map((p) => (
-            <tr key={p.code} className="hover:bg-slate-50">
-              <td className="whitespace-nowrap font-mono text-xs">{p.code}</td>
-              <td className="font-medium">{p.title}</td>
-              <td className="whitespace-nowrap text-xs">{p.bank ?? "—"}</td>
-              <td className="whitespace-nowrap font-mono text-sm">{p.account ?? "—"}</td>
-              <td className="whitespace-nowrap text-xs">{p.accountHolder ?? "—"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+        <p className="text-xs text-emerald-800">
+          🏦 통장거래내역은 파일명에 <b>과제코드</b>(예: <code className="rounded bg-white px-1">P2024-01</code>)를 넣으면 해당 과제에 자동 연결됩니다. 로그인한 사용자만 열람(다운로드 없이 보기).
+        </p>
+        <button
+          onClick={() => bankRef.current?.click()}
+          disabled={uploading}
+          className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+        >
+          {uploading ? "업로드 중…" : cloud ? "거래내역 폴더 업로드" : "거래내역 폴더 선택"}
+        </button>
+        <input
+          ref={bankRef}
+          type="file"
+          // @ts-expect-error webkitdirectory는 표준 타입에 없음
+          webkitdirectory=""
+          directory=""
+          multiple
+          className="hidden"
+          onChange={(e) => e.target.files && loadFolder(e.target.files, "bankbook")}
+        />
+      </div>
+      {rows.length === 0 ? (
+        <Empty message="마스터 [과제] 시트의 은행명·계좌번호·예금주 칸을 채우거나, 과제코드가 든 통장거래내역 파일을 올리면 여기에 표시됩니다." />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="table-base">
+            <thead>
+              <tr><th>코드</th><th>과제명</th><th>은행</th><th>계좌번호</th><th>예금주</th><th>거래내역</th></tr>
+            </thead>
+            <tbody>
+              {rows.map((p) => {
+                const stmt = getByPattern(p.code);
+                return (
+                  <tr key={p.code} className="hover:bg-slate-50">
+                    <td className="whitespace-nowrap font-mono text-xs">{p.code}</td>
+                    <td className="font-medium">{p.title}</td>
+                    <td className="whitespace-nowrap text-xs">{p.bank ?? "—"}</td>
+                    <td className="whitespace-nowrap font-mono text-sm">{p.account ?? "—"}</td>
+                    <td className="whitespace-nowrap text-xs">{p.accountHolder ?? "—"}</td>
+                    <td>{stmt ? <DocViewButton doc={stmt} /> : <span className="text-xs text-slate-400">—</span>}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

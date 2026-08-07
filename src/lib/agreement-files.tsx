@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { getBlob, listAll, ref, uploadBytes } from "firebase/storage";
-import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX } from "@/lib/firebase";
+import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX, BANKBOOK_PREFIX } from "@/lib/firebase";
 
 /**
  * 문서 파일 컨텍스트 — 협약서·특허증 원본을 연다.
@@ -16,7 +16,7 @@ import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX } fro
  * 어느 경우든 "보기"만 제공한다(다운로드 버튼 없음).
  */
 
-export type Category = "agreements" | "patents";
+export type Category = "agreements" | "patents" | "bankbook";
 
 export type DocRef =
   | { name: string; kind: "local"; file: File }
@@ -61,7 +61,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
     setLoading(true);
     try {
       const map = new Map<string, DocRef>();
-      for (const prefix of [AGREEMENTS_PREFIX, PATENTS_PREFIX]) {
+      for (const prefix of [AGREEMENTS_PREFIX, PATENTS_PREFIX, BANKBOOK_PREFIX]) {
         try {
           const res = await listAll(ref(storage, prefix));
           for (const item of res.items) {
@@ -93,7 +93,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
         setUploading(true);
         setError(null);
         try {
-          const prefix = category === "patents" ? PATENTS_PREFIX : AGREEMENTS_PREFIX;
+          const prefix = category === "bankbook" ? BANKBOOK_PREFIX : category === "patents" ? PATENTS_PREFIX : AGREEMENTS_PREFIX;
           for (const f of files) {
             const bytes = new Uint8Array(await f.arrayBuffer());
             await uploadBytes(ref(storage, `${prefix}/${f.name}`), bytes);

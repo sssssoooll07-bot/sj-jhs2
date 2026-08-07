@@ -41,6 +41,7 @@ export const storage = storageInstance;
 /** 마스터 엑셀이 저장되는 Storage 경로 (고정) */
 export const MASTER_PATH = "master/신정개발_RLMS_마스터데이터.xlsx";
 
-/** 협약서·특허증 원본이 저장되는 Storage 폴더 (로그인 사용자만 접근) */
+/** 협약서·특허증·통장거래내역 원본이 저장되는 Storage 폴더 (로그인 사용자만 접근) */
 export const AGREEMENTS_PREFIX = "agreements";
 export const PATENTS_PREFIX = "patents";
+export const BANKBOOK_PREFIX = "bankbook";
