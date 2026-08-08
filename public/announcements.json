@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-07T23:38:17.674Z",
+ "fetchedAt": "2026-08-08T23:34:20.451Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -36,17 +36,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-06-26",
-   "applyEnd": "2026-07-31",
-   "announcedAt": "2026-06-26",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
    "category": "중소벤처기업부 혁신제품 지정 연장사업",
    "summary": null,
@@ -56,70 +45,15 @@
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "AI·지역산업 정책 기획 과제 지원사업 2차 공고",
-   "category": "비R&D",
-   "summary": "정부의 AI 대전환 정책 및 지역 주도형 AI 사업 기조에 대응하기 위해, 전라남도 산업구조와 AI·데이터 환경을 반영한 전략적 AI·지역산업 정책 기획 과제 지원",
-   "applyStart": "2026-07-31",
-   "applyEnd": "2026-08-07",
-   "announcedAt": "2026-07-31",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1120"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "「2026년 지역수요맞춤형 연구개발사업」벤처·스타트업 실증지원 사업 수행기관 모집 3차 공고",
-   "category": "R&D",
-   "summary": "연구개발이 완료되어 제작된 시제품 기반, 시장(현장) 테스트 및 검증 결과를 제품에 추가 반영하기 위한 실증 지원",
-   "applyStart": "2026-07-21",
-   "applyEnd": "2026-08-07",
-   "announcedAt": "2026-07-21",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1109"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 전남농공단지 기업맞춤형 특화지원사업 수혜기업 3차 모집공고(여수,순천,구례,장흥,영암,함평)",
-   "category": "비R&D",
-   "summary": "전남지역 농공단지 입주기업의 경영개선 및 선순환 촉진을 위한 시제품제작, 국내외 판로개척, 마케팅 지원 등의 사업화 특화지원으로 농공단지 입주기업들의 성장을 촉진하고 새로운 일자리 창출에 기여",
-   "applyStart": "2026-07-21",
-   "applyEnd": "2026-08-07",
-   "announcedAt": "2026-07-21",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1111"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "첨단로봇·AI 활용 중소기업 제조혁신 기업지원(기술개발) 모집 연장 공고",
-   "category": "비R&D",
-   "summary": "ㅇ (사업목적) 도내 로봇 전문기업 육성 및 경쟁력 강화를 위한 지역 특화 첨단 제조로봇 공정모델 기술개발 지원",
-   "applyStart": "2026-07-20",
-   "applyEnd": "2026-08-07",
-   "announcedAt": "2026-06-17",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1084"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "첨단로봇·AI 활용 중소기업 제조혁신 기업지원(실증지원) 모집 연장 공고",
-   "category": "비R&D",
-   "summary": "ㅇ (사업목적) 제조기업 수요기반의 AI·로봇 대표공정모델 실증 및 보급 확산을 통한 도내 첨단로봇기업의 제조혁신 경쟁력 향상 도모",
-   "applyStart": "2026-07-20",
-   "applyEnd": "2026-08-07",
-   "announcedAt": "2026-06-17",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1085"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "첨단로봇·AI 활용 중소기업 제조혁신 기업지원(기획 컨설팅) 모집 연장 공고",
-   "category": "비R&D",
-   "summary": "ㅇ (지원목적) 도내 첨단로봇 기업의 제조혁신 경쟁력 향상 도모를 위한 로봇 도입 및 확산사업 등 제조로봇 관련 사업 기획 컨설팅 지원",
-   "applyStart": "2026-07-20",
-   "applyEnd": "2026-08-07",
-   "announcedAt": "2026-06-17",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1086"
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-06-26",
+   "applyEnd": "2026-07-31",
+   "announcedAt": "2026-06-26",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
