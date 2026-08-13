@@ -46,10 +46,10 @@ export default function LibraryPage() {
     .sort((a, b) => +(a.registeredAt ?? 0) - +(b.registeredAt ?? 0));
   const norm = (s: string) => s.replace(/[\s()·∙\-_]/g, "").toLowerCase();
   const findCert = (regNumber: string | null, title: string) => {
-    const byNum = regNumber ? getByPattern(regNumber) : null;
+    const byNum = regNumber ? getByPattern(regNumber, "patents") : null;
     if (byNum) return byNum;
     const prefix = norm(title).slice(0, 5);
-    return prefix.length >= 4 ? getByPattern(prefix) : null;
+    return prefix.length >= 4 ? getByPattern(prefix, "patents") : null;
   };
   const matchedCount = registered.filter((p) => findCert(p.regNumber, p.title)).length;
 

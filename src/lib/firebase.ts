@@ -45,3 +45,4 @@ export const MASTER_PATH = "master/신정개발_RLMS_마스터데이터.xlsx";
 export const AGREEMENTS_PREFIX = "agreements";
 export const PATENTS_PREFIX = "patents";
 export const BANKBOOK_PREFIX = "bankbook";
+export const BUSINESSPLAN_PREFIX = "businessplans";
