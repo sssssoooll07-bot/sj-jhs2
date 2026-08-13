@@ -1,106 +1,69 @@
 "use client";
 
 import { fmtDate, fmtKWon, daysUntil, participationTotals, laborCostByProject } from "@/lib/excel";
-import { Badge, Dday, Empty, Section } from "@/components/ui";
+import { Badge, Dday, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
+import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
+import type { Compliance, Participation } from "@/lib/excel";
+
+const COMP_EMPTY: Compliance = { kind: "", title: "", dueDate: null, recurrence: null, note: null };
+const COMP_COLS: Col<Compliance>[] = [
+  { key: "dueDate", label: "마감일", type: "date", th: "D-day", view: (t) => (t.dueDate ? <Dday days={daysUntil(t.dueDate)} /> : "—") },
+  { key: "title", label: "제목", span: true, view: (t) => <span className="font-medium">{t.title}</span> },
+  { key: "kind", label: "종류", view: (t) => <Badge tone="blue">{t.kind}</Badge> },
+  { key: "recurrence", label: "반복주기", th: "반복" },
+  { key: "note", label: "비고", span: true, hide: true },
+];
+const compRow = (t: Compliance) => ({ 종류: t.kind, 제목: t.title, 마감일: dateStr(t.dueDate), 반복주기: t.recurrence, 비고: t.note });
+
+const PART_EMPTY: Participation = { name: "", code: "", ratePercent: 0, start: null, end: null, role: null, isNew: false, costType: null, costKWon: null, note: null };
+const PART_COLS: Col<Participation>[] = [
+  { key: "name", label: "연구원 성명" },
+  { key: "code", label: "과제코드" },
+  { key: "role", label: "과제내 직위", th: "직위" },
+  { key: "ratePercent", label: "참여율(%)", type: "number", align: "right", th: "참여율", view: (p) => <span className="font-semibold">{p.ratePercent}%</span> },
+  { key: "costType", label: "인건비 구분", type: "select", options: ["현금", "현물"], th: "구분", view: (p) => (p.costType ? <Badge tone={p.costType === "현금" ? "blue" : "violet"}>{p.costType}</Badge> : "—") },
+  { key: "costKWon", label: "인건비(천원)", type: "number", align: "right", th: "인건비", view: (p) => fmtKWon(p.costKWon) },
+  { key: "start", label: "시작일", type: "date", hide: true },
+  { key: "end", label: "종료일", type: "date", hide: true },
+  { key: "isNew", label: "신규 여부", type: "toggle", hide: true },
+  { key: "note", label: "비고", span: true, hide: true },
+];
+const partRow = (p: Participation) => ({
+  "연구원 성명": p.name, 과제코드: p.code, "과제내 직위": p.role, 신규여부: p.isNew ? "O" : "",
+  "참여율(%)": p.ratePercent, 시작일: dateStr(p.start), 종료일: dateStr(p.end),
+  "인건비 구분": p.costType, "인건비(천원)": p.costKWon, 비고: p.note,
+});
 
 export default function CompliancePage() {
   return (
     <WithData>
       {(data) => {
-        const tasks = [...data.compliance].sort((a, b) => +(a.dueDate ?? Infinity) - +(b.dueDate ?? Infinity));
         const totals = participationTotals(data);
         const labor = laborCostByProject(data);
         return (
           <div className="space-y-5">
-            <Section title={`⚖ 법정 의무 — ${tasks.length}건`} sub="연구실 안전점검 · 안전교육 · 보험 · 기업부설연구소(KOITA) 신고">
-              {tasks.length === 0 ? (
-                <Empty message="등록된 법정 의무가 없습니다." />
-              ) : (
-                <table className="table-base">
-                  <thead><tr><th>D-day</th><th>제목</th><th>종류</th><th>마감일</th><th>반복</th></tr></thead>
-                  <tbody>
-                    {tasks.map((t, i) => (
-                      <tr key={i} className="hover:bg-slate-50">
-                        <td>{t.dueDate ? <Dday days={daysUntil(t.dueDate)} /> : "—"}</td>
-                        <td className="font-medium">{t.title}</td>
-                        <td><Badge tone="blue">{t.kind}</Badge></td>
-                        <td className="whitespace-nowrap">{fmtDate(t.dueDate)}</td>
-                        <td className="text-xs">{t.recurrence ?? "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+            <Section title={`⚖ 법정 의무 — ${data.compliance.length}건`} sub="연구실 안전점검 · 안전교육 · 보험 · 기업부설연구소(KOITA) 신고">
+              <EditableTable rows={data.compliance} cols={COMP_COLS} sheetName="법정의무" toSheetRow={compRow} blank={COMP_EMPTY} requiredKey="title" addLabel="법정의무 추가" entityLabel="법정의무" />
             </Section>
 
-            {/* 인건비 현황 — 참여연구원 현황표 기준 */}
             {labor.map((lc) => (
-              <Section
-                key={lc.code}
-                title={`💰 인건비 현황 — ${lc.title}`}
-                sub={`${lc.code} · 참여연구원 ${lc.members.length}명 · 단위: 천원`}
-              >
-                <div className="mb-4 grid grid-cols-3 gap-3">
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500">현금</p>
-                    <p className="mt-0.5 text-lg font-bold text-slate-900">{fmtKWon(lc.cashKWon)}</p>
-                  </div>
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs text-slate-500">현물</p>
-                    <p className="mt-0.5 text-lg font-bold text-slate-900">{fmtKWon(lc.inKindKWon)}</p>
-                    {lc.hasPhases && (
-                      <p className="mt-1">
-                        {lc.matchedPhaseLabel ? (
-                          <Badge tone="green">✓ {lc.matchedPhaseLabel} 기업부담(현물) 일치</Badge>
-                        ) : (
-                          <Badge tone="amber">⚠ 일치하는 차수 없음</Badge>
-                        )}
-                      </p>
-                    )}
-                  </div>
-                  <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                    <p className="text-xs text-blue-700">인건비 합계</p>
-                    <p className="mt-0.5 text-lg font-bold text-blue-800">{fmtKWon(lc.totalKWon)}</p>
-                  </div>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="table-base">
-                    <thead>
-                      <tr>
-                        <th>성명</th><th>과제내 직위</th><th>신규</th><th>참여기간</th>
-                        <th className="text-right">참여율</th><th>구분</th><th className="text-right">인건비</th><th>비고</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {lc.members.map((m, i) => (
-                        <tr key={i} className="hover:bg-slate-50">
-                          <td className="font-medium">{m.name}</td>
-                          <td>{m.role ?? "—"}</td>
-                          <td>{m.isNew ? <Badge tone="cyan">신규</Badge> : <span className="text-xs text-slate-400">기존</span>}</td>
-                          <td className="whitespace-nowrap text-xs">
-                            {fmtDate(m.start)} ~ {fmtDate(m.end)}
-                          </td>
-                          <td className="text-right font-semibold">{m.ratePercent}%</td>
-                          <td><Badge tone={m.costType === "현금" ? "blue" : "violet"}>{m.costType ?? "—"}</Badge></td>
-                          <td className="text-right font-semibold">{fmtKWon(m.costKWon)}</td>
-                          <td className="text-xs text-slate-400">{m.note ?? "—"}</td>
-                        </tr>
-                      ))}
-                      <tr className="bg-slate-50 font-bold">
-                        <td colSpan={6}>합계</td>
-                        <td className="text-right">{fmtKWon(lc.totalKWon)}</td>
-                        <td className="text-xs font-normal text-slate-400">현금 {fmtKWon(lc.cashKWon)} · 현물 {fmtKWon(lc.inKindKWon)}</td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <Section key={lc.code} title={`💰 인건비 현황 — ${lc.title}`} sub={`${lc.code} · 참여연구원 ${lc.members.length}명 · 단위: 천원 (아래 참여율 편집분 자동 집계)`}>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><p className="text-xs text-slate-500">현금</p><p className="mt-0.5 text-lg font-bold text-slate-900">{fmtKWon(lc.cashKWon)}</p></div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><p className="text-xs text-slate-500">현물</p><p className="mt-0.5 text-lg font-bold text-slate-900">{fmtKWon(lc.inKindKWon)}</p>{lc.hasPhases && <p className="mt-1">{lc.matchedPhaseLabel ? <Badge tone="green">✓ {lc.matchedPhaseLabel} 현물 일치</Badge> : <Badge tone="amber">⚠ 일치 차수 없음</Badge>}</p>}</div>
+                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-3"><p className="text-xs text-blue-700">인건비 합계</p><p className="mt-0.5 text-lg font-bold text-blue-800">{fmtKWon(lc.totalKWon)}</p></div>
                 </div>
               </Section>
             ))}
 
-            <Section title="👥 연구원별 총 참여율" sub="진행중 과제 · 오늘 기준 — 동일 기간 합계 100% 초과 금지">
+            <Section title={`👥 참여율 — ${data.participations.length}건`} sub="과제별 참여연구원·인건비. '참여율 추가'로 등록하면 위 인건비·아래 총참여율에 자동 반영됩니다.">
+              <EditableTable rows={data.participations} cols={PART_COLS} sheetName="참여율" toSheetRow={partRow} blank={PART_EMPTY} requiredKey="name" addLabel="참여율 추가" entityLabel="참여율" emptyMessage="참여율 기록이 없습니다. '참여율 추가'로 등록하세요." />
+            </Section>
+
+            <Section title="🧮 연구원별 총 참여율" sub="진행중 과제 · 오늘 기준 — 동일 기간 합계 100% 초과 금지">
               {totals.length === 0 ? (
-                <Empty message="진행중 과제의 참여율 기록이 없습니다. 엑셀 [참여율] 시트에 입력하세요." />
+                <p className="text-sm text-slate-400">진행중 과제의 참여율 기록이 없습니다.</p>
               ) : (
                 <table className="table-base">
                   <thead><tr><th>연구원</th><th>총 참여율</th><th>상태</th><th>과제별 내역</th></tr></thead>
@@ -116,9 +79,6 @@ export default function CompliancePage() {
                   </tbody>
                 </table>
               )}
-              <p className="mt-3 text-xs text-slate-400">
-                전체 참여율 기록 {data.participations.length}건 — 완료 과제 참여분은 합계에서 제외됩니다.
-              </p>
             </Section>
           </div>
         );
