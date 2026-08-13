@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { fmtKWon, fmtDate, type Data, type Project, type Phase, type Consortium, type Disbursement } from "@/lib/excel";
+import { fmtKWon, fmtDate, type Data, type Project, type Phase, type Consortium, type Disbursement, type Agreement } from "@/lib/excel";
 import { Badge, Empty, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
@@ -122,6 +122,39 @@ function PlanBox({ p }: { p: Project }) {
   );
 }
 
+/** 과제별 협약서 — 정보 추가(추가 전용) + 파일 업로드·연결 보기 */
+function AgreementBox({ p, list }: { p: Project; list: Agreement[] }) {
+  const { uploading, error, loadFolder, getByName } = useAgreementFiles();
+  const agRef = useRef<HTMLInputElement>(null);
+  const cols: Col<Agreement>[] = [
+    { key: "program", label: "사업명", span: true, view: (a) => <span className="font-medium">{a.program}</span> },
+    { key: "signedAt", label: "협약일", type: "date" },
+    { key: "totalKWon", label: "총사업비(천원)", type: "number", align: "right", th: "총사업비", view: (a) => fmtKWon(a.totalKWon) },
+    { key: "agency", label: "전문/전담기관", th: "전담기관" },
+    { key: "fileName", label: "협약서 파일명(연결)", th: "협약서", view: (a) => <DocViewButton doc={getByName(a.fileName)} /> },
+    { key: "code", label: "과제코드", hide: true },
+    { key: "note", label: "비고", span: true, hide: true },
+  ];
+  const toRow = (a: Agreement) => ({ 과제코드: a.code, 사업명: a.program, "협약서 파일명": a.fileName, 협약일: dateStr(a.signedAt), "총사업비(천원)": a.totalKWon, "전문/전담기관": a.agency, 비고: a.note });
+  const blank: Agreement = { code: p.code, program: "", fileName: null, signedAt: null, totalKWon: null, agency: null, note: null };
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+        <p className="text-xs text-emerald-800">🔒 협약서 파일은 파일명이 아래 '협약서 파일명'과 같으면 자동 연결됩니다(로그인 사용자만 열람, 다운로드 없이 보기).</p>
+        <button onClick={() => agRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+          {uploading ? "업로드 중…" : "협약서 폴더 업로드"}
+        </button>
+        <input ref={agRef} type="file"
+          // @ts-expect-error webkitdirectory는 표준 타입에 없음
+          webkitdirectory="" directory="" multiple className="hidden"
+          onChange={(e) => e.target.files && loadFolder(e.target.files, "agreements")} />
+      </div>
+      {error && <p className="text-sm font-medium text-red-600">⚠ {error}</p>}
+      <EditableTable rows={list} rowFilter={(a) => a.code === p.code} cols={cols} sheetName="협약서" toSheetRow={toRow} blank={blank} requiredKey="code" addLabel="협약서 추가" entityLabel="협약서" addOnly emptyMessage="이 과제의 협약서 정보가 없습니다. '협약서 추가'로 등록하고, 같은 이름의 파일을 업로드하면 연결됩니다." />
+    </div>
+  );
+}
+
 function Info({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
@@ -173,6 +206,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
 
       <Section title="💳 전용통장 · 통장거래내역"><AccountBox p={p} /></Section>
       <Section title="📑 사업계획서"><PlanBox p={p} /></Section>
+      <Section title="📜 협약서"><AgreementBox p={p} list={data.agreements} /></Section>
       <Section title="🏢 공동기관 사업비 분배" sub="참여기관별 사업비와 비중 자동 계산"><ShareTable list={data.consortium} code={p.code} /></Section>
 
       <Section title={`📊 차수 — ${data.phases.filter((x) => only(x.code)).length}건`} sub="연차 예산. '차수 추가'로 등록.">

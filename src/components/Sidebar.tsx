@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, FlaskConical, Lightbulb, FileSignature,
+  LayoutDashboard, FlaskConical, Lightbulb,
   Megaphone, Scale, BadgeCheck, Users, FolderOpen, type LucideIcon,
 } from "lucide-react";
 import { DataStatus } from "@/components/FileGate";
@@ -12,7 +12,6 @@ const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/", label: "대시보드", Icon: LayoutDashboard },
   { href: "/projects", label: "과제", Icon: FlaskConical },
   { href: "/patents", label: "특허", Icon: Lightbulb },
-  { href: "/agreements", label: "협약서", Icon: FileSignature },
   { href: "/funding", label: "지원사업 공고", Icon: Megaphone },
   { href: "/compliance", label: "법정의무·참여율", Icon: Scale },
   { href: "/certifications", label: "인증·면허", Icon: BadgeCheck },
