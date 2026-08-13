@@ -1,14 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { fmtKWon, fmtDate, type Project, type Phase, type Consortium, type Disbursement } from "@/lib/excel";
+import { ArrowLeft } from "lucide-react";
+import { fmtKWon, fmtDate, type Data, type Project, type Phase, type Consortium, type Disbursement } from "@/lib/excel";
 import { Badge, Empty, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
 
-/** 과제코드/코드에서 연도 추출 (P2025-02 → "2025"). 없으면 "기타". */
+/** 과제코드에서 연도 추출 (P2025-02 → "2025"). 없으면 "기타". */
 const yearOf = (code: string) => code.match(/(\d{4})/)?.[1] ?? "기타";
 
 /* ── 과제 [과제] ── */
@@ -45,7 +46,7 @@ const toRow = (p: Project) => ({
 /* ── 차수 ── */
 const PHASE_EMPTY: Phase = { code: "", label: null, period: null, govKWon: null, cashKWon: null, inKindKWon: null, totalKWon: 0 };
 const PHASE_COLS: Col<Phase>[] = [
-  { key: "code", label: "과제코드", th: "과제" },
+  { key: "code", label: "과제코드", hide: true },
   { key: "label", label: "차수" },
   { key: "period", label: "기간" },
   { key: "govKWon", label: "지원금(천원)", type: "number", align: "right", th: "지원금", view: (p) => fmtKWon(p.govKWon) },
@@ -57,7 +58,7 @@ const phaseRow = (p: Phase) => ({ 과제코드: p.code, 차수: p.label, 기간:
 /* ── 참여기관 ── */
 const CONS_EMPTY: Consortium = { code: "", name: "", role: null, govKWon: null, cashKWon: null, inKindKWon: null };
 const CONS_COLS: Col<Consortium>[] = [
-  { key: "code", label: "과제코드", th: "과제" },
+  { key: "code", label: "과제코드", hide: true },
   { key: "name", label: "기관명" },
   { key: "role", label: "역할" },
   { key: "govKWon", label: "지원금(천원)", type: "number", align: "right", th: "지원금", view: (c) => fmtKWon(c.govKWon) },
@@ -69,105 +70,72 @@ const consRow = (c: Consortium) => ({ 과제코드: c.code, 기관명: c.name, �
 /* ── 입금이력 ── */
 const DISB_EMPTY: Disbursement = { code: "", paidAt: null, payer: null, amountKWon: null };
 const DISB_COLS: Col<Disbursement>[] = [
-  { key: "code", label: "과제코드", th: "과제" },
+  { key: "code", label: "과제코드", hide: true },
   { key: "paidAt", label: "입금일", type: "date" },
   { key: "payer", label: "지급업체" },
   { key: "amountKWon", label: "금액(천원)", type: "number", align: "right", th: "금액", view: (d) => fmtKWon(d.amountKWon) },
 ];
 const disbRow = (d: Disbursement) => ({ 과제코드: d.code, 입금일: dateStr(d.paidAt), 지급업체: d.payer, "금액(천원)": d.amountKWon });
 
-/** 과제별 전용통장 + 통장거래내역 (로그인 사용자만 열람) */
-function AccountTable({ list }: { list: Project[] }) {
-  const { getByPattern, loadFolder, uploading, cloud } = useAgreementFiles();
+/** 전용통장 1건 + 통장거래내역 (상세용) */
+function AccountBox({ p }: { p: Project }) {
+  const { getByPattern, loadFolder, uploading } = useAgreementFiles();
   const bankRef = useRef<HTMLInputElement>(null);
-  const rows = list.filter((p) => p.bank || p.account || p.accountHolder || getByPattern(p.code, "bankbook"));
+  const stmt = getByPattern(p.code, "bankbook");
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
+      <div className="grid grid-cols-3 gap-3">
+        <Info label="은행" value={p.bank} />
+        <Info label="계좌번호" value={p.account} mono />
+        <Info label="예금주" value={p.accountHolder} />
+      </div>
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-        <p className="text-xs text-emerald-800">🏦 은행·계좌·예금주는 <b>과제 수정 창</b>에서 입력합니다. 통장거래내역은 파일명에 <b>과제코드</b>를 넣어 업로드하면 자동 연결됩니다(보기 전용).</p>
+        <p className="text-xs text-emerald-800">통장거래내역: {stmt ? <DocViewButton doc={stmt} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다."}</p>
         <button onClick={() => bankRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-          {uploading ? "업로드 중…" : cloud ? "거래내역 폴더 업로드" : "거래내역 폴더 선택"}
+          {uploading ? "업로드 중…" : "거래내역 업로드"}
         </button>
         <input ref={bankRef} type="file"
           // @ts-expect-error webkitdirectory는 표준 타입에 없음
           webkitdirectory="" directory="" multiple className="hidden"
           onChange={(e) => e.target.files && loadFolder(e.target.files, "bankbook")} />
       </div>
-      {rows.length === 0 ? (
-        <Empty message="과제 수정 창에서 은행·계좌·예금주를 입력하거나, 과제코드가 든 통장거래내역 파일을 올리면 여기에 표시됩니다." />
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="table-base">
-            <thead><tr><th>코드</th><th>과제명</th><th>은행</th><th>계좌번호</th><th>예금주</th><th>거래내역</th></tr></thead>
-            <tbody>
-              {rows.map((p) => {
-                const stmt = getByPattern(p.code, "bankbook");
-                return (
-                  <tr key={p.code} className="hover:bg-slate-50">
-                    <td className="whitespace-nowrap font-mono text-xs">{p.code}</td>
-                    <td className="font-medium">{p.title}</td>
-                    <td className="whitespace-nowrap text-xs">{p.bank ?? "—"}</td>
-                    <td className="whitespace-nowrap font-mono text-sm">{p.account ?? "—"}</td>
-                    <td className="whitespace-nowrap text-xs">{p.accountHolder ?? "—"}</td>
-                    <td>{stmt ? <DocViewButton doc={stmt} /> : <span className="text-xs text-slate-400">—</span>}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 }
 
-/** 과제별 사업계획서 (로그인 사용자만 열람) */
-function BusinessPlanTable({ list }: { list: Project[] }) {
-  const { getByPattern, loadFolder, uploading, cloud } = useAgreementFiles();
+/** 사업계획서 1건 (상세용) */
+function PlanBox({ p }: { p: Project }) {
+  const { getByPattern, loadFolder, uploading } = useAgreementFiles();
   const planRef = useRef<HTMLInputElement>(null);
+  const doc = getByPattern(p.code, "businessplan");
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2">
-        <p className="text-xs text-indigo-800">📑 사업계획서는 파일명에 <b>과제코드</b>(예: <code className="rounded bg-white px-1">P2025-02</code>)를 넣어 업로드하면 과제별로 연결됩니다(PDF 권장, 다운로드 없이 보기).</p>
-        <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
-          {uploading ? "업로드 중…" : cloud ? "사업계획서 폴더 업로드" : "사업계획서 폴더 선택"}
-        </button>
-        <input ref={planRef} type="file"
-          // @ts-expect-error webkitdirectory는 표준 타입에 없음
-          webkitdirectory="" directory="" multiple className="hidden"
-          onChange={(e) => e.target.files && loadFolder(e.target.files, "businessplan")} />
-      </div>
-      {list.length === 0 ? (
-        <Empty message="해당 연도의 과제가 없습니다." />
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="table-base">
-            <thead><tr><th>코드</th><th>과제명</th><th>구분</th><th>사업계획서</th></tr></thead>
-            <tbody>
-              {list.map((p) => {
-                const doc = getByPattern(p.code, "businessplan");
-                return (
-                  <tr key={p.code} className="hover:bg-slate-50">
-                    <td className="whitespace-nowrap font-mono text-xs">{p.code}</td>
-                    <td className="font-medium">{p.title}</td>
-                    <td><Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type}</Badge></td>
-                    <td>{doc ? <DocViewButton doc={doc} /> : <span className="text-xs text-slate-400">—</span>}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2">
+      <p className="text-xs text-indigo-800">사업계획서: {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF 권장)."}</p>
+      <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+        {uploading ? "업로드 중…" : "사업계획서 업로드"}
+      </button>
+      <input ref={planRef} type="file"
+        // @ts-expect-error webkitdirectory는 표준 타입에 없음
+        webkitdirectory="" directory="" multiple className="hidden"
+        onChange={(e) => e.target.files && loadFolder(e.target.files, "businessplan")} />
     </div>
   );
 }
 
-/** 공동기관 사업비 분배 (참여기관별 자동 %) */
+function Info({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+      <p className="text-[11px] font-medium text-slate-400">{label}</p>
+      <p className={`mt-0.5 text-sm text-slate-800 ${mono ? "font-mono" : ""}`}>{value ?? "—"}</p>
+    </div>
+  );
+}
+
+/** 공동기관 사업비 분배 */
 function ShareTable({ list, code }: { list: Consortium[]; code: string }) {
   const share = list.filter((c) => c.code === code).map((c) => ({ name: c.name, role: c.role, total: (c.govKWon ?? 0) + (c.cashKWon ?? 0) + (c.inKindKWon ?? 0) }));
   const grand = share.reduce((s, x) => s + x.total, 0);
-  if (share.length === 0) return null;
+  if (share.length === 0) return <Empty message="참여기관이 없습니다. 아래 '참여기관'에서 추가하세요." />;
   return (
     <table className="table-base">
       <thead><tr><th>기관</th><th>역할</th><th className="text-right">사업비</th><th className="text-right">비중</th></tr></thead>
@@ -186,19 +154,55 @@ function ShareTable({ list, code }: { list: Consortium[]; code: string }) {
   );
 }
 
+/** 과제 상세 — 전용통장·사업계획서·사업비 분배·차수·참여기관·입금 */
+function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: () => void }) {
+  const only = (code: string) => code === p.code;
+  return (
+    <div className="space-y-5">
+      <button onClick={onBack} className="btn-ghost"><ArrowLeft className="h-4 w-4" /> 과제 목록</button>
+
+      <Section title={`${p.code} · ${p.title}`} sub={`${p.type} · ${p.agency ?? "—"} · ${p.period ?? `${fmtDate(p.startDate)} ~ ${fmtDate(p.endDate)}`}`}>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Info label="진행상태" value={p.status} />
+          <Info label="총사업금액" value={fmtKWon(p.totalKWon)} />
+          <Info label="역할" value={p.role} />
+          <Info label="수행사" value={p.company} />
+        </div>
+        {p.note && <p className="mt-3 text-xs text-slate-500">비고: {p.note}</p>}
+      </Section>
+
+      <Section title="💳 전용통장 · 통장거래내역"><AccountBox p={p} /></Section>
+      <Section title="📑 사업계획서"><PlanBox p={p} /></Section>
+      <Section title="🏢 공동기관 사업비 분배" sub="참여기관별 사업비와 비중 자동 계산"><ShareTable list={data.consortium} code={p.code} /></Section>
+
+      <Section title={`📊 차수 — ${data.phases.filter((x) => only(x.code)).length}건`} sub="연차 예산. '차수 추가'로 등록.">
+        <EditableTable rows={data.phases} rowFilter={(x) => only(x.code)} cols={PHASE_COLS} sheetName="차수" toSheetRow={phaseRow} blank={{ ...PHASE_EMPTY, code: p.code }} requiredKey="code" addLabel="차수 추가" entityLabel="차수" />
+      </Section>
+      <Section title={`🏢 참여기관 — ${data.consortium.filter((x) => only(x.code)).length}건`} sub="공동·참여 기관별 사업비.">
+        <EditableTable rows={data.consortium} rowFilter={(x) => only(x.code)} cols={CONS_COLS} sheetName="참여기관" toSheetRow={consRow} blank={{ ...CONS_EMPTY, code: p.code }} requiredKey="name" addLabel="참여기관 추가" entityLabel="참여기관" />
+      </Section>
+      <Section title={`💵 입금이력 — ${data.disbursements.filter((x) => only(x.code)).length}건`} sub="지원금 입금 내역.">
+        <EditableTable rows={data.disbursements} rowFilter={(x) => only(x.code)} cols={DISB_COLS} sheetName="입금이력" toSheetRow={disbRow} blank={{ ...DISB_EMPTY, code: p.code }} requiredKey="code" addLabel="입금 추가" entityLabel="입금" />
+      </Section>
+    </div>
+  );
+}
+
 export default function ProjectsPage() {
   const [year, setYear] = useState("전체");
+  const [sel, setSel] = useState<string | null>(null);
+
   return (
     <WithData>
       {(data) => {
+        const selProject = sel ? data.projects.find((x) => x.code === sel) : null;
+        if (selProject) return <ProjectDetail data={data} p={selProject} onBack={() => setSel(null)} />;
+
         const years = ["전체", ...Array.from(new Set(data.projects.map((p) => yearOf(p.code)))).sort().reverse()];
         const inYear = (code: string) => year === "전체" || yearOf(code) === year;
-        const projFiltered = data.projects.filter((p) => inYear(p.code));
-        const consInYear = projFiltered.filter((p) => data.consortium.some((c) => c.code === p.code));
 
         return (
           <div className="space-y-5">
-            {/* 연도 필터 */}
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>
               {years.map((y) => (
@@ -208,40 +212,8 @@ export default function ProjectsPage() {
               ))}
             </div>
 
-            <Section title={`⚗ 과제 — ${projFiltered.length}건${year !== "전체" ? ` (${year}년)` : ""}`} sub="연구과제·지원사업 통합. 행의 ✎로 수정, '과제 추가'로 등록. 은행·계좌·예금주도 수정 창에서 입력합니다.">
-              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
-            </Section>
-
-            <Section title="💳 과제별 전용통장" sub="정부 R&D 전용계좌 · 통장거래내역 (로그인 사용자만 열람)">
-              <AccountTable list={projFiltered} />
-            </Section>
-
-            <Section title="📑 과제별 사업계획서" sub="과제코드가 든 파일을 올리면 과제별로 연결됩니다 (로그인 사용자만 열람)">
-              <BusinessPlanTable list={projFiltered} />
-            </Section>
-
-            <Section title="🏢 공동기관 사업비 분배" sub="참여기관별 사업비(지원금+기업부담)와 비중을 과제별로 자동 계산">
-              <div className="space-y-4">
-                {consInYear.map((p) => (
-                  <div key={p.code}>
-                    <p className="mb-1 text-xs font-semibold text-slate-500"><span className="font-mono">{p.code}</span> {p.title}</p>
-                    <ShareTable list={data.consortium} code={p.code} />
-                  </div>
-                ))}
-                {consInYear.length === 0 && <Empty message="해당 조건의 참여기관이 없습니다. 아래 '참여기관'에서 추가하세요." />}
-              </div>
-            </Section>
-
-            <Section title={`📊 차수 — ${data.phases.filter((x) => inYear(x.code)).length}건`} sub="과제별 연차 예산. '차수 추가'로 등록(과제코드·차수 기준).">
-              <EditableTable rows={data.phases} rowFilter={(x) => inYear(x.code)} cols={PHASE_COLS} sheetName="차수" toSheetRow={phaseRow} blank={PHASE_EMPTY} requiredKey="code" addLabel="차수 추가" entityLabel="차수" />
-            </Section>
-
-            <Section title={`🏢 참여기관 — ${data.consortium.filter((x) => inYear(x.code)).length}건`} sub="공동·참여 기관별 사업비. 위 '공동기관 사업비 분배'에 자동 반영됩니다.">
-              <EditableTable rows={data.consortium} rowFilter={(x) => inYear(x.code)} cols={CONS_COLS} sheetName="참여기관" toSheetRow={consRow} blank={CONS_EMPTY} requiredKey="name" addLabel="참여기관 추가" entityLabel="참여기관" />
-            </Section>
-
-            <Section title={`💵 입금이력 — ${data.disbursements.filter((x) => inYear(x.code)).length}건`} sub="지원금 입금 내역. '입금 추가'로 등록.">
-              <EditableTable rows={data.disbursements} rowFilter={(x) => inYear(x.code)} cols={DISB_COLS} sheetName="입금이력" toSheetRow={disbRow} blank={DISB_EMPTY} requiredKey="code" addLabel="입금 추가" entityLabel="입금" />
+            <Section title={`⚗ 과제 — ${data.projects.filter((p) => inYear(p.code)).length}건${year !== "전체" ? ` (${year}년)` : ""}`} sub="행을 클릭하면 상세(전용통장·사업계획서·사업비 분배·차수·참여기관·입금)로 이동합니다. ✎는 과제 기본정보 수정, '과제 추가'로 등록.">
+              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
             </Section>
           </div>
         );

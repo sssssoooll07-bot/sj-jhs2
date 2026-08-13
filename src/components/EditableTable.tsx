@@ -38,7 +38,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, rowFilter,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, rowFilter, onRowClick,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -53,6 +53,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   addOnly?: boolean;
   /** 표시만 걸러낸다(저장은 rows 전체 기준) — 연도 필터 등 */
   rowFilter?: (r: T) => boolean;
+  /** 행 클릭 시 호출 (수정 버튼 제외) — 상세 보기 등 */
+  onRowClick?: (r: T) => void;
 }) {
   const { saveSheet, error } = useDataCtx();
   const [modal, setModal] = useState<{ r: T; isNew: boolean; index: number } | null>(null);
@@ -97,7 +99,7 @@ export function EditableTable<T extends Record<string, unknown>>({
             </thead>
             <tbody>
               {visible.map(({ r, i }) => (
-                <tr key={i} className="hover:bg-slate-50">
+                <tr key={i} onClick={() => onRowClick?.(r)} className={`hover:bg-slate-50 ${onRowClick ? "cursor-pointer" : ""}`}>
                   {tableCols.map((c) => (
                     <td key={c.key} className={c.align === "right" ? "text-right" : ""}>
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
@@ -105,7 +107,7 @@ export function EditableTable<T extends Record<string, unknown>>({
                   ))}
                   {!addOnly && (
                     <td className="text-right">
-                      <button onClick={() => setModal({ r: { ...r }, isNew: false, index: i })} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
+                      <button onClick={(e) => { e.stopPropagation(); setModal({ r: { ...r }, isNew: false, index: i }); }} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
                         <Pencil className="h-4 w-4" />
                       </button>
                     </td>
