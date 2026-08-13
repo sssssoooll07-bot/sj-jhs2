@@ -21,7 +21,7 @@ const EMPTY: Project = {
 const COLS: Col<Project>[] = [
   { key: "code", label: "과제코드", th: "코드" },
   { key: "title", label: "과제명", span: true, view: (p) => <span className="font-medium">{p.title}</span> },
-  { key: "type", label: "구분", type: "select", options: ["연구과제", "지원사업"], view: (p) => <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type}</Badge> },
+  { key: "type", label: "구분 (연구과제=R&D / 지원사업=비R&D)", type: "select", options: ["연구과제", "지원사업"], th: "구분", view: (p) => <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type === "연구과제" ? "R&D" : "비R&D"}</Badge> },
   { key: "agency", label: "지원부처/기관", th: "지원기관" },
   { key: "status", label: "진행상태", type: "select", options: ["진행중", "완료"], view: (p) => <StatusBadge status={p.status} /> },
   { key: "totalKWon", label: "총사업금액(천원)", type: "number", align: "right", th: "총사업금액", view: (p) => <span className="font-semibold">{fmtKWon(p.totalKWon)}</span> },
@@ -190,6 +190,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
 
 export default function ProjectsPage() {
   const [year, setYear] = useState("전체");
+  const [kind, setKind] = useState("전체");
   const [sel, setSel] = useState<string | null>(null);
 
   return (
@@ -200,20 +201,32 @@ export default function ProjectsPage() {
 
         const years = ["전체", ...Array.from(new Set(data.projects.map((p) => yearOf(p.code)))).sort().reverse()];
         const inYear = (code: string) => year === "전체" || yearOf(code) === year;
+        const inKind = (t: string) => kind === "전체" || (kind === "R&D" ? t === "연구과제" : t === "지원사업");
+        const cnt = data.projects.filter((p) => inYear(p.code) && inKind(p.type)).length;
 
         return (
           <div className="space-y-5">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>
-              {years.map((y) => (
-                <button key={y} onClick={() => setYear(y)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${year === y ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
-                  {y === "전체" ? "전체" : `${y}년`}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>
+                {years.map((y) => (
+                  <button key={y} onClick={() => setYear(y)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${year === y ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                    {y === "전체" ? "전체" : `${y}년`}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs font-semibold text-slate-400">구분</span>
+                {["전체", "R&D", "비R&D"].map((k) => (
+                  <button key={k} onClick={() => setKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${kind === k ? "bg-indigo-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                    {k}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <Section title={`⚗ 과제 — ${data.projects.filter((p) => inYear(p.code)).length}건${year !== "전체" ? ` (${year}년)` : ""}`} sub="행을 클릭하면 상세(전용통장·사업계획서·사업비 분배·차수·참여기관·입금)로 이동합니다. ✎는 과제 기본정보 수정, '과제 추가'로 등록.">
-              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
+            <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${kind !== "전체" ? ` · ${kind}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
+              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inKind(p.type)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
             </Section>
           </div>
         );
