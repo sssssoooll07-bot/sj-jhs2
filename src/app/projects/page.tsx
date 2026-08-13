@@ -19,16 +19,16 @@ const EMPTY: Project = {
   bank: null, account: null, accountHolder: null, phaseSumKWon: 0, phaseCheck: "—",
 };
 const COLS: Col<Project>[] = [
-  { key: "code", label: "과제코드", th: "코드" },
-  { key: "title", label: "과제명", span: true, view: (p) => <span className="font-medium">{p.title}</span> },
   { key: "type", label: "구분 (연구과제=R&D / 지원사업=비R&D)", type: "select", options: ["연구과제", "지원사업"], th: "구분", view: (p) => <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type === "연구과제" ? "R&D" : "비R&D"}</Badge> },
+  { key: "title", label: "과제명", span: true, view: (p) => <span className="font-medium">{p.title}</span> },
   { key: "agency", label: "지원부처/기관", th: "지원기관" },
-  { key: "status", label: "진행상태", type: "select", options: ["진행중", "완료"], view: (p) => <StatusBadge status={p.status} /> },
+  { key: "role", label: "역할 (주관/공동)", type: "select", options: ["주관", "공동", "참여"], th: "역할", view: (p) => (p.role ? <Badge tone={p.role === "주관" ? "blue" : "amber"}>{p.role}</Badge> : "—") },
   { key: "totalKWon", label: "총사업금액(천원)", type: "number", align: "right", th: "총사업금액", view: (p) => <span className="font-semibold">{fmtKWon(p.totalKWon)}</span> },
+  { key: "status", label: "진행상태", type: "select", options: ["진행중", "완료"], view: (p) => <StatusBadge status={p.status} /> },
+  { key: "code", label: "과제코드", hide: true },
   { key: "period", label: "총사업기간", hide: true },
   { key: "startDate", label: "시작일", type: "date", hide: true },
   { key: "endDate", label: "종료일", type: "date", hide: true },
-  { key: "role", label: "역할", hide: true },
   { key: "company", label: "수행사", hide: true },
   { key: "progress", label: "진행사항", span: true, hide: true },
   { key: "note", label: "비고", span: true, hide: true },
@@ -191,6 +191,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
 export default function ProjectsPage() {
   const [year, setYear] = useState("전체");
   const [kind, setKind] = useState("전체");
+  const [roleF, setRoleF] = useState("전체");
   const [sel, setSel] = useState<string | null>(null);
 
   return (
@@ -202,7 +203,8 @@ export default function ProjectsPage() {
         const years = ["전체", ...Array.from(new Set(data.projects.map((p) => yearOf(p.code)))).sort().reverse()];
         const inYear = (code: string) => year === "전체" || yearOf(code) === year;
         const inKind = (t: string) => kind === "전체" || (kind === "R&D" ? t === "연구과제" : t === "지원사업");
-        const cnt = data.projects.filter((p) => inYear(p.code) && inKind(p.type)).length;
+        const inRole = (r: string | null) => roleF === "전체" || (roleF === "주관" ? r === "주관" : r !== "주관");
+        const cnt = data.projects.filter((p) => inYear(p.code) && inKind(p.type) && inRole(p.role)).length;
 
         return (
           <div className="space-y-5">
@@ -223,10 +225,18 @@ export default function ProjectsPage() {
                   </button>
                 ))}
               </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs font-semibold text-slate-400">역할</span>
+                {["전체", "주관", "공동"].map((r) => (
+                  <button key={r} onClick={() => setRoleF(r)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${roleF === r ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                    {r}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${kind !== "전체" ? ` · ${kind}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
-              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inKind(p.type)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
+              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inKind(p.type) && inRole(p.role)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
             </Section>
           </div>
         );
