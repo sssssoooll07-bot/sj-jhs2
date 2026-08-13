@@ -136,13 +136,13 @@ export function DataStatus({ vertical = false }: { vertical?: boolean }) {
       )}
       {firebaseEnabled && user && <p className="truncate text-slate-400">👤 {user.email}</p>}
       <div className="flex flex-wrap gap-1.5">
-        <button onClick={() => inputRef.current?.click()} className="rounded-lg border border-slate-300 px-2 py-1 text-slate-600 hover:bg-slate-50">
+        <button onClick={() => inputRef.current?.click()} className="rounded-lg border border-white/15 px-2 py-1 text-slate-300 transition-colors hover:bg-white/10">
           {firebaseEnabled ? "엑셀 갱신" : "파일 교체"}
         </button>
         {firebaseEnabled ? (
-          <button onClick={signOutUser} className="rounded-lg border border-red-200 px-2 py-1 text-red-600 hover:bg-red-50">로그아웃</button>
+          <button onClick={signOutUser} className="rounded-lg border border-red-500/30 px-2 py-1 text-red-400 transition-colors hover:bg-red-500/10">로그아웃</button>
         ) : (
-          <button onClick={clear} className="rounded-lg border border-red-200 px-2 py-1 text-red-600 hover:bg-red-50">데이터 제거</button>
+          <button onClick={clear} className="rounded-lg border border-red-500/30 px-2 py-1 text-red-400 transition-colors hover:bg-red-500/10">데이터 제거</button>
         )}
       </div>
       <input ref={inputRef} type="file" accept=".xlsx,.xlsm" className="hidden" onChange={(e) => onReplace(e.target.files)} />
