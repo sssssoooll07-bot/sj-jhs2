@@ -38,7 +38,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -49,6 +49,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   addLabel?: string;
   entityLabel?: string;
   emptyMessage?: string;
+  /** true면 기존 행 수정·삭제 없이 '추가'만 가능 (협약서 등) */
+  addOnly?: boolean;
 }) {
   const { saveSheet, error } = useDataCtx();
   const [modal, setModal] = useState<{ r: T; isNew: boolean; index: number } | null>(null);
@@ -87,7 +89,7 @@ export function EditableTable<T extends Record<string, unknown>>({
             <thead>
               <tr>
                 {tableCols.map((c) => <th key={c.key} className={c.align === "right" ? "text-right" : ""}>{c.th ?? c.label}</th>)}
-                <th className="text-right">수정</th>
+                {!addOnly && <th className="text-right">수정</th>}
               </tr>
             </thead>
             <tbody>
@@ -98,11 +100,13 @@ export function EditableTable<T extends Record<string, unknown>>({
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
                     </td>
                   ))}
-                  <td className="text-right">
-                    <button onClick={() => setModal({ r: { ...r }, isNew: false, index: i })} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                  </td>
+                  {!addOnly && (
+                    <td className="text-right">
+                      <button onClick={() => setModal({ r: { ...r }, isNew: false, index: i })} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
