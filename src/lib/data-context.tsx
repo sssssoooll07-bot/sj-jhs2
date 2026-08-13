@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import * as XLSX from "xlsx";
 import { parseWorkbook, type Data } from "@/lib/excel";
 import { auth, storage, firebaseEnabled, MASTER_PATH } from "@/lib/firebase";
 
@@ -34,6 +35,8 @@ type Ctx = {
   signInWithGoogle: () => Promise<void>;
   signOutUser: () => Promise<void>;
   uploadMaster: (file: File) => Promise<void>;
+  /** 화면에서 편집한 시트를 저장(해당 시트만 교체) — 화면 편집 모드 */
+  saveSheet: (sheetName: string, rows: Record<string, unknown>[]) => Promise<void>;
   source: "firebase" | "local" | null;
 };
 
@@ -205,6 +208,30 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loadFromFirebase]);
 
+  // 화면에서 편집한 시트를 저장 — 기존 마스터 xlsx를 불러와 해당 시트만 교체해 다시 올린다(다른 시트·서식 보존).
+  const saveSheet = useCallback(async (sheetName: string, rows: Record<string, unknown>[]) => {
+    if (!storage) throw new Error("Firebase가 설정되지 않았습니다.");
+    setError(null);
+    try {
+      const url = await getDownloadURL(ref(storage, MASTER_PATH));
+      const buf = await (await fetch(url)).arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      wb.Sheets[sheetName] = XLSX.utils.json_to_sheet(rows);
+      if (!wb.SheetNames.includes(sheetName)) wb.SheetNames.push(sheetName);
+      const out = new Uint8Array(XLSX.write(wb, { type: "array", bookType: "xlsx" }));
+      await uploadBytes(ref(storage, MASTER_PATH), out, {
+        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      setData(parseWorkbook(out));
+      setSource("firebase");
+    } catch (e) {
+      const code = (e as { code?: string })?.code ?? "";
+      if (code === "storage/unauthorized") setError("저장 권한이 없습니다. 허용된 계정으로 로그인했는지 확인하세요.");
+      else setError(e instanceof Error ? e.message : "저장에 실패했습니다.");
+      throw e;
+    }
+  }, []);
+
   const clear = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setData(null);
@@ -217,7 +244,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     <DataCtx.Provider
       value={{
         data, fileName, remembered, ready, error, loadFile, clear,
-        firebaseEnabled, user, authReady, signInWithGoogle, signOutUser, uploadMaster, source,
+        firebaseEnabled, user, authReady, signInWithGoogle, signOutUser, uploadMaster, saveSheet, source,
       }}
     >
       {children}
