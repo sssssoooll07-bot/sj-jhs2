@@ -4,21 +4,28 @@ rules_version = '2';
 // 마스터 엑셀(master/), 협약서(agreements/), 특허증(patents/) — 로그인 없이는 전면 차단.
 service firebase.storage {
   match /b/{bucket}/o {
+    // 허용된 계정만 접근 — Google 로그인은 아무 구글 계정이나 로그인되므로 이메일로 제한한다.
+    // 직원을 추가하려면 아래 목록에 이메일을 넣고 재배포한다.
+    function allowed() {
+      return request.auth != null && request.auth.token.email in [
+        'sssssoooll07@gmail.com'
+      ];
+    }
     // 마스터 엑셀
     match /master/{fileName} {
-      allow read, write: if request.auth != null && fileName.matches('.*[.]xlsx');
+      allow read, write: if allowed() && fileName.matches('.*[.]xlsx');
     }
     // 협약서 원본 (PDF/HWP 등)
     match /agreements/{fileName} {
-      allow read, write: if request.auth != null;
+      allow read, write: if allowed();
     }
     // 특허증 원본
     match /patents/{fileName} {
-      allow read, write: if request.auth != null;
+      allow read, write: if allowed();
     }
-    // 통장거래내역 원본 (매우 민감 — 로그인 사용자만)
+    // 통장거래내역 원본 (매우 민감)
     match /bankbook/{fileName} {
-      allow read, write: if request.auth != null;
+      allow read, write: if allowed();
     }
     // 그 외 경로는 전면 차단
     match /{allPaths=**} {

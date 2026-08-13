@@ -5,18 +5,15 @@ import { useDataCtx } from "@/lib/data-context";
 
 /** Firebase 로그인 화면 (Firebase 사용 시, 미로그인 상태) */
 function LoginScreen() {
-  const { signIn, error } = useDataCtx();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { signInWithGoogle, error } = useDataCtx();
   const [busy, setBusy] = useState(false);
   const [localErr, setLocalErr] = useState<string | null>(null);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onGoogle() {
     setBusy(true);
     setLocalErr(null);
     try {
-      await signIn(email, password);
+      await signInWithGoogle();
     } catch (e) {
       setLocalErr(e instanceof Error ? e.message : "로그인에 실패했습니다.");
     } finally {
@@ -29,17 +26,25 @@ function LoginScreen() {
       <div className="mb-6 text-center">
         <p className="text-3xl">🔐</p>
         <h2 className="mt-2 text-lg font-bold text-slate-900">로그인</h2>
-        <p className="mt-1 text-sm text-slate-500">로그인하면 마스터 데이터가 자동으로 표시됩니다.</p>
+        <p className="mt-1 text-sm text-slate-500">회사 구글 계정으로 로그인하면 데이터가 표시됩니다.</p>
       </div>
-      <form onSubmit={onSubmit} className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <input className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" type="email" placeholder="이메일" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus required />
-        <input className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" type="password" placeholder="비밀번호" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        {(localErr || error) && <p className="text-sm text-red-600">⚠ {localErr || error}</p>}
-        <button className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50" disabled={busy}>
-          {busy ? "로그인 중…" : "로그인"}
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <button
+          onClick={onGoogle}
+          disabled={busy}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
+            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" />
+            <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z" />
+            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+          </svg>
+          {busy ? "로그인 중…" : "Google 계정으로 로그인"}
         </button>
-      </form>
-      <p className="mt-4 text-center text-xs text-slate-400">계정은 관리자(Firebase 콘솔)에서 발급합니다.</p>
+        {(localErr || error) && <p className="mt-3 text-sm text-red-600">⚠ {localErr || error}</p>}
+      </div>
+      <p className="mt-4 text-center text-xs text-slate-400">허용된 구글 계정만 데이터에 접근할 수 있습니다.</p>
     </div>
   );
 }

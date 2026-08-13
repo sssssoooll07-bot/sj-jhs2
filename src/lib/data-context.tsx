@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from "firebase/auth";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { parseWorkbook, type Data } from "@/lib/excel";
 import { auth, storage, firebaseEnabled, MASTER_PATH } from "@/lib/firebase";
@@ -31,7 +31,7 @@ type Ctx = {
   firebaseEnabled: boolean;
   user: User | null;
   authReady: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOutUser: () => Promise<void>;
   uploadMaster: (file: File) => Promise<void>;
   source: "firebase" | "local" | null;
@@ -150,21 +150,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
+  const signInWithGoogle = useCallback(async () => {
     if (!auth) throw new Error("Firebase가 설정되지 않았습니다.");
     setError(null);
+    const provider = new GoogleAuthProvider();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithPopup(auth, provider);
     } catch (e) {
       const code = (e as { code?: string })?.code ?? "";
-      if (code === "auth/operation-not-allowed" || code === "auth/configuration-not-found") {
-        throw new Error("Firebase 콘솔에서 이메일/비밀번호 로그인이 아직 켜지지 않았습니다.");
+      // 사용자가 팝업을 닫음 — 에러로 취급하지 않음
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return;
+      if (code === "auth/popup-blocked") {
+        throw new Error("팝업이 차단됐습니다. 브라우저에서 팝업을 허용한 뒤 다시 시도하세요.");
       }
-      if (code === "auth/network-request-failed") {
-        throw new Error("네트워크 오류로 로그인하지 못했습니다.");
+      if (code === "auth/unauthorized-domain") {
+        throw new Error("이 주소가 Firebase 승인 도메인에 없습니다. 콘솔 Authentication → Settings → 승인된 도메인에 추가하세요.");
       }
-      // invalid-credential / user-not-found / wrong-password
-      throw new Error("이메일 또는 비밀번호가 올바르지 않습니다. (계정은 Firebase 콘솔 Authentication → Users에서 추가)");
+      if (code === "auth/operation-not-allowed") {
+        throw new Error("Firebase 콘솔에서 Google 로그인이 아직 켜지지 않았습니다.");
+      }
+      throw new Error("Google 로그인에 실패했습니다. 잠시 후 다시 시도하세요.");
     }
   }, []);
 
@@ -212,7 +217,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     <DataCtx.Provider
       value={{
         data, fileName, remembered, ready, error, loadFile, clear,
-        firebaseEnabled, user, authReady, signIn, signOutUser, uploadMaster, source,
+        firebaseEnabled, user, authReady, signInWithGoogle, signOutUser, uploadMaster, source,
       }}
     >
       {children}
