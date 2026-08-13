@@ -1,12 +1,15 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { fmtKWon, fmtDate, type Project, type Phase, type Consortium, type Disbursement } from "@/lib/excel";
 import { Badge, Empty, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
+
+/** 과제코드/코드에서 연도 추출 (P2025-02 → "2025"). 없으면 "기타". */
+const yearOf = (code: string) => code.match(/(\d{4})/)?.[1] ?? "기타";
 
 /* ── 과제 [과제] ── */
 const EMPTY: Project = {
@@ -134,24 +137,28 @@ function BusinessPlanTable({ list }: { list: Project[] }) {
           webkitdirectory="" directory="" multiple className="hidden"
           onChange={(e) => e.target.files && loadFolder(e.target.files, "businessplan")} />
       </div>
-      <div className="overflow-x-auto">
-        <table className="table-base">
-          <thead><tr><th>코드</th><th>과제명</th><th>구분</th><th>사업계획서</th></tr></thead>
-          <tbody>
-            {list.map((p) => {
-              const doc = getByPattern(p.code, "businessplan");
-              return (
-                <tr key={p.code} className="hover:bg-slate-50">
-                  <td className="whitespace-nowrap font-mono text-xs">{p.code}</td>
-                  <td className="font-medium">{p.title}</td>
-                  <td><Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type}</Badge></td>
-                  <td>{doc ? <DocViewButton doc={doc} /> : <span className="text-xs text-slate-400">—</span>}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {list.length === 0 ? (
+        <Empty message="해당 연도의 과제가 없습니다." />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="table-base">
+            <thead><tr><th>코드</th><th>과제명</th><th>구분</th><th>사업계획서</th></tr></thead>
+            <tbody>
+              {list.map((p) => {
+                const doc = getByPattern(p.code, "businessplan");
+                return (
+                  <tr key={p.code} className="hover:bg-slate-50">
+                    <td className="whitespace-nowrap font-mono text-xs">{p.code}</td>
+                    <td className="font-medium">{p.title}</td>
+                    <td><Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type}</Badge></td>
+                    <td>{doc ? <DocViewButton doc={doc} /> : <span className="text-xs text-slate-400">—</span>}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
@@ -180,47 +187,65 @@ function ShareTable({ list, code }: { list: Consortium[]; code: string }) {
 }
 
 export default function ProjectsPage() {
+  const [year, setYear] = useState("전체");
   return (
     <WithData>
-      {(data) => (
-        <div className="space-y-5">
-          <Section title={`⚗ 과제 — ${data.projects.length}건`} sub="연구과제·지원사업 통합. 행의 ✎로 수정, '과제 추가'로 등록. 은행·계좌·예금주도 수정 창에서 입력합니다.">
-            <EditableTable rows={data.projects} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
-          </Section>
+      {(data) => {
+        const years = ["전체", ...Array.from(new Set(data.projects.map((p) => yearOf(p.code)))).sort().reverse()];
+        const inYear = (code: string) => year === "전체" || yearOf(code) === year;
+        const projFiltered = data.projects.filter((p) => inYear(p.code));
+        const consInYear = projFiltered.filter((p) => data.consortium.some((c) => c.code === p.code));
 
-          <Section title="💳 과제별 전용통장" sub="정부 R&D 전용계좌 · 통장거래내역 (로그인 사용자만 열람)">
-            <AccountTable list={data.projects} />
-          </Section>
-
-          <Section title="📑 과제별 사업계획서" sub="과제코드가 든 파일을 올리면 과제별로 연결됩니다 (로그인 사용자만 열람)">
-            <BusinessPlanTable list={data.projects} />
-          </Section>
-
-          <Section title="🏢 공동기관 사업비 분배" sub="참여기관별 사업비(지원금+기업부담)와 비중을 과제별로 자동 계산">
-            <div className="space-y-4">
-              {data.projects.filter((p) => data.consortium.some((c) => c.code === p.code)).map((p) => (
-                <div key={p.code}>
-                  <p className="mb-1 text-xs font-semibold text-slate-500"><span className="font-mono">{p.code}</span> {p.title}</p>
-                  <ShareTable list={data.consortium} code={p.code} />
-                </div>
+        return (
+          <div className="space-y-5">
+            {/* 연도 필터 */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>
+              {years.map((y) => (
+                <button key={y} onClick={() => setYear(y)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${year === y ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                  {y === "전체" ? "전체" : `${y}년`}
+                </button>
               ))}
-              {data.consortium.length === 0 && <Empty message="참여기관이 없습니다. 아래 '참여기관'에서 추가하세요." />}
             </div>
-          </Section>
 
-          <Section title={`📊 차수 — ${data.phases.length}건`} sub="과제별 연차 예산. '차수 추가'로 등록(과제코드·차수 기준).">
-            <EditableTable rows={data.phases} cols={PHASE_COLS} sheetName="차수" toSheetRow={phaseRow} blank={PHASE_EMPTY} requiredKey="code" addLabel="차수 추가" entityLabel="차수" />
-          </Section>
+            <Section title={`⚗ 과제 — ${projFiltered.length}건${year !== "전체" ? ` (${year}년)` : ""}`} sub="연구과제·지원사업 통합. 행의 ✎로 수정, '과제 추가'로 등록. 은행·계좌·예금주도 수정 창에서 입력합니다.">
+              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
+            </Section>
 
-          <Section title={`🏢 참여기관 — ${data.consortium.length}건`} sub="공동·참여 기관별 사업비. 위 '공동기관 사업비 분배'에 자동 반영됩니다.">
-            <EditableTable rows={data.consortium} cols={CONS_COLS} sheetName="참여기관" toSheetRow={consRow} blank={CONS_EMPTY} requiredKey="name" addLabel="참여기관 추가" entityLabel="참여기관" />
-          </Section>
+            <Section title="💳 과제별 전용통장" sub="정부 R&D 전용계좌 · 통장거래내역 (로그인 사용자만 열람)">
+              <AccountTable list={projFiltered} />
+            </Section>
 
-          <Section title={`💵 입금이력 — ${data.disbursements.length}건`} sub="지원금 입금 내역. '입금 추가'로 등록.">
-            <EditableTable rows={data.disbursements} cols={DISB_COLS} sheetName="입금이력" toSheetRow={disbRow} blank={DISB_EMPTY} requiredKey="code" addLabel="입금 추가" entityLabel="입금" />
-          </Section>
-        </div>
-      )}
+            <Section title="📑 과제별 사업계획서" sub="과제코드가 든 파일을 올리면 과제별로 연결됩니다 (로그인 사용자만 열람)">
+              <BusinessPlanTable list={projFiltered} />
+            </Section>
+
+            <Section title="🏢 공동기관 사업비 분배" sub="참여기관별 사업비(지원금+기업부담)와 비중을 과제별로 자동 계산">
+              <div className="space-y-4">
+                {consInYear.map((p) => (
+                  <div key={p.code}>
+                    <p className="mb-1 text-xs font-semibold text-slate-500"><span className="font-mono">{p.code}</span> {p.title}</p>
+                    <ShareTable list={data.consortium} code={p.code} />
+                  </div>
+                ))}
+                {consInYear.length === 0 && <Empty message="해당 조건의 참여기관이 없습니다. 아래 '참여기관'에서 추가하세요." />}
+              </div>
+            </Section>
+
+            <Section title={`📊 차수 — ${data.phases.filter((x) => inYear(x.code)).length}건`} sub="과제별 연차 예산. '차수 추가'로 등록(과제코드·차수 기준).">
+              <EditableTable rows={data.phases} rowFilter={(x) => inYear(x.code)} cols={PHASE_COLS} sheetName="차수" toSheetRow={phaseRow} blank={PHASE_EMPTY} requiredKey="code" addLabel="차수 추가" entityLabel="차수" />
+            </Section>
+
+            <Section title={`🏢 참여기관 — ${data.consortium.filter((x) => inYear(x.code)).length}건`} sub="공동·참여 기관별 사업비. 위 '공동기관 사업비 분배'에 자동 반영됩니다.">
+              <EditableTable rows={data.consortium} rowFilter={(x) => inYear(x.code)} cols={CONS_COLS} sheetName="참여기관" toSheetRow={consRow} blank={CONS_EMPTY} requiredKey="name" addLabel="참여기관 추가" entityLabel="참여기관" />
+            </Section>
+
+            <Section title={`💵 입금이력 — ${data.disbursements.filter((x) => inYear(x.code)).length}건`} sub="지원금 입금 내역. '입금 추가'로 등록.">
+              <EditableTable rows={data.disbursements} rowFilter={(x) => inYear(x.code)} cols={DISB_COLS} sheetName="입금이력" toSheetRow={disbRow} blank={DISB_EMPTY} requiredKey="code" addLabel="입금 추가" entityLabel="입금" />
+            </Section>
+          </div>
+        );
+      }}
     </WithData>
   );
 }

@@ -38,7 +38,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, rowFilter,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -51,6 +51,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   emptyMessage?: string;
   /** true면 기존 행 수정·삭제 없이 '추가'만 가능 (협약서 등) */
   addOnly?: boolean;
+  /** 표시만 걸러낸다(저장은 rows 전체 기준) — 연도 필터 등 */
+  rowFilter?: (r: T) => boolean;
 }) {
   const { saveSheet, error } = useDataCtx();
   const [modal, setModal] = useState<{ r: T; isNew: boolean; index: number } | null>(null);
@@ -72,6 +74,7 @@ export function EditableTable<T extends Record<string, unknown>>({
 
   const tableCols = cols.filter((c) => !c.hide);
   const formCols = cols.filter((c) => c.editable !== false);
+  const visible = rows.map((r, i) => ({ r, i })).filter(({ r }) => !rowFilter || rowFilter(r));
 
   return (
     <div>
@@ -81,8 +84,8 @@ export function EditableTable<T extends Record<string, unknown>>({
         </button>
         {error && <span className="text-sm font-medium text-red-600">⚠ {error}</span>}
       </div>
-      {rows.length === 0 ? (
-        <Empty message={emptyMessage ?? `등록된 ${entityLabel}이(가) 없습니다. '${addLabel}'으로 등록하세요.`} />
+      {visible.length === 0 ? (
+        <Empty message={rows.length === 0 ? (emptyMessage ?? `등록된 ${entityLabel}이(가) 없습니다. '${addLabel}'으로 등록하세요.`) : "선택한 조건에 해당하는 항목이 없습니다."} />
       ) : (
         <div className="overflow-x-auto">
           <table className="table-base">
@@ -93,7 +96,7 @@ export function EditableTable<T extends Record<string, unknown>>({
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
+              {visible.map(({ r, i }) => (
                 <tr key={i} className="hover:bg-slate-50">
                   {tableCols.map((c) => (
                     <td key={c.key} className={c.align === "right" ? "text-right" : ""}>
