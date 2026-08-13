@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Badge, Empty, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useDataCtx } from "@/lib/data-context";
@@ -27,129 +28,154 @@ function toRows(list: Researcher[]) {
   }));
 }
 
-const inp = "w-full min-w-[5rem] rounded border border-slate-300 px-1.5 py-1 text-xs";
+function Field({ label, span, children }: { label: string; span?: boolean; children: React.ReactNode }) {
+  return (
+    <label className={`block ${span ? "col-span-2" : ""}`}>
+      <span className="mb-1 block text-xs font-medium text-slate-500">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function EditModal({
+  initial, isNew, saving, onSave, onDelete, onClose,
+}: {
+  initial: Researcher; isNew: boolean; saving: boolean;
+  onSave: (r: Researcher) => void; onDelete: () => void; onClose: () => void;
+}) {
+  const [r, setR] = useState<Researcher>(initial);
+  const set = (patch: Partial<Researcher>) => setR((p) => ({ ...p, ...patch }));
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <h3 className="text-base font-bold tracking-tight text-slate-800">연구원 {isNew ? "추가" : "수정"}</h3>
+          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-3 px-5 py-4">
+          <Field label="성명"><input className="field" value={r.name} onChange={(e) => set({ name: e.target.value })} autoFocus /></Field>
+          <Field label="직위"><input className="field" value={r.position ?? ""} onChange={(e) => set({ position: e.target.value || null })} /></Field>
+          <Field label="최종학위"><input className="field" value={r.degree ?? ""} onChange={(e) => set({ degree: e.target.value || null })} /></Field>
+          <Field label="전공"><input className="field" value={r.major ?? ""} onChange={(e) => set({ major: e.target.value || null })} /></Field>
+          <Field label="출신대학"><input className="field" value={r.university ?? ""} onChange={(e) => set({ university: e.target.value || null })} /></Field>
+          <Field label="졸업연도"><input className="field" value={r.gradYear ?? ""} onChange={(e) => set({ gradYear: e.target.value || null })} /></Field>
+          <Field label="국가연구자번호"><input className="field" value={r.researcherNo ?? ""} onChange={(e) => set({ researcherNo: e.target.value || null })} /></Field>
+          <Field label="소속"><input className="field" value={r.company ?? ""} onChange={(e) => set({ company: e.target.value || null })} /></Field>
+          <Field label="재직 여부">
+            <div className="inline-flex rounded-lg border border-slate-200 p-0.5">
+              <button type="button" onClick={() => set({ active: true })} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${r.active ? "bg-emerald-500 text-white" : "text-slate-500 hover:bg-slate-50"}`}>재직</button>
+              <button type="button" onClick={() => set({ active: false })} className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${!r.active ? "bg-red-500 text-white" : "text-slate-500 hover:bg-slate-50"}`}>퇴사</button>
+            </div>
+          </Field>
+          <Field label="비고" span><input className="field" value={r.note ?? ""} onChange={(e) => set({ note: e.target.value || null })} /></Field>
+        </div>
+        <div className="flex items-center gap-2 border-t border-slate-100 px-5 py-4">
+          {!isNew && (
+            <button onClick={onDelete} disabled={saving} className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">
+              <Trash2 className="h-4 w-4" /> 삭제
+            </button>
+          )}
+          <button onClick={onClose} disabled={saving} className="btn-ghost ml-auto">취소</button>
+          <button onClick={() => onSave(r)} disabled={saving || !r.name.trim()} className="btn-primary">{saving ? "저장 중…" : "저장"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ResearchersPage() {
   const { saveSheet, error } = useDataCtx();
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<Researcher[]>([]);
+  const [modal, setModal] = useState<{ r: Researcher; isNew: boolean; index: number } | null>(null);
   const [saving, setSaving] = useState(false);
 
   return (
     <WithData>
       {(data) => {
-        function startEdit() {
-          setDraft(data.researchers.map((r) => ({ ...r })));
-          setEditing(true);
-        }
-        function cancel() {
-          setEditing(false);
-          setDraft([]);
-        }
-        function update(i: number, patch: Partial<Researcher>) {
-          setDraft((d) => d.map((r, j) => (j === i ? { ...r, ...patch } : r)));
-        }
-        function addRow() {
-          setDraft((d) => [...d, { ...EMPTY }]);
-        }
-        function removeRow(i: number) {
-          setDraft((d) => d.filter((_, j) => j !== i));
-        }
-        async function save() {
+        const active = data.researchers.filter((r) => r.active);
+        const departed = data.researchers.filter((r) => !r.active);
+        const list = [...active, ...departed];
+
+        async function commit(newList: Researcher[]) {
           setSaving(true);
           try {
-            await saveSheet("연구원", toRows(draft.filter((r) => r.name.trim())));
-            setEditing(false);
-            setDraft([]);
+            await saveSheet("연구원", toRows(newList.filter((r) => r.name.trim())));
+            setModal(null);
           } catch {
-            /* 실패 시 error 상태로 표시되고 편집 유지 */
+            /* 실패 시 error 상태로 표시되고 모달 유지 */
           } finally {
             setSaving(false);
           }
         }
-
-        const active = data.researchers.filter((r) => r.active);
-        const departed = data.researchers.filter((r) => !r.active);
-        const list = [...active, ...departed];
+        function save(r: Researcher) {
+          if (!modal) return;
+          if (modal.isNew) commit([...data.researchers, r]);
+          else commit(data.researchers.map((x, i) => (i === modal.index ? r : x)));
+        }
+        function del() {
+          if (!modal) return;
+          commit(data.researchers.filter((_, i) => i !== modal.index));
+        }
 
         return (
           <Section
             title={`🧑‍🔬 연구원 — 재직 ${active.length}명 (퇴사 ${departed.length}명)`}
             sub="4대보험 명부 대조 기준. 개인정보 최소수집 — 국가연구자번호는 보기 화면에서 마스킹됩니다."
           >
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              {!editing ? (
-                <button onClick={startEdit} className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
-                  ✏ 편집
-                </button>
-              ) : (
-                <>
-                  <button onClick={save} disabled={saving} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-                    {saving ? "저장 중…" : "💾 저장"}
-                  </button>
-                  <button onClick={cancel} disabled={saving} className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50">
-                    취소
-                  </button>
-                  <button onClick={addRow} className="rounded-lg border border-blue-300 px-3 py-1.5 text-sm text-blue-700 hover:bg-blue-50">
-                    + 행 추가
-                  </button>
-                  <span className="text-xs text-slate-400">편집 후 저장하면 마스터 데이터에 반영됩니다.</span>
-                </>
-              )}
+            <div className="mb-4 flex items-center gap-2">
+              <button onClick={() => setModal({ r: { ...EMPTY }, isNew: true, index: -1 })} className="btn-primary">
+                <Plus className="h-4 w-4" /> 연구원 추가
+              </button>
               {error && <span className="text-sm font-medium text-red-600">⚠ {error}</span>}
             </div>
 
-            {list.length === 0 && !editing ? (
-              <Empty message="등록된 연구원이 없습니다. '편집'으로 추가하세요." />
-            ) : editing ? (
-              <div className="overflow-x-auto">
-                <table className="table-base">
-                  <thead>
-                    <tr><th>재직</th><th>성명</th><th>직위</th><th>학위</th><th>전공</th><th>출신대학</th><th>졸업</th><th>국가연구자번호</th><th>소속</th><th>비고</th><th></th></tr>
-                  </thead>
-                  <tbody>
-                    {draft.map((r, i) => (
-                      <tr key={i}>
-                        <td className="text-center"><input type="checkbox" checked={r.active} onChange={(e) => update(i, { active: e.target.checked })} className="h-4 w-4" /></td>
-                        <td><input className={inp} value={r.name} onChange={(e) => update(i, { name: e.target.value })} placeholder="성명" /></td>
-                        <td><input className={inp} value={r.position ?? ""} onChange={(e) => update(i, { position: e.target.value || null })} /></td>
-                        <td><input className={inp} value={r.degree ?? ""} onChange={(e) => update(i, { degree: e.target.value || null })} /></td>
-                        <td><input className={inp} value={r.major ?? ""} onChange={(e) => update(i, { major: e.target.value || null })} /></td>
-                        <td><input className={inp} value={r.university ?? ""} onChange={(e) => update(i, { university: e.target.value || null })} /></td>
-                        <td><input className={inp} value={r.gradYear ?? ""} onChange={(e) => update(i, { gradYear: e.target.value || null })} /></td>
-                        <td><input className={inp} value={r.researcherNo ?? ""} onChange={(e) => update(i, { researcherNo: e.target.value || null })} /></td>
-                        <td><input className={inp} value={r.company ?? ""} onChange={(e) => update(i, { company: e.target.value || null })} /></td>
-                        <td><input className={inp} value={r.note ?? ""} onChange={(e) => update(i, { note: e.target.value || null })} /></td>
-                        <td><button onClick={() => removeRow(i)} className="whitespace-nowrap text-xs text-red-600 hover:underline">삭제</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            {list.length === 0 ? (
+              <Empty message="등록된 연구원이 없습니다. '연구원 추가'로 등록하세요." />
             ) : (
               <div className="overflow-x-auto">
                 <table className="table-base">
                   <thead>
-                    <tr><th>재직</th><th>성명</th><th>직위</th><th>학위</th><th>전공</th><th>출신대학</th><th>졸업</th><th>국가연구자번호</th><th>소속</th><th>비고</th></tr>
+                    <tr><th>재직</th><th>성명</th><th>직위</th><th>학위</th><th>전공</th><th>출신대학</th><th>졸업</th><th>국가연구자번호</th><th>소속</th><th>비고</th><th className="text-right">수정</th></tr>
                   </thead>
                   <tbody>
-                    {list.map((r, i) => (
-                      <tr key={i} className={r.active ? "hover:bg-slate-50" : "opacity-50"}>
-                        <td>{r.active ? <Badge tone="green">재직</Badge> : <Badge tone="red">퇴사</Badge>}</td>
-                        <td className="font-medium">{r.name}</td>
-                        <td>{r.position ?? "—"}</td>
-                        <td>{r.degree ?? "—"}</td>
-                        <td className="text-xs">{r.major ?? "—"}</td>
-                        <td className="text-xs">{r.university ?? "—"}</td>
-                        <td className="text-xs">{r.gradYear ?? "—"}</td>
-                        <td className="font-mono text-xs">{mask(r.researcherNo)}</td>
-                        <td><Badge tone={r.company === "신정개발" ? "blue" : "violet"}>{r.company}</Badge></td>
-                        <td className="max-w-56 text-xs text-slate-400">{r.note ?? "—"}</td>
-                      </tr>
-                    ))}
+                    {list.map((r) => {
+                      const idx = data.researchers.indexOf(r);
+                      return (
+                        <tr key={idx} className={r.active ? "hover:bg-slate-50" : "opacity-60"}>
+                          <td>{r.active ? <Badge tone="green">재직</Badge> : <Badge tone="red">퇴사</Badge>}</td>
+                          <td className="font-medium">{r.name}</td>
+                          <td>{r.position ?? "—"}</td>
+                          <td>{r.degree ?? "—"}</td>
+                          <td className="text-xs">{r.major ?? "—"}</td>
+                          <td className="text-xs">{r.university ?? "—"}</td>
+                          <td className="text-xs">{r.gradYear ?? "—"}</td>
+                          <td className="font-mono text-xs">{mask(r.researcherNo)}</td>
+                          <td><Badge tone={r.company === "신정개발" ? "blue" : "violet"}>{r.company}</Badge></td>
+                          <td className="max-w-56 text-xs text-slate-400">{r.note ?? "—"}</td>
+                          <td className="text-right">
+                            <button onClick={() => setModal({ r: { ...r }, isNew: false, index: idx })} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
+            )}
+
+            {modal && (
+              <EditModal
+                initial={modal.r}
+                isNew={modal.isNew}
+                saving={saving}
+                onSave={save}
+                onDelete={del}
+                onClose={() => setModal(null)}
+              />
             )}
           </Section>
         );

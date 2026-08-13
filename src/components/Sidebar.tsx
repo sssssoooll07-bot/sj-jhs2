@@ -2,18 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard, FlaskConical, Lightbulb, FileSignature,
+  Megaphone, Scale, BadgeCheck, Users, FolderOpen, type LucideIcon,
+} from "lucide-react";
 import { DataStatus } from "@/components/FileGate";
 
-const NAV = [
-  { href: "/", label: "대시보드", icon: "▦" },
-  { href: "/projects", label: "과제", icon: "⚗" },
-  { href: "/patents", label: "특허", icon: "🧾" },
-  { href: "/agreements", label: "협약서", icon: "📜" },
-  { href: "/funding", label: "지원사업 공고", icon: "📢" },
-  { href: "/compliance", label: "법정의무·참여율", icon: "⚖" },
-  { href: "/certifications", label: "인증·면허", icon: "🏅" },
-  { href: "/researchers", label: "연구원", icon: "🧑‍🔬" },
-  { href: "/library", label: "자료실", icon: "📁" },
+const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
+  { href: "/", label: "대시보드", Icon: LayoutDashboard },
+  { href: "/projects", label: "과제", Icon: FlaskConical },
+  { href: "/patents", label: "특허", Icon: Lightbulb },
+  { href: "/agreements", label: "협약서", Icon: FileSignature },
+  { href: "/funding", label: "지원사업 공고", Icon: Megaphone },
+  { href: "/compliance", label: "법정의무·참여율", Icon: Scale },
+  { href: "/certifications", label: "인증·면허", Icon: BadgeCheck },
+  { href: "/researchers", label: "연구원", Icon: Users },
+  { href: "/library", label: "자료실", Icon: FolderOpen },
 ];
 
 /** 좌측 탭 내비게이션 (다크) */
@@ -42,7 +46,7 @@ export default function Sidebar() {
                   : "text-slate-400 hover:bg-white/5 hover:text-white"
               }`}
             >
-              <span className="w-5 shrink-0 text-center text-base">{n.icon}</span>
+              <n.Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={active ? 2.4 : 1.9} />
               <span className="truncate">{n.label}</span>
             </Link>
           );
