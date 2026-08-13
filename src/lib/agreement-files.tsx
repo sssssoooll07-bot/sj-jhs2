@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { getBlob, listAll, ref, uploadBytes } from "firebase/storage";
-import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX, BANKBOOK_PREFIX, BUSINESSPLAN_PREFIX } from "@/lib/firebase";
+import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX, BANKBOOK_PREFIX, BUSINESSPLAN_PREFIX, REFDOC_PREFIX } from "@/lib/firebase";
 
 /**
  * 문서 파일 컨텍스트 — 협약서·특허증·통장거래내역·사업계획서 원본을 연다(카테고리별로 구분 저장).
@@ -11,7 +11,7 @@ import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX, BANK
  * 어느 경우든 "보기"만 제공한다(다운로드 버튼 없음, 엑셀은 표로 미리보기).
  */
 
-export type Category = "agreements" | "patents" | "bankbook" | "businessplan";
+export type Category = "agreements" | "patents" | "bankbook" | "businessplan" | "refdoc";
 
 export type DocRef =
   | { name: string; kind: "local"; file: File; category: Category }
@@ -22,12 +22,14 @@ const PREFIX: Record<Category, string> = {
   patents: PATENTS_PREFIX,
   bankbook: BANKBOOK_PREFIX,
   businessplan: BUSINESSPLAN_PREFIX,
+  refdoc: REFDOC_PREFIX,
 };
 const PREFIX_CAT: [string, Category][] = [
   [AGREEMENTS_PREFIX, "agreements"],
   [PATENTS_PREFIX, "patents"],
   [BANKBOOK_PREFIX, "bankbook"],
   [BUSINESSPLAN_PREFIX, "businessplan"],
+  [REFDOC_PREFIX, "refdoc"],
 ];
 
 type Ctx = {
@@ -39,6 +41,7 @@ type Ctx = {
   loadFolder: (fileList: FileList, category: Category) => Promise<void>;
   getByName: (name: string | null, category?: Category) => DocRef | null;
   getByPattern: (pattern: string | null, category?: Category) => DocRef | null;
+  list: (category: Category) => DocRef[];
   getViewUrl: (d: DocRef) => Promise<string>;
   clear: () => void;
 };
@@ -144,6 +147,11 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
     [docs]
   );
 
+  const list = useCallback(
+    (category: Category) => [...docs.values()].filter((d) => d.category === category).sort((a, b) => a.name.localeCompare(b.name)),
+    [docs]
+  );
+
   // "보기" — 미리보기용 blob URL. Storage 파일은 contentType이 없어 확장자 MIME으로 감싼다.
   const getViewUrl = useCallback(async (d: DocRef): Promise<string> => {
     let blob: Blob;
@@ -162,7 +170,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
 
   return (
     <DocCtx.Provider
-      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, getViewUrl, clear }}
+      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, list, getViewUrl, clear }}
     >
       {children}
     </DocCtx.Provider>

@@ -1,13 +1,16 @@
 "use client";
 
+import { useRef } from "react";
 import { useDataCtx } from "@/lib/data-context";
+import { useAgreementFiles } from "@/lib/agreement-files";
 import { Badge, Empty, Section } from "@/components/ui";
 import { EditableTable, type Col } from "@/components/EditableTable";
+import DocViewButton from "@/components/DocViewButton";
 import type { LibraryDoc } from "@/lib/excel";
 
 /**
- * 자료실 — 지원사업 신청 시 자주 쓰는 서류의 발급처 바로가기 + 사내 보관함 링크.
- * (특허증은 '특허' 탭에서, 협약서는 '과제' 상세에서 확인)
+ * 자료실 — 발급처 바로가기 + 회사 문서 파일(회사소개서·기술소개서 등) + 사내 보관함 링크.
+ * (특허증은 '특허' 탭, 협약서는 '과제' 상세에서 확인)
  */
 
 const PRIMARY = [
@@ -32,13 +35,52 @@ const LIB_COLS: Col<LibraryDoc>[] = [
 ];
 const libRow = (d: LibraryDoc) => ({ 구분: d.category, 서류명: d.name, "발급처·링크": d.url, 비고: d.note });
 
+/** 회사 문서 파일(회사소개서·기술소개서 등) — 업로드 + 미리보기 */
+function RefDocs() {
+  const { list, loadFolder, uploading, cloud, error } = useAgreementFiles();
+  const ref = useRef<HTMLInputElement>(null);
+  const docs = list("refdoc");
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+        <p className="text-xs text-emerald-800">📁 회사소개서·기술소개서 등 <b>파일</b>을 올리면 로그인 사용자만 미리보기로 봅니다(PDF·이미지 권장, 다운로드 없이 보기).{cloud ? ` · ${docs.length}건 로드됨` : ""}</p>
+        <button onClick={() => ref.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+          {uploading ? "업로드 중…" : "파일 폴더 업로드"}
+        </button>
+        <input ref={ref} type="file"
+          // @ts-expect-error webkitdirectory는 표준 타입에 없음
+          webkitdirectory="" directory="" multiple className="hidden"
+          onChange={(e) => e.target.files && loadFolder(e.target.files, "refdoc")} />
+      </div>
+      {error && <p className="text-sm font-medium text-red-600">⚠ {error}</p>}
+      {docs.length === 0 ? (
+        <Empty message="올린 파일이 없습니다. '파일 폴더 업로드'로 회사소개서·기술소개서 등을 올리세요(PDF 권장)." />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="table-base">
+            <thead><tr><th>파일명</th><th className="text-right">보기</th></tr></thead>
+            <tbody>
+              {docs.map((d) => (
+                <tr key={d.name} className="hover:bg-slate-50">
+                  <td className="font-medium">{d.name}</td>
+                  <td className="text-right"><DocViewButton doc={d} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function LibraryPage() {
   const { data } = useDataCtx();
   return (
     <div className="space-y-5">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-slate-900">자료실</h1>
-        <p className="mt-1 text-sm text-slate-500">지원사업 신청에 자주 쓰는 서류 발급처 · 사내 보관함 링크 모음. (특허증은 특허 탭, 협약서는 과제 상세에서 확인)</p>
+        <p className="mt-1 text-sm text-slate-500">발급처 바로가기 · 회사 문서 파일 · 사내 보관함 링크. (특허증은 특허 탭, 협약서는 과제 상세에서 확인)</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -51,6 +93,10 @@ export default function LibraryPage() {
           </a>
         ))}
       </div>
+
+      <Section title="📁 회사 문서" sub="회사소개서·기술소개서 등 파일을 올려 미리보기로 열람 (로그인 사용자만)">
+        <RefDocs />
+      </Section>
 
       <Section title="🏛 기타 발급처 바로가기" sub="지원사업 신청 시 함께 요구되는 경우가 많은 서류">
         <table className="table-base">
@@ -67,9 +113,9 @@ export default function LibraryPage() {
         </table>
       </Section>
 
-      <Section title="🗂 사내 보관함" sub="자주 쓰는 파일의 사내 공유드라이브 링크. '서류 추가'로 등록하면 저장됩니다(구분·서류명·링크).">
+      <Section title="🗂 사내 보관함 (링크)" sub="사내 공유드라이브 등 웹 링크(URL)를 등록합니다. 파일 자체는 위 '회사 문서'로 올리세요.">
         {data ? (
-          <EditableTable rows={data.library} cols={LIB_COLS} sheetName="자료실" toSheetRow={libRow} blank={LIB_EMPTY} requiredKey="name" addLabel="서류 추가" entityLabel="서류" emptyMessage="등록된 사내 보관함 링크가 없습니다. '서류 추가'로 등록하세요." />
+          <EditableTable rows={data.library} cols={LIB_COLS} sheetName="자료실" toSheetRow={libRow} blank={LIB_EMPTY} requiredKey="name" addLabel="링크 추가" entityLabel="링크" emptyMessage="등록된 사내 보관함 링크가 없습니다. '링크 추가'로 등록하세요(웹 주소 URL)." />
         ) : (
           <Empty message="로그인하면 사내 보관함을 편집할 수 있습니다." />
         )}

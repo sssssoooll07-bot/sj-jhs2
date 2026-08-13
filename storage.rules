@@ -31,6 +31,10 @@ service firebase.storage {
     match /businessplans/{fileName} {
       allow read, write: if allowed();
     }
+    // 자료실 문서(회사소개서·기술소개서 등)
+    match /refdocs/{fileName} {
+      allow read, write: if allowed();
+    }
     // 그 외 경로는 전면 차단
     match /{allPaths=**} {
       allow read, write: if false;
