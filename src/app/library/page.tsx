@@ -1,17 +1,13 @@
 "use client";
 
-import { useRef } from "react";
 import { useDataCtx } from "@/lib/data-context";
-import { useAgreementFiles } from "@/lib/agreement-files";
-import { fmtDate } from "@/lib/excel";
 import { Badge, Empty, Section } from "@/components/ui";
 import { EditableTable, type Col } from "@/components/EditableTable";
-import DocViewButton from "@/components/DocViewButton";
 import type { LibraryDoc } from "@/lib/excel";
 
 /**
- * 자료실 — 지원사업 신청 시 자주 쓰는 서류의 발급처 바로가기 + 특허증 + 사내 보관함 링크.
- * 보안 원칙상 서류 파일 자체는 서버·저장소에 올리지 않는다(특허증은 로그인 사용자만 열람).
+ * 자료실 — 지원사업 신청 시 자주 쓰는 서류의 발급처 바로가기 + 사내 보관함 링크.
+ * (특허증은 '특허' 탭에서, 협약서는 '과제' 상세에서 확인)
  */
 
 const PRIMARY = [
@@ -38,26 +34,11 @@ const libRow = (d: LibraryDoc) => ({ 구분: d.category, 서류명: d.name, "발
 
 export default function LibraryPage() {
   const { data } = useDataCtx();
-  const { count, cloud, loading, uploading, error: certError, loadFolder, getByPattern } = useAgreementFiles();
-  const certInputRef = useRef<HTMLInputElement>(null);
-
-  const registered = (data?.patents ?? [])
-    .filter((p) => p.status === "등록완료")
-    .sort((a, b) => +(a.registeredAt ?? 0) - +(b.registeredAt ?? 0));
-  const norm = (s: string) => s.replace(/[\s()·∙\-_]/g, "").toLowerCase();
-  const findCert = (regNumber: string | null, title: string) => {
-    const byNum = regNumber ? getByPattern(regNumber, "patents") : null;
-    if (byNum) return byNum;
-    const prefix = norm(title).slice(0, 5);
-    return prefix.length >= 4 ? getByPattern(prefix, "patents") : null;
-  };
-  const matchedCount = registered.filter((p) => findCert(p.regNumber, p.title)).length;
-
   return (
     <div className="space-y-5">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-slate-900">자료실</h1>
-        <p className="mt-1 text-sm text-slate-500">지원사업 신청에 자주 쓰는 서류 발급처 · 특허증 · 사내 보관함 링크 모음.</p>
+        <p className="mt-1 text-sm text-slate-500">지원사업 신청에 자주 쓰는 서류 발급처 · 사내 보관함 링크 모음. (특허증은 특허 탭, 협약서는 과제 상세에서 확인)</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -84,55 +65,6 @@ export default function LibraryPage() {
             ))}
           </tbody>
         </table>
-      </Section>
-
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm text-emerald-800">
-            {cloud ? "☁ " : "🏅 "}
-            {cloud ? (loading ? "특허증 불러오는 중…" : `클라우드 특허증 ${count}건 로드됨 · ${matchedCount}/${registered.length}건 매칭`) : "특허증 폴더를 선택하면 등록특허별로 자동 연결됩니다."}
-          </p>
-          <button onClick={() => certInputRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-            {uploading ? "업로드 중…" : cloud ? "특허증 폴더 업로드" : "특허증 폴더 선택"}
-          </button>
-          <input ref={certInputRef} type="file"
-            // @ts-expect-error webkitdirectory는 표준 타입에 없음
-            webkitdirectory="" directory="" multiple className="hidden"
-            onChange={(e) => e.target.files && loadFolder(e.target.files, "patents")} />
-        </div>
-        <p className="mt-2 text-xs text-emerald-700">특허증은 로그인한 사용자만 접근하며, 한 번 업로드하면 이후엔 로그인만 하면 자동으로 보입니다(다운로드 없이 열람만).</p>
-        {certError && <p className="mt-2 text-sm font-medium text-red-600">⚠ {certError}</p>}
-      </div>
-
-      <Section title={`📜 특허증 — 등록특허 ${registered.length}건`} sub="등록번호 순 · 특허 탭의 등록완료 특허와 연결">
-        {registered.length === 0 ? (
-          <Empty message="등록완료 특허가 없습니다." />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="table-base">
-              <thead><tr><th>특허 명칭</th><th>등록번호</th><th>등록일</th><th>특허권자</th><th>특허증</th></tr></thead>
-              <tbody>
-                {registered.map((p, i) => {
-                  const cert = findCert(p.regNumber, p.title);
-                  return (
-                    <tr key={i} className="hover:bg-slate-50">
-                      <td className="font-medium">{p.title}</td>
-                      <td className="font-mono text-xs">{p.regNumber ?? "—"}</td>
-                      <td className="whitespace-nowrap text-xs">{fmtDate(p.registeredAt)}</td>
-                      <td className="text-xs">{p.owner ?? "—"}</td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <DocViewButton doc={cert} />
-                          {!cert && count > 0 && <span className="text-xs text-amber-600">폴더에 없음</span>}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </Section>
 
       <Section title="🗂 사내 보관함" sub="자주 쓰는 파일의 사내 공유드라이브 링크. '서류 추가'로 등록하면 저장됩니다(구분·서류명·링크).">

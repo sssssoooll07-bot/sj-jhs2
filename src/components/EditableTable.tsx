@@ -93,15 +93,15 @@ export function EditableTable<T extends Record<string, unknown>>({
           <table className="table-base">
             <thead>
               <tr>
-                {tableCols.map((c) => <th key={c.key} className={c.align === "right" ? "text-right" : ""}>{c.th ?? c.label}</th>)}
+                {tableCols.map((c, ci) => <th key={ci} className={c.align === "right" ? "text-right" : ""}>{c.th ?? c.label}</th>)}
                 {!addOnly && <th className="text-right">수정</th>}
               </tr>
             </thead>
             <tbody>
               {visible.map(({ r, i }) => (
                 <tr key={i} onClick={() => onRowClick?.(r)} className={`hover:bg-slate-50 ${onRowClick ? "cursor-pointer" : ""}`}>
-                  {tableCols.map((c) => (
-                    <td key={c.key} className={c.align === "right" ? "text-right" : ""}>
+                  {tableCols.map((c, ci) => (
+                    <td key={ci} className={c.align === "right" ? "text-right" : ""}>
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
                     </td>
                   ))}
