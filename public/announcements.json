@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-13T23:49:14.810Z",
+ "fetchedAt": "2026-08-14T23:26:49.916Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -100,17 +100,6 @@
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1110"
   },
   {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 광양 지역산업 위기대응 맞춤형 지원사업 3차 통합공고",
-   "category": "비R&D",
-   "summary": "글로벌 공급과잉 등으로 인한 광양 철강산업 위기 및 지역경제 악화에 실효적 대응을 위한 광양 지역산업 위기대응 맞춤형 지원 ※ 산업위기지역(광양시,‘25.11.20 지정)",
-   "applyStart": "2026-07-15",
-   "applyEnd": "2026-08-14",
-   "announcedAt": "2026-07-15",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1105"
-  },
-  {
    "source": "SMTECH",
    "agency": "SMTECH",
    "title": "2026년도 중소기업 R&D 우수성과 50선 모집 공고",
@@ -208,6 +197,17 @@
    "applyEnd": "2026-08-24",
    "announcedAt": "2026-08-03",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02876&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 광양 지역산업 위기대응 맞춤형 지원사업 3차 통합공고",
+   "category": "비R&D",
+   "summary": "글로벌 공급과잉 등으로 인한 광양 철강산업 위기 및 지역경제 악화에 실효적 대응을 위한 광양 지역산업 위기대응 맞춤형 지원 ※ 산업위기지역(광양시,‘25.11.20 지정)",
+   "applyStart": "2026-07-15",
+   "applyEnd": "2026-08-31",
+   "announcedAt": "2026-07-15",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1105"
   },
   {
    "source": "SMTECH",
