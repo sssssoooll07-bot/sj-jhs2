@@ -33,7 +33,7 @@ const patentYear = (p: Patent): string => {
 export default function PatentsPage() {
   const { count, cloud, uploading, error, loadFolder, getByPattern, refresh } = useAgreementFiles();
   const certRef = useRef<HTMLInputElement>(null);
-  const [year, setYear] = useState("전체");
+  const [year, setYear] = useState("2025");
 
   // 특허 탭 진입 시 특허증 목록을 새로 읽는다(업로드 직후에도 재로그인 없이 반영)
   useEffect(() => {
