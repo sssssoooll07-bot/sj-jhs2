@@ -16,7 +16,7 @@ const yearOf = (code: string) => code.match(/(\d{4})/)?.[1] ?? "기타";
 const EMPTY: Project = {
   code: "", title: "", type: "연구과제", agency: null, period: null, startDate: null, endDate: null,
   totalKWon: null, status: "진행중", role: "주관", company: "신정개발", progress: null, note: null,
-  bank: null, account: null, accountHolder: null, phaseSumKWon: 0, phaseCheck: "—",
+  bank: null, account: null, accountHolder: null, vatPaid: false, selfPaid: false, phaseSumKWon: 0, phaseCheck: "—",
 };
 const COLS: Col<Project>[] = [
   { key: "type", label: "구분 (연구과제=R&D / 지원사업=비R&D)", type: "select", options: ["연구과제", "지원사업"], th: "구분", view: (p) => <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type === "연구과제" ? "R&D" : "비R&D"}</Badge> },
@@ -35,12 +35,15 @@ const COLS: Col<Project>[] = [
   { key: "bank", label: "전용통장 은행", hide: true },
   { key: "account", label: "전용통장 계좌번호", hide: true },
   { key: "accountHolder", label: "예금주", hide: true },
+  { key: "vatPaid", label: "부가세 입금완료", type: "toggle", hide: true },
+  { key: "selfPaid", label: "자부담(민간부담금) 입금완료", type: "toggle", hide: true },
 ];
 const toRow = (p: Project) => ({
   과제코드: p.code, 과제명: p.title, 구분: p.type, "지원부처/기관": p.agency, 총사업기간: p.period,
   시작일: dateStr(p.startDate), 종료일: dateStr(p.endDate), "총사업금액(천원)": p.totalKWon,
   진행상태: p.status, 역할: p.role, 수행사: p.company, 진행사항: p.progress, 비고: p.note,
   은행명: p.bank, 계좌번호: p.account, 예금주: p.accountHolder,
+  부가세입금: p.vatPaid ? "O" : "", 자부담입금: p.selfPaid ? "O" : "",
 });
 
 /* ── 차수 ── */
@@ -88,6 +91,13 @@ function AccountBox({ p }: { p: Project }) {
         <Info label="은행" value={p.bank} />
         <Info label="계좌번호" value={p.account} mono />
         <Info label="예금주" value={p.accountHolder} />
+      </div>
+      <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">부가세 입금
+          {p.vatPaid ? <Badge tone="green">완료 ✓</Badge> : <Badge tone="amber">미입금</Badge>}</span>
+        <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">자부담(민간부담금) 입금
+          {p.selfPaid ? <Badge tone="green">완료 ✓</Badge> : <Badge tone="amber">미입금</Badge>}</span>
+        <span className="ml-auto text-[11px] text-slate-400">입금 여부는 과제 목록에서 ✎로 체크</span>
       </div>
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
         <p className="text-xs text-emerald-800">통장거래내역: {stmt ? <DocViewButton doc={stmt} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다."}</p>
