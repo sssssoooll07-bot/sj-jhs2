@@ -43,7 +43,7 @@ export default function CompliancePage() {
         const labor = laborCostByProject(data);
         return (
           <div className="space-y-5">
-            <Section title={`⚖ 법정 의무 — ${data.compliance.length}건`} sub="연구실 안전점검 · 안전교육 · 보험 · 기업부설연구소(KOITA) 신고">
+            <Section title={`⚖ 법정 의무 — ${data.compliance.length}건`} sub="기업부설연구소 연차보고(KOITA) — 매월 초 1회">
               <EditableTable rows={data.compliance} cols={COMP_COLS} sheetName="법정의무" toSheetRow={compRow} blank={COMP_EMPTY} requiredKey="title" addLabel="법정의무 추가" entityLabel="법정의무" />
             </Section>
 
