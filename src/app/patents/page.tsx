@@ -47,18 +47,8 @@ export default function PatentsPage() {
     {
       key: "title", label: "특허 명칭", span: true,
       view: (p) => {
-        const name = <>{p.title} {p.isPCT && <Badge tone="cyan">PCT</Badge>}</>;
-        // 출원중(비-PCT) → KIPRIS에서 출원번호로 조회
-        if (p.status === "출원중" && !p.isPCT && p.appNumber) {
-          const url = `https://www.kipris.or.kr/khome/search/searchResult.do?tab=patent&query=${encodeURIComponent(p.appNumber)}`;
-          return (
-            <a href={url} target="_blank" rel="noreferrer" className="font-medium text-blue-700 hover:underline" title={`KIPRIS 조회: ${p.appNumber}`}>
-              {name} <span className="text-xs text-slate-400">🔍↗</span>
-            </a>
-          );
-        }
-        // 등록완료·PCT → 특허증 미리보기
         const cert = findCert(p);
+        const name = <>{p.title} {p.isPCT && <Badge tone="cyan">PCT</Badge>}</>;
         return cert ? <DocViewButton doc={cert} label={name} /> : <span className="font-medium">{name}</span>;
       },
     },
