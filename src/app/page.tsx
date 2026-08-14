@@ -1,30 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { collectDeadlines, participationTotals, daysUntil, fmtKWon, fmtDate, type Data } from "@/lib/excel";
-import { Badge, Dday, Empty, Section } from "@/components/ui";
+import { collectDeadlines, participationTotals, daysUntil, fmtKWon, fmtDate } from "@/lib/excel";
+import { Badge, Dday, Empty, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
-
-type Due = { source: string; title: string; due: Date; dday: number; href: string; tone: "blue" | "violet" | "amber" | "cyan" | "red" };
-
-/** 전체 탭 통합 마감 임박 (과제 종료 · 인증 갱신 · 공고 마감 · 법정의무) — 90일 내 */
-function collectAllDue(data: Data): Due[] {
-  const out: Due[] = [];
-  for (const p of data.projects) {
-    if (p.status === "진행중" && p.endDate) out.push({ source: "과제 종료", title: p.title, due: p.endDate, dday: daysUntil(p.endDate), href: "/projects", tone: "blue" });
-  }
-  for (const c of data.certifications) {
-    const d = c.renewalDue ?? c.validUntil;
-    if (c.renewable && d) out.push({ source: "인증 갱신", title: c.name, due: d, dday: daysUntil(d), href: "/certifications", tone: "amber" });
-  }
-  for (const f of data.funding) {
-    if (f.applyDue && ["관심", "검토중", "신청준비"].includes(f.status)) out.push({ source: "공고 마감", title: f.title, due: f.applyDue, dday: daysUntil(f.applyDue), href: "/funding", tone: "cyan" });
-  }
-  for (const t of data.compliance) {
-    if (t.dueDate) out.push({ source: "법정의무", title: t.title, due: t.dueDate, dday: daysUntil(t.dueDate), href: "/compliance", tone: "red" });
-  }
-  return out.filter((d) => d.dday <= 90 && d.dday >= -30).sort((a, b) => a.dday - b.dday);
-}
 
 export default function Dashboard() {
   return (
@@ -40,9 +19,8 @@ export default function Dashboard() {
         const activeResearchers = data.researchers.filter((r) => r.active).length;
         const totals = participationTotals(data);
         const over = totals.filter((t) => t.total > 100);
-        const allDue = collectAllDue(data);
         const projDeadlines = collectDeadlines(data, 90);
-        const mismatch = data.projects.filter((p) => p.phaseCheck === "불일치");
+        const fundingList = [...data.funding].sort((a, b) => +(a.applyDue ?? Infinity) - +(b.applyDue ?? Infinity));
 
         const cards = [
           { href: "/projects", label: "과제", value: `${data.projects.length}건`, sub: `진행중 ${active.length} · R&D ${rnd} / 비R&D ${biz}` },
@@ -67,24 +45,23 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-              {/* 통합 마감 임박 */}
-              <Section title="⏰ 마감 임박 (통합, 90일 내)" sub="과제 종료 · 인증 갱신 · 공고 마감 · 법정의무를 D-day 순으로">
-                {allDue.length === 0 ? (
-                  <Empty message="임박한 마감이 없습니다." />
+              {/* 과제 마감 임박 (과제만) */}
+              <Section title="⏰ 과제 마감 임박 (90일 내)" sub="진행중 과제의 수행기간 종료 (D-day 순)">
+                {projDeadlines.length === 0 ? (
+                  <Empty message="수행기간 종료가 임박한 과제가 없습니다." />
                 ) : (
                   <ul className="divide-y divide-slate-100">
-                    {allDue.slice(0, 12).map((d, i) => (
+                    {projDeadlines.map((d, i) => (
                       <li key={i}>
                         <Link href={d.href} className="flex items-center gap-3 py-2 hover:bg-slate-50">
                           <Dday days={d.dday} />
                           <span className="min-w-0 flex-1 truncate text-sm">
-                            <Badge tone={d.tone}>{d.source}</Badge> <span className="ml-1">{d.title}</span>
+                            <Badge tone={d.source === "연구과제" ? "blue" : "violet"}>{d.source === "연구과제" ? "R&D" : "비R&D"}</Badge> <span className="ml-1">{d.title}</span>
                           </span>
-                          <span className="whitespace-nowrap text-xs text-slate-400">{fmtDate(d.due)}</span>
+                          <span className="whitespace-nowrap text-xs text-slate-400">종료 {fmtDate(d.due)}</span>
                         </Link>
                       </li>
                     ))}
-                    {allDue.length > 12 && <li className="pt-2 text-center text-xs text-slate-400">외 {allDue.length - 12}건</li>}
                   </ul>
                 )}
               </Section>
@@ -129,26 +106,29 @@ export default function Dashboard() {
                 )}
               </Section>
 
-              {/* 요약 · 데이터 품질 */}
-              <Section title="📋 요약 · 데이터 품질" sub="한눈에 보는 현황과 엑셀 검증">
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    {mismatch.length ? <Badge tone="amber">확인 필요</Badge> : <Badge tone="green">OK</Badge>}
-                    차수합계 ≠ 총사업금액: {mismatch.length}건
-                    {mismatch.length > 0 && <span className="text-xs text-slate-400">({mismatch.map((m) => m.code).join(", ")})</span>}
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Badge tone={projDeadlines.length ? "amber" : "green"}>{projDeadlines.length}건</Badge>
-                    과제 수행기간 종료 임박(90일)
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Badge tone="blue">특허 {data.patents.length}</Badge>
-                    <Badge tone="cyan">공고 {data.funding.length}</Badge>
-                    <Badge tone="violet">인증 {data.certifications.length}</Badge>
-                    <Badge tone="slate">연구원 {data.researchers.length}</Badge>
-                  </li>
-                  <li className="text-xs text-slate-400">데이터 로드: {new Date(data.loadedAt).toLocaleString("ko-KR")}</li>
-                </ul>
+              {/* 지원사업 공고 */}
+              <Section title={`📢 지원사업 공고 — ${data.funding.length}건`} sub="신청 마감 D-day 순 · 관리 중인 공고">
+                {fundingList.length === 0 ? (
+                  <Empty message="등록된 공고가 없습니다. 지원사업 공고 탭에서 추가하세요." />
+                ) : (
+                  <ul className="divide-y divide-slate-100">
+                    {fundingList.slice(0, 12).map((f, i) => {
+                      const isActive = ["관심", "검토중", "신청준비"].includes(f.status);
+                      return (
+                        <li key={i}>
+                          <Link href="/funding" className="flex items-center gap-3 py-2 hover:bg-slate-50">
+                            {f.applyDue && isActive ? <Dday days={daysUntil(f.applyDue)} /> : <StatusBadge status={f.status} />}
+                            <span className="min-w-0 flex-1 truncate text-sm">
+                              <span className="font-medium">{f.title}</span> <span className="text-xs text-slate-400">· {f.agency}</span>
+                            </span>
+                            <span className="whitespace-nowrap text-xs text-slate-400">{f.applyDue ? fmtDate(f.applyDue) : "—"}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                    {fundingList.length > 12 && <li className="pt-2 text-center text-xs text-slate-400">외 {fundingList.length - 12}건</li>}
+                  </ul>
+                )}
               </Section>
             </div>
           </div>
