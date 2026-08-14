@@ -16,6 +16,7 @@ export type Col<T> = {
   editable?: boolean; // false면 폼에서 제외
   view?: (r: T) => React.ReactNode; // 보기 셀 커스텀
   align?: "left" | "right";
+  nowrap?: boolean; // 보기 테이블에서 줄바꿈 방지(한 줄 표시)
   th?: string;
   placeholder?: string;
 };
@@ -105,7 +106,7 @@ export function EditableTable<T extends Record<string, unknown>>({
               {visible.map(({ r, i }) => (
                 <tr key={i} onClick={() => onRowClick?.(r)} className={`hover:bg-slate-50 ${onRowClick ? "cursor-pointer" : ""}`}>
                   {tableCols.map((c, ci) => (
-                    <td key={ci} className={c.align === "right" ? "text-right" : ""}>
+                    <td key={ci} className={`${c.align === "right" ? "text-right" : ""} ${c.nowrap ? "whitespace-nowrap" : ""}`}>
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
                     </td>
                   ))}
