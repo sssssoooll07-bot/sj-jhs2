@@ -10,7 +10,7 @@ import { useAgreementFiles, type DocRef } from "@/lib/agreement-files";
  * - 엑셀(xlsx): 브라우저에서 파싱해 표(HTML)로 미리보기 — 통장거래내역 등
  * 바로 다운로드되지 않고, 원하면 "다운로드" 버튼으로 저장한다. 로컬/클라우드 모두 지원.
  */
-export default function DocViewButton({ doc }: { doc: DocRef | null }) {
+export default function DocViewButton({ doc, label }: { doc: DocRef | null; label?: React.ReactNode }) {
   const { getViewUrl } = useAgreementFiles();
   const [busy, setBusy] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
@@ -31,17 +31,13 @@ export default function DocViewButton({ doc }: { doc: DocRef | null }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  if (!doc) return <span className="text-xs text-slate-400">미로드</span>;
+  if (!doc) return <>{label ?? <span className="text-xs text-slate-400">미로드</span>}</>;
 
   const isImage = /\.(png|jpe?g)$/i.test(doc.name);
   const isExcel = /\.xlsx?$/i.test(doc.name);
   const isPdf = /\.pdf$/i.test(doc.name);
   if (!(isImage || isExcel || isPdf)) {
-    return (
-      <span className="text-xs text-slate-400" title="브라우저에서 직접 열 수 없는 형식(HWP 등)">
-        파일 있음(뷰어 미지원)
-      </span>
-    );
+    return <>{label ?? <span className="text-xs text-slate-400" title="브라우저에서 직접 열 수 없는 형식(HWP 등)">파일 있음(뷰어 미지원)</span>}</>;
   }
 
   async function open() {
@@ -76,16 +72,22 @@ export default function DocViewButton({ doc }: { doc: DocRef | null }) {
 
   return (
     <>
-      <div className="inline-flex items-center gap-1">
-        <button
-          onClick={open}
-          disabled={busy}
-          className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-        >
-          {busy ? "여는 중…" : "보기 ↗"}
+      {label ? (
+        <button onClick={open} disabled={busy} className="text-left font-medium text-blue-700 hover:underline disabled:opacity-50" title="클릭하면 특허증 미리보기">
+          {label}{busy ? " …" : ""}
         </button>
-        {err && <span className="text-xs text-red-600" title={err}>실패</span>}
-      </div>
+      ) : (
+        <div className="inline-flex items-center gap-1">
+          <button
+            onClick={open}
+            disabled={busy}
+            className="rounded-lg border border-slate-300 px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+          >
+            {busy ? "여는 중…" : "보기 ↗"}
+          </button>
+          {err && <span className="text-xs text-red-600" title={err}>실패</span>}
+        </div>
+      )}
 
       {isOpen && (
         <div

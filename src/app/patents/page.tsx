@@ -44,12 +44,18 @@ export default function PatentsPage() {
 
   const cols: Col<Patent>[] = [
     { key: "status", label: "상태", type: "select", options: ["등록완료", "출원중"], view: (p) => <StatusBadge status={p.status} /> },
-    { key: "title", label: "특허 명칭", span: true, view: (p) => <span className="font-medium">{p.title} {p.isPCT && <Badge tone="cyan">PCT</Badge>}</span> },
+    {
+      key: "title", label: "특허 명칭", span: true,
+      view: (p) => {
+        const cert = findCert(p);
+        const name = <>{p.title} {p.isPCT && <Badge tone="cyan">PCT</Badge>}</>;
+        return cert ? <DocViewButton doc={cert} label={name} /> : <span className="font-medium">{name}</span>;
+      },
+    },
     { key: "regNumber", label: "등록번호" },
     { key: "appNumber", label: "출원번호" },
     { key: "registeredAt", label: "등록일", type: "date" },
     { key: "note", label: "연계사업(비고)", th: "연계사업", span: true, view: (p) => (p.note ? <Badge tone="blue">{p.note}</Badge> : "—") },
-    { key: "citations", label: "특허증", th: "특허증", editable: false, view: (p) => <DocViewButton doc={findCert(p)} /> },
     { key: "owner", label: "특허권자", hide: true },
     { key: "inventors", label: "발명자", span: true, hide: true },
     { key: "filedAt", label: "출원일", type: "date", hide: true },
