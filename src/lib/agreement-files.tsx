@@ -140,9 +140,11 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
   const getByPattern = useCallback(
     (pattern: string | null, category?: Category) => {
       if (!pattern) return null;
-      const p = pattern.trim().toLowerCase();
+      // 공백·괄호·구분기호를 제거해 비교(파일명 "산업용 저장소…" ↔ 검색어 "산업용저장" 매칭)
+      const squash = (s: string) => s.replace(/[\s()·∙\-_]/g, "").toLowerCase();
+      const p = squash(pattern);
       if (!p) return null;
-      for (const [name, d] of docs) if (name.includes(p) && (!category || d.category === category)) return d;
+      for (const [, d] of docs) if (squash(d.name).includes(p) && (!category || d.category === category)) return d;
       return null;
     },
     [docs]
