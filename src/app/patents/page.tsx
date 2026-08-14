@@ -9,7 +9,7 @@ import DocViewButton from "@/components/DocViewButton";
 import type { Patent } from "@/lib/excel";
 
 const EMPTY: Patent = {
-  status: "출원중", title: "", regNumber: null, appNumber: null, filedAt: null, registeredAt: null,
+  status: "출원완료", title: "", regNumber: null, appNumber: null, filedAt: null, registeredAt: null,
   owner: "㈜신정개발", inventors: null, claims: null, citations: null, isPCT: false,
   examStatus: null, note: null, projectCode: null,
 };
@@ -48,7 +48,7 @@ export default function PatentsPage() {
   };
 
   const cols: Col<Patent>[] = [
-    { key: "status", label: "상태", type: "select", options: ["등록완료", "출원중"], view: (p) => <StatusBadge status={p.status} /> },
+    { key: "status", label: "상태", type: "select", options: ["등록완료", "출원완료"], view: (p) => <StatusBadge status={p.status} /> },
     {
       key: "title", label: "특허 명칭", span: true,
       view: (p) => {
@@ -76,7 +76,7 @@ export default function PatentsPage() {
         const years = ["전체", ...Array.from(new Set(data.patents.map(patentYear))).sort().reverse()];
         const inYear = (p: Patent) => year === "전체" || patentYear(p) === year;
         const reg = data.patents.filter((p) => p.status === "등록완료").length;
-        const filed = data.patents.filter((p) => p.status === "출원중").length;
+        const filed = data.patents.filter((p) => p.status === "출원완료").length;
         const shown = data.patents.filter(inYear).length;
 
         return (

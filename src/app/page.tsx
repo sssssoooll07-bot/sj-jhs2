@@ -13,7 +13,7 @@ export default function Dashboard() {
         const rnd = data.projects.filter((p) => p.type === "연구과제").length;
         const biz = data.projects.filter((p) => p.type === "지원사업").length;
         const registered = data.patents.filter((p) => p.status === "등록완료").length;
-        const filed = data.patents.filter((p) => p.status === "출원중").length;
+        const filed = data.patents.filter((p) => p.status === "출원완료").length;
         const renewable = data.certifications.filter((c) => c.renewable).length;
         const fundingActive = data.funding.filter((f) => ["관심", "검토중", "신청준비", "신청완료"].includes(f.status)).length;
         const activeResearchers = data.researchers.filter((r) => r.active).length;
