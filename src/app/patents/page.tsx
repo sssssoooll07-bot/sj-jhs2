@@ -84,6 +84,9 @@ export default function PatentsPage() {
                   {y === "전체" ? "전체" : `${y}년`}
                 </button>
               ))}
+              <a href="https://www.kipris.or.kr/khome/search/searchResult.do?tab=patent" target="_blank" rel="noreferrer" className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50">
+                🔍 KIPRIS 특허검색 ↗
+              </a>
             </div>
 
             <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
