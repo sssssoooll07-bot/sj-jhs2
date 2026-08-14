@@ -43,12 +43,14 @@ export type Agreement = {
   totalKWon: number | null; agency: string | null; note: string | null;
 };
 
+export type BudgetItem = { code: string; category: string; planKWon: number | null; finalKWon: number | null; execKWon: number | null; note: string | null };
 export type Data = {
   projects: Project[]; phases: Phase[]; consortium: Consortium[]; disbursements: Disbursement[];
   patents: Patent[]; researchers: Researcher[]; certifications: Certification[];
   funding: Funding[]; compliance: Compliance[]; participations: Participation[];
   library: LibraryDoc[];
   agreements: Agreement[];
+  budgetItems: BudgetItem[];
   loadedAt: string;
 };
 
@@ -184,7 +186,15 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
       signedAt: dt(r["협약일"]), totalKWon: n(r["총사업비(천원)"]), agency: s(r["전문/전담기관"]), note: s(r["비고"]),
     }));
 
-  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, loadedAt: new Date().toISOString() };
+  // [사업비] 시트 — 사업(과제)별 비목(세목) 예산·집행 (원 단위)
+  const budgetItems: BudgetItem[] = rows("사업비")
+    .filter((r) => s(r["과제코드"]) && s(r["비목"]))
+    .map((r) => ({
+      code: s(r["과제코드"])!, category: s(r["비목"])!,
+      planKWon: n(r["최초계획금액"]), finalKWon: n(r["최종변경금액"]), execKWon: n(r["집행금액"]), note: s(r["비고"]),
+    }));
+
+  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, loadedAt: new Date().toISOString() };
 }
 
 const DAY = 86_400_000;
