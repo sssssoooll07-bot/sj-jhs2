@@ -223,9 +223,8 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
 }
 
 export default function ProjectsPage() {
-  const [year, setYear] = useState("전체");
-  const [kind, setKind] = useState("전체");
-  const [roleF, setRoleF] = useState("전체");
+  const [year, setYear] = useState("2026");
+  const [roleF, setRoleF] = useState("주관");
   const [sel, setSel] = useState<string | null>(null);
 
   return (
@@ -236,9 +235,8 @@ export default function ProjectsPage() {
 
         const years = ["전체", ...Array.from(new Set(data.projects.map((p) => yearOf(p.code)))).sort().reverse()];
         const inYear = (code: string) => year === "전체" || yearOf(code) === year;
-        const inKind = (t: string) => kind === "전체" || (kind === "R&D" ? t === "연구과제" : t === "지원사업");
         const inRole = (r: string | null) => roleF === "전체" || (roleF === "주관" ? r === "주관" : r !== "주관");
-        const cnt = data.projects.filter((p) => inYear(p.code) && inKind(p.type) && inRole(p.role)).length;
+        const cnt = data.projects.filter((p) => inYear(p.code) && inRole(p.role)).length;
 
         return (
           <div className="space-y-5">
@@ -252,14 +250,6 @@ export default function ProjectsPage() {
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 text-xs font-semibold text-slate-400">구분</span>
-                {["전체", "R&D", "비R&D"].map((k) => (
-                  <button key={k} onClick={() => setKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${kind === k ? "bg-indigo-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
-                    {k}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5">
                 <span className="mr-1 text-xs font-semibold text-slate-400">역할</span>
                 {["전체", "주관", "공동"].map((r) => (
                   <button key={r} onClick={() => setRoleF(r)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${roleF === r ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
@@ -269,8 +259,8 @@ export default function ProjectsPage() {
               </div>
             </div>
 
-            <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${kind !== "전체" ? ` · ${kind}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
-              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inKind(p.type) && inRole(p.role)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
+            <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${roleF !== "전체" ? ` · ${roleF}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
+              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inRole(p.role)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
             </Section>
           </div>
         );

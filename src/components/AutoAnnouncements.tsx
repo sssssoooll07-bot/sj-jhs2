@@ -60,7 +60,7 @@ function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }
 export default function AutoAnnouncements() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [failed, setFailed] = useState(false);
-  const [src, setSrc] = useState<"전체" | SrcKey>("전체");
+  const [src, setSrc] = useState<"전체" | SrcKey>("JNTP");
 
   useEffect(() => {
     fetch("/announcements.json", { cache: "no-store" })
@@ -93,7 +93,7 @@ export default function AutoAnnouncements() {
   });
   const fetchedLabel = `매일 08:00 자동 수집 · 전남 전체·여수만 · 마지막 수집 ${new Date(feed.fetchedAt).toLocaleString("ko-KR")}`;
   const keys: SrcKey[] = src === "전체" ? (Object.keys(SOURCE_INFO) as SrcKey[]) : [src];
-  const filterButtons: ["전체" | SrcKey, string][] = [["전체", "전체"], ["JNTP", "전남테크노파크"], ["SMTECH", "중기청"]];
+  const filterButtons: ["전체" | SrcKey, string][] = [["JNTP", "전남테크노파크"], ["SMTECH", "중기청"], ["전체", "전체"]];
 
   return (
     <div className="space-y-5">
