@@ -41,9 +41,13 @@ export default function PatentsPage() {
   }, [refresh]);
 
   const findCert = (p: Patent) => {
+    // 1) 등록번호 → 2) 특허명 전체 → 3) 앞 5글자(순서대로 더 느슨하게)
     const byNum = p.regNumber ? getByPattern(p.regNumber, "patents") : null;
     if (byNum) return byNum;
-    const prefix = norm(p.title).slice(0, 5);
+    const full = norm(p.title);
+    const byFull = full.length >= 6 ? getByPattern(full, "patents") : null;
+    if (byFull) return byFull;
+    const prefix = full.slice(0, 5);
     return prefix.length >= 4 ? getByPattern(prefix, "patents") : null;
   };
 
