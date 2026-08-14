@@ -42,6 +42,7 @@ type Ctx = {
   getByName: (name: string | null, category?: Category) => DocRef | null;
   getByPattern: (pattern: string | null, category?: Category) => DocRef | null;
   list: (category: Category) => DocRef[];
+  refresh: () => Promise<void>;
   getViewUrl: (d: DocRef) => Promise<string>;
   clear: () => void;
 };
@@ -170,7 +171,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
 
   return (
     <DocCtx.Provider
-      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, list, getViewUrl, clear }}
+      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, list, refresh, getViewUrl, clear }}
     >
       {children}
     </DocCtx.Provider>

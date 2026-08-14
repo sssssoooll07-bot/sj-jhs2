@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { StatusBadge, Badge, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
@@ -31,9 +31,14 @@ const patentYear = (p: Patent): string => {
 };
 
 export default function PatentsPage() {
-  const { count, cloud, uploading, error, loadFolder, getByPattern } = useAgreementFiles();
+  const { count, cloud, uploading, error, loadFolder, getByPattern, refresh } = useAgreementFiles();
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("전체");
+
+  // 특허 탭 진입 시 특허증 목록을 새로 읽는다(업로드 직후에도 재로그인 없이 반영)
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const findCert = (p: Patent) => {
     const byNum = p.regNumber ? getByPattern(p.regNumber, "patents") : null;
