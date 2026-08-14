@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { fmtKWon, fmtDate, type Data, type Project, type Phase, type Consortium, type Disbursement, type Agreement } from "@/lib/excel";
 import { Badge, Empty, Section, StatusBadge } from "@/components/ui";
@@ -188,7 +188,10 @@ function ShareTable({ list, code }: { list: Consortium[]; code: string }) {
 
 /** 과제 상세 — 전용통장·사업계획서·사업비 분배·차수·참여기관·입금 */
 function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: () => void }) {
+  const { refresh } = useAgreementFiles();
   const only = (code: string) => code === p.code;
+  // 과제 상세 진입 시 협약서·사업계획서·통장 목록을 새로 읽는다(업로드 직후 재로그인 없이 반영)
+  useEffect(() => { void refresh(); }, [refresh]);
   return (
     <div className="space-y-5">
       <button onClick={onBack} className="btn-ghost"><ArrowLeft className="h-4 w-4" /> 과제 목록</button>
