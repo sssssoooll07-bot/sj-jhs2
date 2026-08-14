@@ -47,7 +47,7 @@ function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }
 export default function AutoAnnouncements() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [failed, setFailed] = useState(false);
-  const [src, setSrc] = useState<"전체" | SrcKey>("전체");
+  const [src, setSrc] = useState<SrcKey>("JNTP");
 
   useEffect(() => {
     fetch("/announcements.json", { cache: "no-store" })
@@ -71,10 +71,15 @@ export default function AutoAnnouncements() {
     );
   }
 
-  const accepting = feed.items.filter((i) => !i.applyEnd || daysUntil(new Date(i.applyEnd + "T00:00:00Z")) >= 0);
+  // 접수중 + 마감 100일 이내만 (마감 없는 상시 공고는 표시)
+  const accepting = feed.items.filter((i) => {
+    if (!i.applyEnd) return true;
+    const d = daysUntil(new Date(i.applyEnd + "T00:00:00Z"));
+    return d >= 0 && d <= 100;
+  });
   const fetchedLabel = `매일 08:00 자동 수집 · 마지막 수집 ${new Date(feed.fetchedAt).toLocaleString("ko-KR")}`;
-  const keys: SrcKey[] = src === "전체" ? (Object.keys(SOURCE_INFO) as SrcKey[]) : [src];
-  const filterButtons: ["전체" | SrcKey, string][] = [["전체", "전체"], ["JNTP", "전남테크노파크"], ["SMTECH", "중기청"]];
+  const keys: SrcKey[] = [src];
+  const filterButtons: [SrcKey, string][] = [["JNTP", "전남테크노파크"], ["SMTECH", "중기청"]];
 
   return (
     <div className="space-y-5">
