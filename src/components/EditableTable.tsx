@@ -38,7 +38,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, rowFilter, onRowClick,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -51,6 +51,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   emptyMessage?: string;
   /** true면 기존 행 수정·삭제 없이 '추가'만 가능 (협약서 등) */
   addOnly?: boolean;
+  /** true면 추가·수정 모두 없이 보기 전용 */
+  readOnly?: boolean;
   /** 표시만 걸러낸다(저장은 rows 전체 기준) — 연도 필터 등 */
   rowFilter?: (r: T) => boolean;
   /** 행 클릭 시 호출 (수정 버튼 제외) — 상세 보기 등 */
@@ -80,12 +82,14 @@ export function EditableTable<T extends Record<string, unknown>>({
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-2">
-        <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="btn-primary">
-          <Plus className="h-4 w-4" /> {addLabel}
-        </button>
-        {error && <span className="text-sm font-medium text-red-600">⚠ {error}</span>}
-      </div>
+      {!readOnly && (
+        <div className="mb-4 flex items-center gap-2">
+          <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="btn-primary">
+            <Plus className="h-4 w-4" /> {addLabel}
+          </button>
+          {error && <span className="text-sm font-medium text-red-600">⚠ {error}</span>}
+        </div>
+      )}
       {visible.length === 0 ? (
         <Empty message={rows.length === 0 ? (emptyMessage ?? `등록된 ${entityLabel}이(가) 없습니다. '${addLabel}'으로 등록하세요.`) : "선택한 조건에 해당하는 항목이 없습니다."} />
       ) : (

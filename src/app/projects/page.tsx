@@ -134,8 +134,7 @@ function PlanBox({ p }: { p: Project }) {
 
 /** 과제별 협약서 — 정보 추가(추가 전용) + 파일 업로드·연결 보기 */
 function AgreementBox({ p, list }: { p: Project; list: Agreement[] }) {
-  const { uploading, error, loadFolder, getByName } = useAgreementFiles();
-  const agRef = useRef<HTMLInputElement>(null);
+  const { getByName } = useAgreementFiles();
   const cols: Col<Agreement>[] = [
     { key: "program", label: "사업명", span: true, view: (a) => <span className="font-medium">{a.program}</span> },
     { key: "signedAt", label: "협약일", type: "date" },
@@ -149,18 +148,8 @@ function AgreementBox({ p, list }: { p: Project; list: Agreement[] }) {
   const blank: Agreement = { code: p.code, program: "", fileName: null, signedAt: null, totalKWon: null, agency: null, note: null };
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-        <p className="text-xs text-emerald-800">🔒 협약서 파일은 파일명이 아래 '협약서 파일명'과 같으면 자동 연결됩니다(로그인 사용자만 열람, 다운로드 없이 보기).</p>
-        <button onClick={() => agRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-          {uploading ? "업로드 중…" : "협약서 폴더 업로드"}
-        </button>
-        <input ref={agRef} type="file"
-          // @ts-expect-error webkitdirectory는 표준 타입에 없음
-          webkitdirectory="" directory="" multiple className="hidden"
-          onChange={(e) => e.target.files && loadFolder(e.target.files, "agreements")} />
-      </div>
-      {error && <p className="text-sm font-medium text-red-600">⚠ {error}</p>}
-      <EditableTable rows={list} rowFilter={(a) => a.code === p.code} cols={cols} sheetName="협약서" toSheetRow={toRow} blank={blank} requiredKey="code" addLabel="협약서 추가" entityLabel="협약서" addOnly emptyMessage="이 과제의 협약서 정보가 없습니다. '협약서 추가'로 등록하고, 같은 이름의 파일을 업로드하면 연결됩니다." />
+      <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">🔒 협약서는 로그인 사용자만 열람합니다(다운로드 없이 보기). &apos;협약서&apos; 열의 링크를 눌러 확인하세요.</p>
+      <EditableTable rows={list} rowFilter={(a) => a.code === p.code} cols={cols} sheetName="협약서" toSheetRow={toRow} blank={blank} requiredKey="code" entityLabel="협약서" addOnly readOnly emptyMessage="이 과제의 협약서가 없습니다." />
     </div>
   );
 }
