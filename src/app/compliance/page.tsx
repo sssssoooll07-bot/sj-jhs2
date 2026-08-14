@@ -1,20 +1,10 @@
 "use client";
 
-import { fmtDate, fmtKWon, daysUntil, participationTotals, laborCostByProject } from "@/lib/excel";
-import { Badge, Dday, Section } from "@/components/ui";
+import { fmtKWon, participationTotals, laborCostByProject } from "@/lib/excel";
+import { Badge, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
-import type { Compliance, Participation } from "@/lib/excel";
-
-const COMP_EMPTY: Compliance = { kind: "", title: "", dueDate: null, recurrence: null, note: null };
-const COMP_COLS: Col<Compliance>[] = [
-  { key: "dueDate", label: "마감일", type: "date", th: "D-day", view: (t) => (t.dueDate ? <Dday days={daysUntil(t.dueDate)} /> : "—") },
-  { key: "title", label: "제목", span: true, view: (t) => <span className="font-medium">{t.title}</span> },
-  { key: "kind", label: "종류", view: (t) => <Badge tone="blue">{t.kind}</Badge> },
-  { key: "recurrence", label: "반복주기", th: "반복" },
-  { key: "note", label: "비고", span: true, hide: true },
-];
-const compRow = (t: Compliance) => ({ 종류: t.kind, 제목: t.title, 마감일: dateStr(t.dueDate), 반복주기: t.recurrence, 비고: t.note });
+import type { Participation } from "@/lib/excel";
 
 const PART_EMPTY: Participation = { name: "", code: "", ratePercent: 0, start: null, end: null, role: null, isNew: false, costType: null, costKWon: null, note: null };
 const PART_COLS: Col<Participation>[] = [
@@ -43,10 +33,6 @@ export default function CompliancePage() {
         const labor = laborCostByProject(data);
         return (
           <div className="space-y-5">
-            <Section title={`⚖ 법정 의무 — ${data.compliance.length}건`} sub="기업부설연구소 연차보고(KOITA) — 매월 초 1회">
-              <EditableTable rows={data.compliance} cols={COMP_COLS} sheetName="법정의무" toSheetRow={compRow} blank={COMP_EMPTY} requiredKey="title" addLabel="법정의무 추가" entityLabel="법정의무" />
-            </Section>
-
             {labor.map((lc) => (
               <Section key={lc.code} title={`💰 인건비 현황 — ${lc.title}`} sub={`${lc.code} · 참여연구원 ${lc.members.length}명 · 단위: 천원 (아래 참여율 편집분 자동 집계)`}>
                 <div className="grid grid-cols-3 gap-3">

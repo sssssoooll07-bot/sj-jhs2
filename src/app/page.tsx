@@ -27,7 +27,7 @@ export default function Dashboard() {
           { href: "/patents", label: "특허", value: `${data.patents.length}건`, sub: `등록 ${registered} · 출원 ${filed}` },
           { href: "/certifications", label: "인증·면허", value: `${data.certifications.length}건`, sub: `갱신대상 ${renewable}건` },
           { href: "/funding", label: "지원사업 공고", value: `${data.funding.length}건`, sub: `신청관리 ${fundingActive}건` },
-          { href: "/compliance", label: "법정의무·참여율", value: `${data.compliance.length}건`, sub: `참여율 초과 ${over.length}명` },
+          { href: "/compliance", label: "참여율", value: `${data.participations.length}건`, sub: `참여율 초과 ${over.length}명` },
           { href: "/researchers", label: "연구원", value: `${activeResearchers}명`, sub: `전체 ${data.researchers.length}명 (재직 기준)` },
         ];
 
