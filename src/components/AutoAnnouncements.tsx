@@ -11,19 +11,10 @@ type Item = {
 type Feed = { fetchedAt: string; errors?: string[]; items: Item[] };
 
 const SOURCE_INFO = {
-  JNTP: {
-    label: "전남테크노파크 (JNTP)",
-    icon: "🏢",
-    tone: "blue" as const,
-    site: "https://data.jntp.or.kr/jntp/content/business/announcement/list.jsp",
-  },
-  SMTECH: {
-    label: "SMTECH (중소기업 기술개발사업)",
-    icon: "🏛",
-    tone: "violet" as const,
-    site: "https://www.smtech.go.kr/front/ifg/no/notice02_list.do",
-  },
+  JNTP: { label: "전남테크노파크", icon: "🏢", tone: "blue" as const, site: "https://data.jntp.or.kr/jntp/content/business/announcement/list.jsp" },
+  SMTECH: { label: "중기청 (SMTECH)", icon: "🏛", tone: "violet" as const, site: "https://www.smtech.go.kr/front/ifg/no/notice02_list.do" },
 };
+type SrcKey = keyof typeof SOURCE_INFO;
 
 function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }) {
   if (items.length === 0) return <Empty message="현재 접수중인 공고가 없습니다." />;
@@ -43,9 +34,7 @@ function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }
                 </a>
               </td>
               <td className="max-w-52 text-xs">{i.category ? <Badge tone={tone}>{i.category}</Badge> : "—"}</td>
-              <td className="whitespace-nowrap text-xs">
-                {i.applyStart ?? "—"} ~ {i.applyEnd ?? "—"}
-              </td>
+              <td className="whitespace-nowrap text-xs">{i.applyStart ?? "—"} ~ {i.applyEnd ?? "—"}</td>
             </tr>
           ))}
         </tbody>
@@ -54,10 +43,11 @@ function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }
   );
 }
 
-/** 매일 08:00 KST에 GitHub Actions가 갱신하는 공개 공고 피드 — 출처(JNTP/SMTECH)별 분리 표시 */
+/** 매일 08:00 KST에 GitHub Actions가 갱신하는 공개 공고 피드 — 상단 출처 필터(전체/전남TP/중기청) */
 export default function AutoAnnouncements() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [failed, setFailed] = useState(false);
+  const [src, setSrc] = useState<"전체" | SrcKey>("전체");
 
   useEffect(() => {
     fetch("/announcements.json", { cache: "no-store" })
@@ -82,29 +72,39 @@ export default function AutoAnnouncements() {
   }
 
   const accepting = feed.items.filter((i) => !i.applyEnd || daysUntil(new Date(i.applyEnd + "T00:00:00Z")) >= 0);
-  const fetchedLabel = `매일 08:00 자동 수집 · 마지막 수집 ${new Date(feed.fetchedAt).toLocaleString("ko-KR")} · 신청 관리는 엑셀에 입력`;
+  const fetchedLabel = `매일 08:00 자동 수집 · 마지막 수집 ${new Date(feed.fetchedAt).toLocaleString("ko-KR")}`;
+  const keys: SrcKey[] = src === "전체" ? (Object.keys(SOURCE_INFO) as SrcKey[]) : [src];
+  const filterButtons: ["전체" | SrcKey, string][] = [["전체", "전체"], ["JNTP", "전남테크노파크"], ["SMTECH", "중기청"]];
 
   return (
-    <>
-      {(Object.keys(SOURCE_INFO) as (keyof typeof SOURCE_INFO)[]).map((key) => {
+    <div className="space-y-5">
+      {/* 출처 필터 (과제탭과 동일한 스타일) */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-xs font-semibold text-slate-400">출처</span>
+        {filterButtons.map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setSrc(k)}
+            className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${src === k ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {keys.map((key) => {
         const info = SOURCE_INFO[key];
         const items = accepting.filter((i) => i.source === key);
         return (
-          <Section
-            key={key}
-            title={`${info.icon} ${info.label} — 접수중 ${items.length}건`}
-            sub={fetchedLabel}
-          >
+          <Section key={key} title={`${info.icon} ${info.label} — 접수중 ${items.length}건`} sub={fetchedLabel}>
             <div className="mb-2 text-right">
-              <a href={info.site} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline">
-                {info.label} 공고 전체보기 ↗
-              </a>
+              <a href={info.site} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline">{info.label} 공고 전체보기 ↗</a>
             </div>
             <SourceTable items={items} tone={info.tone} />
           </Section>
         );
       })}
       {feed.errors && <p className="text-xs text-amber-600">⚠ 일부 출처 수집 실패: {feed.errors.join(" / ")} (이전 수집분 표시)</p>}
-    </>
+    </div>
   );
 }
