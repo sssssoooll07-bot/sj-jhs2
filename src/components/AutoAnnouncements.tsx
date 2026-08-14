@@ -60,7 +60,7 @@ function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }
 export default function AutoAnnouncements() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [failed, setFailed] = useState(false);
-  const [src, setSrc] = useState<"전체" | SrcKey>("JNTP");
+  const [src, setSrc] = useState<"전체" | SrcKey>("전체");
 
   useEffect(() => {
     fetch("/announcements.json", { cache: "no-store" })
