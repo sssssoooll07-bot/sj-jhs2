@@ -16,8 +16,21 @@ const SOURCE_INFO = {
 };
 type SrcKey = keyof typeof SOURCE_INFO;
 
+// 여수(본사 소재지)와 무관한 전남 내 다른 시·군 한정 공고는 제외한다.
+const OTHER_CITIES = [
+  "광양", "순천", "나주", "목포", "장성", "곡성", "구례", "고흥", "보성", "화순",
+  "장흥", "강진", "해남", "영암", "무안", "함평", "영광", "완도", "진도", "신안", "담양", "광주",
+];
+/** 전남 전체(도 단위) 또는 여수 관련만 관심 대상 */
+function isRelevant(i: Item): boolean {
+  const t = `${i.title} ${i.category ?? ""} ${i.summary ?? ""}`;
+  if (t.includes("여수")) return true; // 여수 관련은 항상 표시
+  if (OTHER_CITIES.some((c) => t.includes(c))) return false; // 다른 시·군 한정 → 제외
+  return true; // 시·군 특정이 없으면 전남 전체(또는 전국)로 간주
+}
+
 function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }) {
-  if (items.length === 0) return <Empty message="현재 접수중인 공고가 없습니다." />;
+  if (items.length === 0) return <Empty message="현재 접수중인(마감 100일 이내) 전남 전체·여수 공고가 없습니다." />;
   return (
     <div className="overflow-x-auto">
       <table className="table-base">
@@ -43,11 +56,11 @@ function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }
   );
 }
 
-/** 매일 08:00 KST에 GitHub Actions가 갱신하는 공개 공고 피드 — 상단 출처 필터(전체/전남TP/중기청) */
+/** 매일 08:00 KST에 GitHub Actions가 갱신하는 공개 공고 피드 — 출처 필터(전체/전남TP/중기청), 전남 전체·여수만 */
 export default function AutoAnnouncements() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [failed, setFailed] = useState(false);
-  const [src, setSrc] = useState<SrcKey>("JNTP");
+  const [src, setSrc] = useState<"전체" | SrcKey>("전체");
 
   useEffect(() => {
     fetch("/announcements.json", { cache: "no-store" })
@@ -71,15 +84,16 @@ export default function AutoAnnouncements() {
     );
   }
 
-  // 접수중 + 마감 100일 이내만 (마감 없는 상시 공고는 표시)
+  // 전남 전체·여수 + 접수중 + 마감 100일 이내
   const accepting = feed.items.filter((i) => {
+    if (!isRelevant(i)) return false;
     if (!i.applyEnd) return true;
     const d = daysUntil(new Date(i.applyEnd + "T00:00:00Z"));
     return d >= 0 && d <= 100;
   });
-  const fetchedLabel = `매일 08:00 자동 수집 · 마지막 수집 ${new Date(feed.fetchedAt).toLocaleString("ko-KR")}`;
-  const keys: SrcKey[] = [src];
-  const filterButtons: [SrcKey, string][] = [["JNTP", "전남테크노파크"], ["SMTECH", "중기청"]];
+  const fetchedLabel = `매일 08:00 자동 수집 · 전남 전체·여수만 · 마지막 수집 ${new Date(feed.fetchedAt).toLocaleString("ko-KR")}`;
+  const keys: SrcKey[] = src === "전체" ? (Object.keys(SOURCE_INFO) as SrcKey[]) : [src];
+  const filterButtons: ["전체" | SrcKey, string][] = [["전체", "전체"], ["JNTP", "전남테크노파크"], ["SMTECH", "중기청"]];
 
   return (
     <div className="space-y-5">
