@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-14T23:26:49.916Z",
+ "fetchedAt": "2026-08-15T23:25:46.538Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -9,6 +9,9 @@
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
+ ],
+ "errors": [
+  "SMTECH: fetch failed"
  ],
  "items": [
   {
@@ -65,39 +68,6 @@
    "applyEnd": "2026-08-10",
    "announcedAt": "2026-07-06",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02873&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 생분해성 플라스틱 표준개발 및 평가 기반구축 기업지원 사업 2차 공고",
-   "category": "비R&D",
-   "summary": "생분해성 플라스틱 관련 중소·중견기업 대상 생분해 및 바이오플라스틱 관련 산업 활성화",
-   "applyStart": "2026-07-28",
-   "applyEnd": "2026-08-14",
-   "announcedAt": "2026-07-27",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1115"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026 무탄소 전력활용 수소산업육성 기업지원사업(2차)",
-   "category": "비R&D",
-   "summary": "□ 도내 기업이 개발한 수전해시스템 소재·부품·설비에 대해 신뢰성 있는 시험 평가 서비스를 제공하고, 체계적인 수전해시스템 지원체계를 구축하여 수전해 연관기업의 도내 유치를 촉진함으로써 지역 내 청정수소산업 생태계 확립 및 기술 경쟁력 강화를 도모 □ 수소와 타 산업간 융복합을 통해 기후변화대응, 탄소중립 등 에너지 주요 현안을 해결하는 수소 산업 육성·지",
-   "applyStart": "2026-07-27",
-   "applyEnd": "2026-08-14",
-   "announcedAt": "2026-07-27",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1113"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026 장성군산업농공단지활성화지원사업 2차 수혜기업 모집공고",
-   "category": "비R&D",
-   "summary": "ㅇ (사업목적) 장성군 산업‧농공단지 및 지역산업 육성을 위해 장성군 소재 중소기업들의 기술 및 사업화 경쟁력 강화",
-   "applyStart": "2026-07-21",
-   "applyEnd": "2026-08-14",
-   "announcedAt": "2026-07-21",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1110"
   },
   {
    "source": "SMTECH",
