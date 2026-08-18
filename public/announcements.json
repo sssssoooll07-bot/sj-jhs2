@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-17T23:28:01.736Z",
+ "fetchedAt": "2026-08-18T23:27:05.132Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -76,17 +76,6 @@
    "applyEnd": "2026-08-14",
    "announcedAt": "2026-06-30",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02871&buclCd=S9161&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "「2026년 중소기업 밀집지역 위기대응 체계 구축사업」Stand-up 맞춤지원 모집 공고(하반기)",
-   "category": "비R&D",
-   "summary": "◦ (사업목적) 지역중소기업 밀집지역을 상시 모니터링하고 선제적으로 지원 ◦ (지원근거) ｢지역중소기업 육성 및 촉진 등에 관한 법률(이하, 지역중소기업법)｣ 제26조(지역중소기업 위기대응 체계의 구축·운영) ◦ (사업내용) 전남광주통합특별시 내 중소기업 밀집지역 상시 모니터링 및 긴급처방 지원(Stand-up 맞춤지원) ◦ (운영기관) 전남테크노파크 지역",
-   "applyStart": "2026-07-31",
-   "applyEnd": "2026-08-17",
-   "announcedAt": "2026-07-30",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1119"
   },
   {
    "source": "JNTP",
