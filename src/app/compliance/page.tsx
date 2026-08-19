@@ -6,23 +6,27 @@ import { Badge, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 
-const PART_EMPTY: Participation = { name: "", code: "", ratePercent: 0, start: null, end: null, role: null, isNew: false, costType: null, costKWon: null, note: null };
+const PART_EMPTY: Participation = { name: "", code: "", ratePercent: 0, start: null, end: null, role: null, isNew: false, costType: null, costKWon: null, note: null, kind: "내부", org: "㈜신정개발", duty: null };
 const PART_COLS: Col<Participation>[] = [
   { key: "name", label: "연구원 성명" },
-  { key: "code", label: "과제코드" },
+  { key: "kind", label: "구분", type: "select", options: ["내부", "외부(지역내)", "외부(지역외)"], nowrap: true, view: (p) => (p.kind ? <Badge tone={p.kind.startsWith("내부") ? "blue" : "violet"}>{p.kind}</Badge> : "—") },
+  { key: "org", label: "소속", th: "소속" },
   { key: "role", label: "과제내 직위", th: "직위" },
+  { key: "duty", label: "역할", span: true, view: (p) => <span className="text-xs text-slate-500">{p.duty ?? "—"}</span> },
   { key: "ratePercent", label: "참여율(%)", type: "number", align: "center", th: "참여율", view: (p) => <span className="font-semibold">{p.ratePercent}%</span> },
-  { key: "costType", label: "인건비 구분", type: "select", options: ["현금", "현물"], th: "구분", view: (p) => (p.costType ? <Badge tone={p.costType === "현금" ? "blue" : "violet"}>{p.costType}</Badge> : "—") },
+  { key: "costType", label: "인건비 구분", type: "select", options: ["현금", "현물"], th: "인건비구분", hide: true },
   { key: "costKWon", label: "인건비(천원)", type: "number", align: "center", th: "인건비", view: (p) => fmtKWon(p.costKWon) },
+  { key: "code", label: "과제코드", hide: true },
   { key: "start", label: "시작일", type: "date", hide: true },
   { key: "end", label: "종료일", type: "date", hide: true },
   { key: "isNew", label: "신규 여부", type: "toggle", hide: true },
-  { key: "note", label: "구분·역할", span: true, th: "구분·역할", view: (p) => <span className="text-xs text-slate-500">{p.note ?? "—"}</span> },
+  { key: "note", label: "비고", span: true, hide: true },
 ];
 const partRow = (p: Participation) => ({
   "연구원 성명": p.name, 과제코드: p.code, "과제내 직위": p.role, 신규여부: p.isNew ? "O" : "",
   "참여율(%)": p.ratePercent, 시작일: dateStr(p.start), 종료일: dateStr(p.end),
   "인건비 구분": p.costType, "인건비(천원)": p.costKWon, 비고: p.note,
+  구분: p.kind, 소속: p.org, 역할: p.duty,
 });
 
 function ComplianceInner({ data }: { data: Data }) {
@@ -33,7 +37,7 @@ function ComplianceInner({ data }: { data: Data }) {
   const totals = participationTotals(data);
   const labor = laborCostByProject(data).filter((lc) => lc.code === p?.code);
   // 탭으로 사업을 선택하므로 표에서 과제코드 열은 감춘다
-  const partCols = PART_COLS.filter((c) => c.key !== "code");
+  const partCols = PART_COLS;
 
   return (
     <div className="space-y-5">

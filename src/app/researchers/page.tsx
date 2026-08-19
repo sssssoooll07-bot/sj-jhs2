@@ -6,7 +6,7 @@ import { Badge, Empty, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useDataCtx } from "@/lib/data-context";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
-import type { Researcher, Participant, Employee } from "@/lib/excel";
+import type { Researcher, Employee } from "@/lib/excel";
 
 /** 국가연구자번호는 보기 화면에서 마스킹 (개인정보 최소수집) */
 function mask(no: string | null): string {
@@ -28,18 +28,6 @@ function toRows(list: Researcher[]) {
     소속: r.company, 비고: r.note, 재직여부: r.active ? "Y" : "N",
   }));
 }
-
-/* 사업별 참여인력 */
-const PART_COLS: Col<Participant>[] = [
-  { key: "kind", label: "구분", type: "select", options: ["내부", "외부(지역내)", "외부(지역외)"], nowrap: true, view: (x) => <Badge tone={x.kind.startsWith("내부") ? "blue" : "violet"}>{x.kind}</Badge> },
-  { key: "name", label: "성명" },
-  { key: "org", label: "소속", th: "소속" },
-  { key: "position", label: "직위", th: "직위" },
-  { key: "role", label: "역할", span: true },
-  { key: "code", label: "과제코드", hide: true },
-  { key: "note", label: "비고", span: true, hide: true },
-];
-const partRow = (x: Participant) => ({ 과제코드: x.code, 구분: x.kind, 성명: x.name, 소속: x.org, 직위: x.position, 역할: x.role, 비고: x.note });
 
 /* 전체 직원 (4대보험 명부) */
 const EMP_COLS: Col<Employee>[] = [
@@ -112,8 +100,7 @@ export default function ResearchersPage() {
   const { saveSheet, error } = useDataCtx();
   const [modal, setModal] = useState<{ r: Researcher; isNew: boolean; index: number } | null>(null);
   const [saving, setSaving] = useState(false);
-  const [sel, setSel] = useState(0);
-  const [view, setView] = useState<"researchers" | "employees" | "participants">("researchers");
+  const [view, setView] = useState<"researchers" | "employees">("researchers");
 
   return (
     <WithData>
@@ -121,10 +108,6 @@ export default function ResearchersPage() {
         const active = data.researchers.filter((r) => r.active);
         const departed = data.researchers.filter((r) => !r.active);
         const list = [...active, ...departed];
-
-        const projActive = data.projects.filter((p) => p.status === "진행중");
-        const idx = Math.min(sel, Math.max(projActive.length - 1, 0));
-        const proj = projActive[idx];
 
         async function commit(newList: Researcher[]) {
           setSaving(true);
@@ -150,40 +133,12 @@ export default function ResearchersPage() {
         return (
           <div className="space-y-5">
             <div className="flex flex-wrap gap-1.5">
-              {([["researchers", "연구원 명단"], ["employees", "전체 직원"], ["participants", "사업별 참여인력"]] as const).map(([k, label]) => (
+              {([["researchers", "연구원 명단"], ["employees", "전체 직원"]] as const).map(([k, label]) => (
                 <button key={k} onClick={() => setView(k)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${view === k ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
                   {label}
                 </button>
               ))}
             </div>
-
-            {view === "participants" && (
-            <Section title="👥 사업별 참여인력" sub="진행중 사업을 선택하면 그 사업의 참여인력(내부 연구원·외부 위원, 역할)이 표시됩니다.">
-              {projActive.length === 0 ? (
-                <p className="text-sm text-slate-400">진행중인 사업이 없습니다.</p>
-              ) : (
-                <>
-                  <div className="mb-4 flex flex-wrap gap-1.5">
-                    {projActive.map((pr, i) => (
-                      <button key={pr.code} onClick={() => setSel(i)}
-                        className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${i === idx ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
-                        {pr.title}
-                      </button>
-                    ))}
-                  </div>
-                  {proj && (
-                    <EditableTable
-                      rows={data.participants} rowFilter={(x) => x.code === proj.code} cols={PART_COLS}
-                      sheetName="참여인력" toSheetRow={partRow}
-                      blank={{ code: proj.code, kind: "내부", name: "", org: "㈜신정개발", position: null, role: null, note: null }}
-                      requiredKey="name" addLabel="참여인력 추가" entityLabel="참여인력"
-                      emptyMessage="이 사업의 참여인력이 없습니다. '참여인력 추가'로 등록하세요."
-                    />
-                  )}
-                </>
-              )}
-            </Section>
-            )}
 
             {view === "researchers" && (
             <Section

@@ -39,6 +39,7 @@ export type Compliance = { kind: string; title: string; dueDate: Date | null; re
 export type Participation = {
   name: string; code: string; ratePercent: number; start: Date | null; end: Date | null;
   role: string | null; isNew: boolean; costType: string | null; costKWon: number | null; note: string | null;
+  kind: string | null; org: string | null; duty: string | null;
 };
 export type LibraryDoc = { category: string | null; name: string; url: string | null; validUntil: Date | null; note: string | null };
 export type Agreement = {
@@ -178,6 +179,7 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
       start: dt(r["시작일"]), end: dt(r["종료일"]),
       role: s(r["과제내 직위"]), isNew: ox(r["신규여부"]),
       costType: s(r["인건비 구분"]), costKWon: n(r["인건비(천원)"]), note: s(r["비고"]),
+      kind: s(r["구분"]), org: s(r["소속"]), duty: s(r["역할"]),
     }));
 
   // [자료실] 시트는 선택 사항 — 없으면 빈 목록 (기본 발급처 링크는 화면에 내장)
