@@ -85,9 +85,9 @@ function PlanBox({ p }: { p: Project }) {
   const planRef = useRef<HTMLInputElement>(null);
   const doc = getByPattern(p.code, "businessplan");
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2">
-      <p className="text-xs text-indigo-800">사업계획서: {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF 권장)."}</p>
-      <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-indigo-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+      <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">사업계획서:</span> {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF 권장)."}</p>
+      <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-slate-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-slate-700 disabled:opacity-50">
         {uploading ? "업로드 중…" : "사업계획서 업로드"}
       </button>
       <input ref={planRef} type="file"
@@ -101,21 +101,21 @@ function PlanBox({ p }: { p: Project }) {
 /** 과제별 협약서 — 정보 추가(추가 전용) + 파일 업로드·연결 보기 */
 function AgreementBox({ p, list }: { p: Project; list: Agreement[] }) {
   const { getByName } = useAgreementFiles();
-  const cols: Col<Agreement>[] = [
-    { key: "program", label: "사업명", span: true, view: (a) => <span className="font-medium">{a.program}</span> },
-    { key: "signedAt", label: "협약일", type: "date" },
-    { key: "totalKWon", label: "총사업비(천원)", type: "number", align: "right", th: "총사업비", view: (a) => fmtKWon(a.totalKWon) },
-    { key: "agency", label: "전문/전담기관", th: "전담기관" },
-    { key: "fileName", label: "협약서 파일명(연결)", th: "협약서", view: (a) => <DocViewButton doc={getByName(a.fileName)} /> },
-    { key: "code", label: "과제코드", hide: true },
-    { key: "note", label: "비고", span: true, hide: true },
-  ];
-  const toRow = (a: Agreement) => ({ 과제코드: a.code, 사업명: a.program, "협약서 파일명": a.fileName, 협약일: dateStr(a.signedAt), "총사업비(천원)": a.totalKWon, "전문/전담기관": a.agency, 비고: a.note });
-  const blank: Agreement = { code: p.code, program: "", fileName: null, signedAt: null, totalKWon: null, agency: null, note: null };
+  const ags = list.filter((a) => a.code === p.code);
+  if (ags.length === 0) {
+    return <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">이 과제의 협약서가 없습니다.</div>;
+  }
   return (
-    <div className="space-y-3">
-      <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">🔒 협약서는 로그인 사용자만 열람합니다(다운로드 없이 보기). &apos;협약서&apos; 열의 링크를 눌러 확인하세요.</p>
-      <EditableTable rows={list} rowFilter={(a) => a.code === p.code} cols={cols} sheetName="협약서" toSheetRow={toRow} blank={blank} requiredKey="code" entityLabel="협약서" addOnly readOnly emptyMessage="이 과제의 협약서가 없습니다." />
+    <div className="space-y-2">
+      {ags.map((a, i) => (
+        <div key={i} className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          <span className="font-medium text-slate-700">협약서:</span>
+          {getByName(a.fileName) ? <DocViewButton doc={getByName(a.fileName)} /> : <span className="text-slate-400">파일 미연결</span>}
+          {a.signedAt && <span>· 협약일 {fmtDate(a.signedAt)}</span>}
+          {a.totalKWon != null && <span>· 총사업비 {fmtKWon(a.totalKWon)}</span>}
+          {a.agency && <span>· {a.agency}</span>}
+        </div>
+      ))}
     </div>
   );
 }
