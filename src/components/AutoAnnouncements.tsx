@@ -87,9 +87,16 @@ export default function AutoAnnouncements() {
   // 전남 전체·여수 + 접수중 + 마감 100일 이내
   const accepting = feed.items.filter((i) => {
     if (!isRelevant(i)) return false;
-    if (!i.applyEnd) return true;
-    const d = daysUntil(new Date(i.applyEnd + "T00:00:00Z"));
-    return d >= 0 && d <= 100;
+    if (i.applyEnd) {
+      const d = daysUntil(new Date(i.applyEnd + "T00:00:00Z"));
+      return d >= 0 && d <= 100; // 마감이 안 지난 것(오늘~100일 이내)만
+    }
+    // 마감일이 없으면 게시 30일 이내만 표시(오래된/지난 공고 제외)
+    if (i.announcedAt) {
+      const d = daysUntil(new Date(i.announcedAt + "T00:00:00Z"));
+      return d >= -30 && d <= 0;
+    }
+    return false; // 마감일·게시일 모두 없으면 제외
   });
   const fetchedLabel = `매일 08:00 자동 수집 · 전남 전체·여수만 · 마지막 수집 ${new Date(feed.fetchedAt).toLocaleString("ko-KR")}`;
   const keys: SrcKey[] = src === "전체" ? (Object.keys(SOURCE_INFO) as SrcKey[]) : [src];
