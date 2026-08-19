@@ -308,7 +308,7 @@ export function participationTotals(data: Data): { name: string; total: number; 
     if (p.end && p.end < now) continue;
     const cur = byName.get(p.name) ?? { total: 0, parts: [] };
     cur.total += p.ratePercent;
-    if (p.ratePercent > 0) cur.parts.push(`${titleOf(p.code)} ${p.ratePercent}%`); // 참여율 산정된 것만, 과제명으로
+    if (p.ratePercent > 0) cur.parts.push(titleOf(p.code)); // 참여율 산정된 과제명만(비율은 총계 열에 표시)
     byName.set(p.name, cur);
   }
   return [...byName.entries()]
