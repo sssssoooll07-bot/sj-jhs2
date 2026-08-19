@@ -38,7 +38,7 @@ export type Participation = {
   name: string; code: string; ratePercent: number; start: Date | null; end: Date | null;
   role: string | null; isNew: boolean; costType: string | null; costKWon: number | null; note: string | null;
 };
-export type LibraryDoc = { category: string | null; name: string; url: string | null; note: string | null };
+export type LibraryDoc = { category: string | null; name: string; url: string | null; validUntil: Date | null; note: string | null };
 export type Agreement = {
   code: string; program: string; fileName: string | null; signedAt: Date | null;
   totalKWon: number | null; agency: string | null; note: string | null;
@@ -177,7 +177,7 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
   // [자료실] 시트는 선택 사항 — 없으면 빈 목록 (기본 발급처 링크는 화면에 내장)
   const library: LibraryDoc[] = rows("자료실")
     .filter((r) => s(r["서류명"]))
-    .map((r) => ({ category: s(r["구분"]), name: s(r["서류명"])!, url: s(r["발급처·링크"]), note: s(r["비고"]) }));
+    .map((r) => ({ category: s(r["구분"]), name: s(r["서류명"])!, url: s(r["발급처·링크"]), validUntil: dt(r["만료일"]), note: s(r["비고"]) }));
 
   // [협약서] 시트 — 과제↔협약서 파일명 매핑 (파일 자체는 브라우저에서만 연다)
   // 과제코드(P0000-00 형식)만 데이터로 취급 — 하단 안내(※) 행 제외
