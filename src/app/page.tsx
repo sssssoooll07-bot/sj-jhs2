@@ -20,7 +20,9 @@ export default function Dashboard() {
         const totals = participationTotals(data);
         const over = totals.filter((t) => t.total > 100);
         const projDeadlines = collectDeadlines(data, 90);
-        const fundingList = [...data.funding].sort((a, b) => +(a.applyDue ?? Infinity) - +(b.applyDue ?? Infinity));
+        const fundingList = [...data.funding]
+          .filter((f) => (f.applyDue ? daysUntil(f.applyDue) >= 0 : ["관심", "검토중", "신청준비", "신청완료"].includes(f.status)))
+          .sort((a, b) => +(a.applyDue ?? Infinity) - +(b.applyDue ?? Infinity));
 
         const cards = [
           { href: "/projects", label: "과제", value: `${data.projects.length}건`, sub: `진행중 ${active.length} · R&D ${rnd} / 비R&D ${biz}` },
@@ -107,7 +109,7 @@ export default function Dashboard() {
               </Section>
 
               {/* 지원사업 공고 */}
-              <Section title={`📢 지원사업 공고 — ${data.funding.length}건`} sub="신청 마감 D-day 순 · 관리 중인 공고">
+              <Section title={`📢 지원사업 공고 — ${fundingList.length}건`} sub="마감 전(접수중) 공고만 · 신청 마감 D-day 순">
                 {fundingList.length === 0 ? (
                   <Empty message="등록된 공고가 없습니다. 지원사업 공고 탭에서 추가하세요." />
                 ) : (
