@@ -298,18 +298,21 @@ export function laborCostByProject(data: Data): LaborCost[] {
 /** 연구원별 총 참여율(오늘 기준, 진행중 과제) */
 export function participationTotals(data: Data): { name: string; total: number; detail: string }[] {
   const activeCodes = new Set(data.projects.filter((p) => p.status === "진행중").map((p) => p.code));
+  const titleOf = (code: string) => data.projects.find((p) => p.code === code)?.title ?? code;
   const now = new Date();
   const byName = new Map<string, { total: number; parts: string[] }>();
   for (const p of data.participations) {
     if (!activeCodes.has(p.code)) continue;
+    if (p.kind && p.kind.startsWith("외부")) continue; // 외부 위원 제외 (내부 연구원만)
     if (p.start && p.start > now) continue;
     if (p.end && p.end < now) continue;
     const cur = byName.get(p.name) ?? { total: 0, parts: [] };
     cur.total += p.ratePercent;
-    cur.parts.push(`${p.code} ${p.ratePercent}%`);
+    if (p.ratePercent > 0) cur.parts.push(`${titleOf(p.code)} ${p.ratePercent}%`); // 참여율 산정된 것만, 과제명으로
     byName.set(p.name, cur);
   }
   return [...byName.entries()]
-    .map(([name, v]) => ({ name, total: v.total, detail: v.parts.join(" · ") }))
+    .filter(([, v]) => v.total > 0)
+    .map(([name, v]) => ({ name, total: v.total, detail: v.parts.join(" · ") || "—" }))
     .sort((a, b) => b.total - a.total);
 }
