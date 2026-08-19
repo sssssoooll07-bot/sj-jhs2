@@ -24,6 +24,7 @@ export type Patent = {
 };
 export type Researcher = { name: string; position: string | null; degree: string | null; major: string | null; university: string | null; gradYear: string | null; researcherNo: string | null; company: string | null; note: string | null; active: boolean };
 export type Participant = { code: string; kind: string; name: string; org: string | null; position: string | null; role: string | null; note: string | null };
+export type Employee = { name: string; joinedAt: Date | null; rndLab: boolean; note: string | null };
 export type Certification = {
   year: string; name: string; category: string; renewable: boolean; validUntil: Date | null;
   renewalDue: Date | null; rndRelated: boolean; issuer: string | null; certNo: string | null;
@@ -56,6 +57,7 @@ export type Data = {
   budgetItems: BudgetItem[];
   budgetUsages: BudgetUsage[];
   participants: Participant[];
+  employees: Employee[];
   loadedAt: string;
 };
 
@@ -214,7 +216,11 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
       org: s(r["소속"]), position: s(r["직위"]), role: s(r["역할"]), note: s(r["비고"]),
     }));
 
-  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, participants, loadedAt: new Date().toISOString() };
+  const employees: Employee[] = rows("전체직원")
+    .filter((r) => s(r["성명"]))
+    .map((r) => ({ name: s(r["성명"])!, joinedAt: dt(r["입사일"]), rndLab: yn(r["기업부설연구소"]), note: s(r["비고"]) }));
+
+  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, participants, employees, loadedAt: new Date().toISOString() };
 }
 
 const DAY = 86_400_000;

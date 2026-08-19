@@ -5,8 +5,8 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Badge, Empty, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useDataCtx } from "@/lib/data-context";
-import { EditableTable, type Col } from "@/components/EditableTable";
-import type { Researcher, Participant } from "@/lib/excel";
+import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
+import type { Researcher, Participant, Employee } from "@/lib/excel";
 
 /** 국가연구자번호는 보기 화면에서 마스킹 (개인정보 최소수집) */
 function mask(no: string | null): string {
@@ -40,6 +40,15 @@ const PART_COLS: Col<Participant>[] = [
   { key: "note", label: "비고", span: true, hide: true },
 ];
 const partRow = (x: Participant) => ({ 과제코드: x.code, 구분: x.kind, 성명: x.name, 소속: x.org, 직위: x.position, 역할: x.role, 비고: x.note });
+
+/* 전체 직원 (4대보험 명부) */
+const EMP_COLS: Col<Employee>[] = [
+  { key: "name", label: "성명" },
+  { key: "joinedAt", label: "입사일", type: "date", nowrap: true },
+  { key: "rndLab", label: "기업부설연구소 연구원", type: "toggle", th: "기업부설연구소", view: (e) => (e.rndLab ? <Badge tone="green">연구원</Badge> : "—") },
+  { key: "note", label: "비고", span: true },
+];
+const empRow = (e: Employee) => ({ 성명: e.name, 입사일: dateStr(e.joinedAt), 기업부설연구소: e.rndLab ? "Y" : "", 비고: e.note });
 
 function Field({ label, span, children }: { label: string; span?: boolean; children: React.ReactNode }) {
   return (
@@ -213,6 +222,15 @@ export default function ResearchersPage() {
                   </table>
                 </div>
               )}
+            </Section>
+
+            {/* 전체 직원 (4대보험 명부 33명) */}
+            <Section title={`🏢 전체 직원 — ${data.employees.length}명`} sub="4대보험 사업장 가입자 명부 기준 전체 직원. '기업부설연구소' 열에 연구전담요원 여부가 표시됩니다.">
+              <EditableTable
+                rows={data.employees} cols={EMP_COLS} sheetName="전체직원" toSheetRow={empRow}
+                blank={{ name: "", joinedAt: null, rndLab: false, note: null }} requiredKey="name"
+                addLabel="직원 추가" entityLabel="직원" emptyMessage="등록된 직원이 없습니다."
+              />
             </Section>
 
             {modal && (
