@@ -31,6 +31,9 @@ export default function CompliancePage() {
       {(data) => {
         const totals = participationTotals(data);
         const labor = laborCostByProject(data);
+        const projTitle = (code: string) => data.projects.find((p) => p.code === code)?.title ?? code;
+        const partCols = PART_COLS.map((c) => (c.key === "code" ? { ...c, th: "사업", label: "사업(과제)", view: (p: Participation) => <span className="text-xs text-slate-600">{projTitle(p.code)}</span> } : c));
+        const partRows = [...data.participations].sort((a, b) => a.code.localeCompare(b.code));
         return (
           <div className="space-y-5">
             {labor.map((lc) => (
@@ -43,8 +46,8 @@ export default function CompliancePage() {
               </Section>
             ))}
 
-            <Section title={`👥 참여율 — ${data.participations.length}건`} sub="과제별 참여연구원·인건비. '참여율 추가'로 등록하면 위 인건비·아래 총참여율에 자동 반영됩니다.">
-              <EditableTable rows={data.participations} cols={PART_COLS} sheetName="참여율" toSheetRow={partRow} blank={PART_EMPTY} requiredKey="name" addLabel="참여율 추가" entityLabel="참여율" emptyMessage="참여율 기록이 없습니다. '참여율 추가'로 등록하세요." />
+            <Section title={`👥 참여율 — ${data.participations.length}건`} sub="사업(과제)별 참여연구원·인건비. '참여율 추가'로 등록하면 위 인건비·아래 총참여율에 자동 반영됩니다.">
+              <EditableTable rows={partRows} cols={partCols} sheetName="참여율" toSheetRow={partRow} blank={PART_EMPTY} requiredKey="name" addLabel="참여율 추가" entityLabel="참여율" emptyMessage="참여율 기록이 없습니다. '참여율 추가'로 등록하세요." />
             </Section>
 
             <Section title="🧮 연구원별 총 참여율" sub="진행중 과제 · 오늘 기준 — 동일 기간 합계 100% 초과 금지">
