@@ -15,7 +15,7 @@ export type Col<T> = {
   hide?: boolean; // 보기 테이블에서 숨김(폼엔 표시)
   editable?: boolean; // false면 폼에서 제외
   view?: (r: T) => React.ReactNode; // 보기 셀 커스텀
-  align?: "left" | "right";
+  align?: "left" | "right" | "center";
   nowrap?: boolean; // 보기 테이블에서 줄바꿈 방지(한 줄 표시)
   th?: string;
   placeholder?: string;
@@ -98,7 +98,7 @@ export function EditableTable<T extends Record<string, unknown>>({
           <table className="table-base">
             <thead>
               <tr>
-                {tableCols.map((c, ci) => <th key={ci} className={c.align === "right" ? "text-right" : ""}>{c.th ?? c.label}</th>)}
+                {tableCols.map((c, ci) => <th key={ci} className={c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""}>{c.th ?? c.label}</th>)}
                 {!addOnly && <th className="text-right">수정</th>}
               </tr>
             </thead>
@@ -106,7 +106,7 @@ export function EditableTable<T extends Record<string, unknown>>({
               {visible.map(({ r, i }) => (
                 <tr key={i} onClick={() => onRowClick?.(r)} className={`hover:bg-slate-50 ${onRowClick ? "cursor-pointer" : ""}`}>
                   {tableCols.map((c, ci) => (
-                    <td key={ci} className={`${c.align === "right" ? "text-right" : ""} ${c.nowrap ? "whitespace-nowrap" : ""}`}>
+                    <td key={ci} className={`${c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""} ${c.nowrap ? "whitespace-nowrap" : ""}`}>
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
                     </td>
                   ))}

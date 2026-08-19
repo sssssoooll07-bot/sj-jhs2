@@ -12,11 +12,11 @@ const won = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleStr
 
 const BUDGET_COLS: Col<BudgetItem>[] = [
   { key: "category", label: "비목(세목)", span: true, view: (b) => <span className="font-medium">{b.category}</span> },
-  { key: "planKWon", label: "최초계획금액(천원)", type: "number", align: "right", th: "최초계획", nowrap: true, view: (b) => won(b.planKWon) },
-  { key: "finalKWon", label: "최종변경금액(천원)", type: "number", align: "right", th: "최종변경", nowrap: true, view: (b) => won(b.finalKWon) },
-  { key: "execKWon", label: "집행금액(천원)", type: "number", align: "right", th: "집행", nowrap: true, view: (b) => won(b.execKWon) },
+  { key: "planKWon", label: "최초계획금액(천원)", type: "number", align: "center", th: "최초계획", nowrap: true, view: (b) => won(b.planKWon) },
+  { key: "finalKWon", label: "최종변경금액(천원)", type: "number", align: "center", th: "최종변경", nowrap: true, view: (b) => won(b.finalKWon) },
+  { key: "execKWon", label: "집행금액(천원)", type: "number", align: "center", th: "집행", nowrap: true, view: (b) => won(b.execKWon) },
   {
-    key: "note", label: "비고", th: "잔액(집행율)", nowrap: true, align: "right", editable: false,
+    key: "note", label: "비고", th: "잔액(집행율)", nowrap: true, align: "center", editable: false,
     view: (b) => {
       const f = b.finalKWon ?? 0, e = b.execKWon ?? 0;
       const rate = f ? (e / f) * 100 : 0;
