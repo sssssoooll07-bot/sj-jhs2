@@ -45,6 +45,7 @@ export type Agreement = {
 };
 
 export type BudgetItem = { code: string; category: string; planKWon: number | null; finalKWon: number | null; execKWon: number | null; note: string | null };
+export type BudgetUsage = { code: string; category: string; usedAt: Date | null; desc: string | null; amountKWon: number | null; note: string | null };
 export type Data = {
   projects: Project[]; phases: Phase[]; consortium: Consortium[]; disbursements: Disbursement[];
   patents: Patent[]; researchers: Researcher[]; certifications: Certification[];
@@ -52,6 +53,7 @@ export type Data = {
   library: LibraryDoc[];
   agreements: Agreement[];
   budgetItems: BudgetItem[];
+  budgetUsages: BudgetUsage[];
   loadedAt: string;
 };
 
@@ -196,7 +198,14 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
       planKWon: n(r["최초계획금액"]), finalKWon: n(r["최종변경금액"]), execKWon: n(r["집행금액"]), note: s(r["비고"]),
     }));
 
-  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, loadedAt: new Date().toISOString() };
+  const budgetUsages: BudgetUsage[] = rows("사업비사용내역")
+    .filter((r) => s(r["과제코드"]) && s(r["비목"]))
+    .map((r) => ({
+      code: s(r["과제코드"])!, category: s(r["비목"])!,
+      usedAt: dt(r["집행일"]), desc: s(r["적요"]), amountKWon: n(r["금액(천원)"]), note: s(r["비고"]),
+    }));
+
+  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, loadedAt: new Date().toISOString() };
 }
 
 const DAY = 86_400_000;

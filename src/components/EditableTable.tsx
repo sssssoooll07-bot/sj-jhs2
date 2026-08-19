@@ -85,8 +85,8 @@ export function EditableTable<T extends Record<string, unknown>>({
     <div>
       {!readOnly && (
         <div className="mb-4 flex items-center gap-2">
-          <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="btn-primary">
-            <Plus className="h-4 w-4" /> {addLabel}
+          <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700">
+            <Plus className="h-3.5 w-3.5" /> {addLabel}
           </button>
           {error && <span className="text-sm font-medium text-red-600">⚠ {error}</span>}
         </div>
