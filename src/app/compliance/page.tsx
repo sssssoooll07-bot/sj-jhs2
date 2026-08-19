@@ -17,7 +17,7 @@ const PART_COLS: Col<Participation>[] = [
   { key: "start", label: "시작일", type: "date", hide: true },
   { key: "end", label: "종료일", type: "date", hide: true },
   { key: "isNew", label: "신규 여부", type: "toggle", hide: true },
-  { key: "note", label: "비고", span: true, hide: true },
+  { key: "note", label: "구분·역할", span: true, th: "구분·역할", view: (p) => <span className="text-xs text-slate-500">{p.note ?? "—"}</span> },
 ];
 const partRow = (p: Participation) => ({
   "연구원 성명": p.name, 과제코드: p.code, "과제내 직위": p.role, 신규여부: p.isNew ? "O" : "",
