@@ -113,6 +113,7 @@ export default function ResearchersPage() {
   const [modal, setModal] = useState<{ r: Researcher; isNew: boolean; index: number } | null>(null);
   const [saving, setSaving] = useState(false);
   const [sel, setSel] = useState(0);
+  const [view, setView] = useState<"researchers" | "employees" | "participants">("researchers");
 
   return (
     <WithData>
@@ -148,7 +149,15 @@ export default function ResearchersPage() {
 
         return (
           <div className="space-y-5">
-            {/* 사업별 참여인력 */}
+            <div className="flex flex-wrap gap-1.5">
+              {([["researchers", "연구원 명단"], ["employees", "전체 직원"], ["participants", "사업별 참여인력"]] as const).map(([k, label]) => (
+                <button key={k} onClick={() => setView(k)} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${view === k ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {view === "participants" && (
             <Section title="👥 사업별 참여인력" sub="진행중 사업을 선택하면 그 사업의 참여인력(내부 연구원·외부 위원, 역할)이 표시됩니다.">
               {projActive.length === 0 ? (
                 <p className="text-sm text-slate-400">진행중인 사업이 없습니다.</p>
@@ -174,8 +183,9 @@ export default function ResearchersPage() {
                 </>
               )}
             </Section>
+            )}
 
-            {/* 회사 전체 연구원 명단 */}
+            {view === "researchers" && (
             <Section
               title={`🧑‍🔬 연구원 명단 — 재직 ${active.length}명 (퇴사 ${departed.length}명)`}
               sub="회사 전체 연구원. 4대보험 명부 대조 기준. 국가연구자번호는 보기 화면에서 마스킹됩니다."
@@ -223,8 +233,9 @@ export default function ResearchersPage() {
                 </div>
               )}
             </Section>
+            )}
 
-            {/* 전체 직원 (4대보험 명부 33명) */}
+            {view === "employees" && (
             <Section title={`🏢 전체 직원 — ${data.employees.length}명`} sub="4대보험 사업장 가입자 명부 기준 전체 직원. '기업부설연구소' 열에 연구전담요원 여부가 표시됩니다.">
               <EditableTable
                 rows={data.employees} cols={EMP_COLS} sheetName="전체직원" toSheetRow={empRow}
@@ -232,6 +243,7 @@ export default function ResearchersPage() {
                 addLabel="직원 추가" entityLabel="직원" emptyMessage="등록된 직원이 없습니다."
               />
             </Section>
+            )}
 
             {modal && (
               <EditModal
