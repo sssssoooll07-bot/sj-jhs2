@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { fmtKWon, fmtDate, type Data, type Project, type Phase, type Consortium, type Disbursement, type Agreement } from "@/lib/excel";
-import { Badge, Empty, Section, StatusBadge } from "@/components/ui";
+import { fmtKWon, fmtDate, type Data, type Project, type Agreement } from "@/lib/excel";
+import { Badge, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
@@ -45,40 +45,6 @@ const toRow = (p: Project) => ({
   은행명: p.bank, 계좌번호: p.account, 예금주: p.accountHolder,
   부가세입금: p.vatPaid ? "O" : "", 자부담입금: p.selfPaid ? "O" : "",
 });
-
-/* ── 차수 ── */
-const PHASE_EMPTY: Phase = { code: "", label: null, period: null, govKWon: null, cashKWon: null, inKindKWon: null, totalKWon: 0 };
-const PHASE_COLS: Col<Phase>[] = [
-  { key: "code", label: "과제코드", hide: true },
-  { key: "label", label: "차수" },
-  { key: "period", label: "기간" },
-  { key: "govKWon", label: "지원금(천원)", type: "number", align: "right", th: "지원금", view: (p) => fmtKWon(p.govKWon) },
-  { key: "cashKWon", label: "기업부담-현금(천원)", type: "number", align: "right", th: "현금", view: (p) => fmtKWon(p.cashKWon) },
-  { key: "inKindKWon", label: "기업부담-현물(천원)", type: "number", align: "right", th: "현물", view: (p) => fmtKWon(p.inKindKWon) },
-];
-const phaseRow = (p: Phase) => ({ 과제코드: p.code, 차수: p.label, 기간: p.period, "지원금(천원)": p.govKWon, "기업부담-현금(천원)": p.cashKWon, "기업부담-현물(천원)": p.inKindKWon });
-
-/* ── 참여기관 ── */
-const CONS_EMPTY: Consortium = { code: "", name: "", role: null, govKWon: null, cashKWon: null, inKindKWon: null };
-const CONS_COLS: Col<Consortium>[] = [
-  { key: "code", label: "과제코드", hide: true },
-  { key: "name", label: "기관명" },
-  { key: "role", label: "역할" },
-  { key: "govKWon", label: "지원금(천원)", type: "number", align: "right", th: "지원금", view: (c) => fmtKWon(c.govKWon) },
-  { key: "cashKWon", label: "기업부담-현금(천원)", type: "number", align: "right", th: "현금", view: (c) => fmtKWon(c.cashKWon) },
-  { key: "inKindKWon", label: "기업부담-현물(천원)", type: "number", align: "right", th: "현물", view: (c) => fmtKWon(c.inKindKWon) },
-];
-const consRow = (c: Consortium) => ({ 과제코드: c.code, 기관명: c.name, 역할: c.role, "지원금(천원)": c.govKWon, "기업부담-현금(천원)": c.cashKWon, "기업부담-현물(천원)": c.inKindKWon });
-
-/* ── 입금이력 ── */
-const DISB_EMPTY: Disbursement = { code: "", paidAt: null, payer: null, amountKWon: null };
-const DISB_COLS: Col<Disbursement>[] = [
-  { key: "code", label: "과제코드", hide: true },
-  { key: "paidAt", label: "입금일", type: "date" },
-  { key: "payer", label: "지급업체" },
-  { key: "amountKWon", label: "금액(천원)", type: "number", align: "right", th: "금액", view: (d) => fmtKWon(d.amountKWon) },
-];
-const disbRow = (d: Disbursement) => ({ 과제코드: d.code, 입금일: dateStr(d.paidAt), 지급업체: d.payer, "금액(천원)": d.amountKWon });
 
 /** 전용통장 1건 + 통장거래내역 (상세용) */
 function AccountBox({ p }: { p: Project }) {
@@ -163,40 +129,20 @@ function Info({ label, value, mono }: { label: string; value: string | null; mon
   );
 }
 
-/** 공동기관 사업비 분배 */
-function ShareTable({ list, code }: { list: Consortium[]; code: string }) {
-  const share = list.filter((c) => c.code === code).map((c) => ({ name: c.name, role: c.role, total: (c.govKWon ?? 0) + (c.cashKWon ?? 0) + (c.inKindKWon ?? 0) }));
-  const grand = share.reduce((s, x) => s + x.total, 0);
-  if (share.length === 0) return <Empty message="참여기관이 없습니다. 아래 '참여기관'에서 추가하세요." />;
-  return (
-    <table className="table-base">
-      <thead><tr><th>기관</th><th>역할</th><th className="text-right">사업비</th><th className="text-right">비중</th></tr></thead>
-      <tbody>
-        {share.map((c, i) => (
-          <tr key={i}>
-            <td>{c.name}</td>
-            <td>{c.role ? <Badge tone={c.role === "주관" ? "blue" : "slate"}>{c.role}</Badge> : "—"}</td>
-            <td className="text-right font-semibold">{fmtKWon(c.total)}</td>
-            <td className="text-right text-xs text-slate-500">{grand > 0 ? `${Math.round((c.total / grand) * 100)}%` : "—"}</td>
-          </tr>
-        ))}
-        <tr className="bg-slate-50 font-bold"><td colSpan={2}>합계</td><td className="text-right">{fmtKWon(grand)}</td><td className="text-right text-xs">100%</td></tr>
-      </tbody>
-    </table>
-  );
-}
-
-/** 과제 상세 — 전용통장·사업계획서·사업비 분배·차수·참여기관·입금 */
+/** 과제 상세 — 상단 요약 + 전용통장/사업계획서/협약서 탭 */
 function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: () => void }) {
   const { refresh } = useAgreementFiles();
-  const only = (code: string) => code === p.code;
+  const [tab, setTab] = useState<"account" | "plan" | "agreement">("account");
   // 과제 상세 진입 시 협약서·사업계획서·통장 목록을 새로 읽는다(업로드 직후 재로그인 없이 반영)
   useEffect(() => { void refresh(); }, [refresh]);
+
+  const TABS: [typeof tab, string][] = [["account", "💳 전용통장"], ["plan", "📑 사업계획서"], ["agreement", "📜 협약서"]];
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <button onClick={onBack} className="btn-ghost"><ArrowLeft className="h-4 w-4" /> 과제 목록</button>
 
-      <Section title={`${p.code} · ${p.title}`} sub={`${p.type} · ${p.agency ?? "—"} · ${p.period ?? `${fmtDate(p.startDate)} ~ ${fmtDate(p.endDate)}`}`}>
+      <Section title={p.title} sub={`${p.type} · ${p.agency ?? "—"} · ${p.period ?? `${fmtDate(p.startDate)} ~ ${fmtDate(p.endDate)}`}`}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Info label="진행상태" value={p.status} />
           <Info label="총사업금액" value={fmtKWon(p.totalKWon)} />
@@ -206,20 +152,21 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
         {p.note && <p className="mt-3 text-xs text-slate-500">비고: {p.note}</p>}
       </Section>
 
-      <Section title="💳 전용통장 · 통장거래내역"><AccountBox p={p} /></Section>
-      <Section title="📑 사업계획서"><PlanBox p={p} /></Section>
-      <Section title="📜 협약서"><AgreementBox p={p} list={data.agreements} /></Section>
-      <Section title="🏢 공동기관 사업비 분배" sub="참여기관별 사업비와 비중 자동 계산"><ShareTable list={data.consortium} code={p.code} /></Section>
-
-      <Section title={`📊 차수 — ${data.phases.filter((x) => only(x.code)).length}건`} sub="연차 예산. '차수 추가'로 등록.">
-        <EditableTable rows={data.phases} rowFilter={(x) => only(x.code)} cols={PHASE_COLS} sheetName="차수" toSheetRow={phaseRow} blank={{ ...PHASE_EMPTY, code: p.code }} requiredKey="code" addLabel="차수 추가" entityLabel="차수" />
-      </Section>
-      <Section title={`🏢 참여기관 — ${data.consortium.filter((x) => only(x.code)).length}건`} sub="공동·참여 기관별 사업비.">
-        <EditableTable rows={data.consortium} rowFilter={(x) => only(x.code)} cols={CONS_COLS} sheetName="참여기관" toSheetRow={consRow} blank={{ ...CONS_EMPTY, code: p.code }} requiredKey="name" addLabel="참여기관 추가" entityLabel="참여기관" />
-      </Section>
-      <Section title={`💵 입금이력 — ${data.disbursements.filter((x) => only(x.code)).length}건`} sub="지원금 입금 내역.">
-        <EditableTable rows={data.disbursements} rowFilter={(x) => only(x.code)} cols={DISB_COLS} sheetName="입금이력" toSheetRow={disbRow} blank={{ ...DISB_EMPTY, code: p.code }} requiredKey="code" addLabel="입금 추가" entityLabel="입금" />
-      </Section>
+      <div className="card p-5 sm:p-6">
+        <div className="flex flex-wrap gap-1.5">
+          {TABS.map(([key, label]) => (
+            <button key={key} onClick={() => setTab(key)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${tab === key ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4">
+          {tab === "account" && <AccountBox p={p} />}
+          {tab === "plan" && <PlanBox p={p} />}
+          {tab === "agreement" && <AgreementBox p={p} list={data.agreements} />}
+        </div>
+      </div>
     </div>
   );
 }
