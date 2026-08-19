@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { fmtKWon, fmtDate, type Data, type Project, type Agreement } from "@/lib/excel";
 import { Badge, Section, StatusBadge } from "@/components/ui";
@@ -142,14 +143,16 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
     <div className="space-y-4">
       <button onClick={onBack} className="btn-ghost"><ArrowLeft className="h-4 w-4" /> 과제 목록</button>
 
-      <Section title={p.title} sub={`${p.type} · ${p.agency ?? "—"} · ${p.period ?? `${fmtDate(p.startDate)} ~ ${fmtDate(p.endDate)}`}`}>
+      <Section title={p.title} sub={p.note ?? undefined}>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Info label="구분" value={p.type} />
+          <Info label="지원기관" value={p.agency} />
+          <Info label="사업기간" value={p.period ?? (p.startDate && p.endDate ? `${fmtDate(p.startDate)} ~ ${fmtDate(p.endDate)}` : null)} />
           <Info label="진행상태" value={p.status} />
           <Info label="총사업금액" value={fmtKWon(p.totalKWon)} />
           <Info label="역할" value={p.role} />
           <Info label="수행사" value={p.company} />
         </div>
-        {p.note && <p className="mt-3 text-xs text-slate-500">비고: {p.note}</p>}
       </Section>
 
       <div className="card p-5 sm:p-6">
@@ -171,16 +174,18 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
   );
 }
 
-export default function ProjectsPage() {
+function ProjectsInner() {
   const [year, setYear] = useState("2026");
   const [roleF, setRoleF] = useState("주관");
-  const [sel, setSel] = useState<string | null>(null);
+  const params = useSearchParams();
+  const router = useRouter();
+  const sel = params.get("p");
 
   return (
     <WithData>
       {(data) => {
         const selProject = sel ? data.projects.find((x) => x.code === sel) : null;
-        if (selProject) return <ProjectDetail data={data} p={selProject} onBack={() => setSel(null)} />;
+        if (selProject) return <ProjectDetail data={data} p={selProject} onBack={() => router.push("/projects")} />;
 
         const years = ["전체", ...Array.from(new Set(data.projects.map((p) => yearOf(p.code)))).sort().reverse()];
         const inYear = (code: string) => year === "전체" || yearOf(code) === year;
@@ -209,11 +214,19 @@ export default function ProjectsPage() {
             </div>
 
             <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${roleF !== "전체" ? ` · ${roleF}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
-              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inRole(p.role)} onRowClick={(p) => setSel(p.code)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
+              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inRole(p.role)} onRowClick={(p) => router.push(`/projects?p=${encodeURIComponent(p.code)}`)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
             </Section>
           </div>
         );
       }}
     </WithData>
+  );
+}
+
+export default function ProjectsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProjectsInner />
+    </Suspense>
   );
 }
