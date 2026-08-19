@@ -101,7 +101,7 @@ function AccountBox({ p }: { p: Project }) {
       </div>
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
         <p className="text-xs text-emerald-800">통장거래내역: {stmt ? <DocViewButton doc={stmt} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다."}</p>
-        <button onClick={() => bankRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+        <button onClick={() => bankRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
           {uploading ? "업로드 중…" : "거래내역 업로드"}
         </button>
         <input ref={bankRef} type="file"
@@ -121,7 +121,7 @@ function PlanBox({ p }: { p: Project }) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2">
       <p className="text-xs text-indigo-800">사업계획서: {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF 권장)."}</p>
-      <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+      <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-indigo-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
         {uploading ? "업로드 중…" : "사업계획서 업로드"}
       </button>
       <input ref={planRef} type="file"
