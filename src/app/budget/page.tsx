@@ -32,6 +32,9 @@ function BudgetInner({ data }: { data: Data }) {
 
   const template = useMemo(() => list("budget").find((d) => /양식|서식|템플릿/.test(d.name)), [list]);
 
+  const now = new Date();
+  const todayUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+
   const usageSum = (cat: string) =>
     data.budgetUsages.filter((u) => u.code === p?.code && u.category === cat).reduce((s, u) => s + (u.amountKWon ?? 0), 0);
 
@@ -118,7 +121,7 @@ function BudgetInner({ data }: { data: Data }) {
                       <p className="mb-2 text-sm font-semibold text-slate-700">📋 &lt;{selCat}&gt; 사용내역 — 합계 {won(usageSum(selCat))}천원</p>
                       <EditableTable
                         rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === selCat} cols={USAGE_COLS}
-                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: null, desc: null, amountKWon: null, note: null }}
+                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, amountKWon: null, note: null }}
                         requiredKey="desc" addLabel="사용내역 추가" entityLabel="사용내역"
                         emptyMessage="사용내역이 없습니다. '사용내역 추가'로 집행 내역(집행일·적요·금액)을 기록하세요."
                       />
