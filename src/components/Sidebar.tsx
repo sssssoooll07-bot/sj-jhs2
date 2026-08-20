@@ -40,6 +40,7 @@ export default function Sidebar() {
             <Link
               key={n.href}
               href={n.href}
+              onClick={(e) => { if (active) { e.preventDefault(); window.location.reload(); } }}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all ${
                 active
                   ? "bg-blue-600 font-semibold text-white shadow-lg shadow-blue-900/40"
