@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Empty } from "@/components/ui";
 import { fmtDate } from "@/lib/excel";
@@ -137,6 +137,11 @@ function EditModal<T extends Record<string, unknown>>({
   requiredKey: Extract<keyof T, string>; onSave: (r: T) => void; onDelete: () => void; onClose: () => void;
 }) {
   const [r, setR] = useState<T>(initial);
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
   const set = (k: string, v: unknown) => setR((p) => ({ ...p, [k]: v }));
   const valid = String(r[requiredKey] ?? "").trim().length > 0;
 

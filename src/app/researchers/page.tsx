@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Badge, Empty, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
@@ -54,6 +54,11 @@ function EditModal({
   onSave: (r: Researcher) => void; onDelete: () => void; onClose: () => void;
 }) {
   const [r, setR] = useState<Researcher>(initial);
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
   const set = (patch: Partial<Researcher>) => setR((p) => ({ ...p, ...patch }));
 
   return (
