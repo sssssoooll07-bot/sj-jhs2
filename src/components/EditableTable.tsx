@@ -138,10 +138,13 @@ function EditModal<T extends Record<string, unknown>>({
 }) {
   const [r, setR] = useState<T>(initial);
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "Enter" && !saving && String(r[requiredKey] ?? "").trim()) { e.preventDefault(); onSave(r); }
+    };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
+  }, [onClose, onSave, r, saving, requiredKey]);
   const set = (k: string, v: unknown) => setR((p) => ({ ...p, [k]: v }));
   const valid = String(r[requiredKey] ?? "").trim().length > 0;
 

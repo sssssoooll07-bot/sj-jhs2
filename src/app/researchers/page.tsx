@@ -55,10 +55,13 @@ function EditModal({
 }) {
   const [r, setR] = useState<Researcher>(initial);
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "Enter" && !saving && r.name.trim()) { e.preventDefault(); onSave(r); }
+    };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
+  }, [onClose, onSave, r, saving]);
   const set = (patch: Partial<Researcher>) => setR((p) => ({ ...p, ...patch }));
 
   return (
