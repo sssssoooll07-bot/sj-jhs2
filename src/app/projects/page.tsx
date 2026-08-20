@@ -133,11 +133,11 @@ function Info({ label, value, mono }: { label: string; value: string | null; mon
 /** 과제 상세 — 상단 요약 + 전용통장/사업계획서/협약서 탭 */
 function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: () => void }) {
   const { refresh } = useAgreementFiles();
-  const [tab, setTab] = useState<"account" | "plan" | "agreement">("account");
+  const [tab, setTab] = useState<"account" | "plan" | "agreement">("agreement");
   // 과제 상세 진입 시 협약서·사업계획서·통장 목록을 새로 읽는다(업로드 직후 재로그인 없이 반영)
   useEffect(() => { void refresh(); }, [refresh]);
 
-  const TABS: [typeof tab, string][] = [["account", "💳 전용통장"], ["plan", "📑 사업계획서"], ["agreement", "📜 협약서"]];
+  const TABS: [typeof tab, string][] = [["agreement", "📜 협약서"], ["plan", "📑 사업계획서"], ["account", "💳 전용통장"]];
 
   return (
     <div className="space-y-4">
