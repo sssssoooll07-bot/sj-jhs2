@@ -19,6 +19,7 @@ export type Col<T> = {
   nowrap?: boolean; // 보기 테이블에서 줄바꿈 방지(한 줄 표시)
   th?: string;
   placeholder?: string;
+  derive?: (val: unknown, r: T) => Partial<T>; // 이 필드 변경 시 다른 필드 자동 계산(예: 총액→공급가/부가세)
 };
 
 /** Date → "yyyy-mm-dd" (시트 저장·date input용). Date 아니면 null. */
@@ -145,7 +146,12 @@ function EditModal<T extends Record<string, unknown>>({
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, [onClose, onSave, r, saving, requiredKey]);
-  const set = (k: string, v: unknown) => setR((p) => ({ ...p, [k]: v }));
+  const set = (k: string, v: unknown) => setR((p) => {
+    const next = { ...p, [k]: v } as T;
+    const col = cols.find((c) => c.key === k);
+    if (col?.derive) Object.assign(next as Record<string, unknown>, col.derive(v, next));
+    return next;
+  });
   const valid = String(r[requiredKey] ?? "").trim().length > 0;
 
   return (

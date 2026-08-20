@@ -66,11 +66,15 @@ function BudgetInner({ data }: { data: Data }) {
   const USAGE_COLS: Col<BudgetUsage>[] = [
     { key: "usedAt", label: "집행일", type: "date", nowrap: true },
     { key: "desc", label: "적요(사용내역)", span: true },
-    { key: "amountKWon", label: "공급가(원)", type: "number", align: "center", th: "공급가", nowrap: true, view: (u) => won(u.amountKWon) },
-    { key: "vatKWon", label: "부가세(원)", type: "number", align: "center", th: "부가세", nowrap: true, view: (u) => won(u.vatKWon) },
-    { key: "note", label: "합계(실지출)", th: "합계", align: "center", nowrap: true, editable: false, view: (u) => <span className="font-semibold">{won((u.amountKWon ?? 0) + (u.vatKWon ?? 0))}</span> },
+    {
+      key: "grossKWon", label: "총액(원) — 입력하면 부가세 자동계산", type: "number", align: "center", th: "총액", nowrap: true, placeholder: "총액 입력",
+      view: (u) => won(u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0))),
+      derive: (v) => { const g = Number(v) || 0; const vat = Math.round(g / 11); return g ? { vatKWon: vat, amountKWon: g - vat } : { vatKWon: null, amountKWon: null }; },
+    },
+    { key: "amountKWon", label: "공급가(원) — 자동·수정가능", type: "number", align: "center", th: "공급가", nowrap: true, view: (u) => won(u.amountKWon) },
+    { key: "vatKWon", label: "부가세(원) — 자동·수정가능", type: "number", align: "center", th: "부가세", nowrap: true, view: (u) => won(u.vatKWon) },
   ];
-  const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, "금액(원)": u.amountKWon, "부가세(원)": u.vatKWon, 비고: u.note });
+  const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, "총액(원)": u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0)), "금액(원)": u.amountKWon, "부가세(원)": u.vatKWon, 비고: u.note });
 
   return (
     <div className="space-y-5">
@@ -125,7 +129,7 @@ function BudgetInner({ data }: { data: Data }) {
                       <p className="mb-2 text-sm font-semibold text-slate-700">📋 &lt;{selCat}&gt; 사용내역 — 실지출 {won(usedTotalWon(selCat))}원 · 집행(공급가) {won(usedWon(selCat))}원</p>
                       <EditableTable
                         rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === selCat} cols={USAGE_COLS}
-                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, amountKWon: null, vatKWon: null, note: null }}
+                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
                         requiredKey="desc" addLabel="사용내역 추가" entityLabel="사용내역"
                         emptyMessage="사용내역이 없습니다. '사용내역 추가'로 집행 내역(집행일·적요·공급가·부가세)을 기록하세요."
                       />
