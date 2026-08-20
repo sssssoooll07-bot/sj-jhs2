@@ -17,7 +17,7 @@ const yearOf = (code: string) => code.match(/(\d{4})/)?.[1] ?? "기타";
 const EMPTY: Project = {
   code: "", title: "", type: "연구과제", agency: null, period: null, startDate: null, endDate: null,
   totalKWon: null, status: "진행중", role: "주관", company: "신정개발", progress: null, note: null,
-  bank: null, account: null, accountHolder: null, vatPaid: false, selfPaid: false, phaseSumKWon: 0, phaseCheck: "—",
+  bank: null, account: null, accountHolder: null, vatPaid: false, selfPaid: false, techType: null, phaseSumKWon: 0, phaseCheck: "—",
 };
 const COLS: Col<Project>[] = [
   { key: "type", label: "구분 (연구과제=R&D / 지원사업=비R&D)", type: "select", options: ["연구과제", "지원사업"], th: "구분", view: (p) => <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type === "연구과제" ? "R&D" : "비R&D"}</Badge> },
@@ -144,6 +144,11 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
       <button onClick={onBack} className="btn-ghost"><ArrowLeft className="h-4 w-4" /> 과제 목록</button>
 
       <Section title={p.title} sub={p.note ?? undefined}>
+        {p.techType && (
+          <div className="mb-3">
+            <Badge tone={p.techType.includes("궤도") ? "violet" : p.techType.startsWith("스크류") ? "blue" : "amber"}>🔧 {p.techType}</Badge>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Info label="구분" value={p.type} />
           <Info label="지원기관" value={p.agency} />
