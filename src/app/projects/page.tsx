@@ -182,6 +182,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
 function ProjectsInner() {
   const [year, setYear] = useState("2026");
   const [roleF, setRoleF] = useState("주관");
+  const [techF, setTechF] = useState("전체");
   const params = useSearchParams();
   const router = useRouter();
   const sel = params.get("p");
@@ -193,9 +194,11 @@ function ProjectsInner() {
         if (selProject) return <ProjectDetail data={data} p={selProject} onBack={() => router.push("/projects")} />;
 
         const years = ["전체", ...Array.from(new Set(data.projects.map((p) => yearOf(p.code)))).sort().reverse()];
+        const techTypes = ["전체", ...Array.from(new Set(data.projects.map((p) => p.techType).filter(Boolean) as string[]))];
         const inYear = (code: string) => year === "전체" || yearOf(code) === year;
         const inRole = (r: string | null) => roleF === "전체" || (roleF === "주관" ? r === "주관" : r !== "주관");
-        const cnt = data.projects.filter((p) => inYear(p.code) && inRole(p.role)).length;
+        const inTech = (p: Project) => techF === "전체" || p.techType === techF;
+        const cnt = data.projects.filter((p) => inYear(p.code) && inRole(p.role) && inTech(p)).length;
 
         return (
           <div className="space-y-5">
@@ -216,10 +219,20 @@ function ProjectsInner() {
                   </button>
                 ))}
               </div>
+              {techTypes.length > 1 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="mr-1 text-xs font-semibold text-slate-400">기술유형</span>
+                  {techTypes.map((t) => (
+                    <button key={t} onClick={() => setTechF(t)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${techF === t ? "bg-violet-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${roleF !== "전체" ? ` · ${roleF}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
-              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inRole(p.role)} onRowClick={(p) => router.push(`/projects?p=${encodeURIComponent(p.code)}`)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
+            <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${roleF !== "전체" ? ` · ${roleF}` : ""}${techF !== "전체" ? ` · ${techF}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
+              <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inRole(p.role) && inTech(p)} onRowClick={(p) => router.push(`/projects?p=${encodeURIComponent(p.code)}`)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
             </Section>
           </div>
         );
