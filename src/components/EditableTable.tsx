@@ -99,18 +99,18 @@ export function EditableTable<T extends Record<string, unknown>>({
             <thead>
               <tr>
                 {tableCols.map((c, ci) => <th key={ci} className={c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""}>{c.th ?? c.label}</th>)}
-                {!addOnly && <th className="text-right">수정</th>}
+                {onRowClick && !addOnly && !readOnly && <th className="text-right">수정</th>}
               </tr>
             </thead>
             <tbody>
               {visible.map(({ r, i }) => (
-                <tr key={i} onClick={() => onRowClick?.(r)} className={`hover:bg-slate-50 ${onRowClick ? "cursor-pointer" : ""}`}>
+                <tr key={i} onClick={() => { if (onRowClick) onRowClick(r); else if (!addOnly && !readOnly) setModal({ r: { ...r }, isNew: false, index: i }); }} className={`hover:bg-slate-50 ${onRowClick || (!addOnly && !readOnly) ? "cursor-pointer" : ""}`}>
                   {tableCols.map((c, ci) => (
                     <td key={ci} className={`${c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""} ${c.nowrap ? "whitespace-nowrap" : ""}`}>
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
                     </td>
                   ))}
-                  {!addOnly && (
+                  {onRowClick && !addOnly && !readOnly && (
                     <td className="text-right">
                       <button onClick={(e) => { e.stopPropagation(); setModal({ r: { ...r }, isNew: false, index: i }); }} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
                         <Pencil className="h-4 w-4" />
