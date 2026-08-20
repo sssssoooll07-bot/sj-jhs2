@@ -9,7 +9,6 @@ import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import { fmtKWon, fmtDate, type Data, type BudgetItem, type BudgetUsage } from "@/lib/excel";
 
 const won = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString("ko-KR"));
-const kwon = (wonVal: number) => Math.round(wonVal / 1000); // 원 → 천원
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
@@ -36,29 +35,27 @@ function BudgetInner({ data }: { data: Data }) {
   const now = new Date();
   const todayUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
 
-  // 사용내역은 '원' 단위. 집행액은 공급가만(부가세 제외). 비목 예산은 '천원'.
+  // 모두 '원' 단위. 집행액은 공급가만(부가세 제외).
   const usedWon = (cat: string) =>
     data.budgetUsages.filter((u) => u.code === p?.code && u.category === cat).reduce((s, u) => s + (u.amountKWon ?? 0), 0);
   const usedTotalWon = (cat: string) =>
     data.budgetUsages.filter((u) => u.code === p?.code && u.category === cat).reduce((s, u) => s + (u.amountKWon ?? 0) + (u.vatKWon ?? 0), 0);
-  const execK = (cat: string) => kwon(usedWon(cat)); // 집행 천원(공급가)
 
   const items = p ? data.budgetItems.filter((b) => b.code === p.code) : [];
   const tot = items.reduce(
-    (a, b) => ({ plan: a.plan + (b.planKWon ?? 0), final: a.final + (b.finalKWon ?? 0), execWon: a.execWon + usedWon(b.category) }),
-    { plan: 0, final: 0, execWon: 0 },
+    (a, b) => ({ plan: a.plan + (b.planKWon ?? 0), final: a.final + (b.finalKWon ?? 0), exec: a.exec + usedWon(b.category) }),
+    { plan: 0, final: 0, exec: 0 },
   );
-  const totExecK = kwon(tot.execWon);
 
   const BUDGET_COLS: Col<BudgetItem>[] = [
     { key: "category", label: "비목(세목)", span: true, view: (b) => <span className="font-medium">{b.category}</span> },
-    { key: "planKWon", label: "최초계획금액(천원)", type: "number", align: "center", th: "최초계획", nowrap: true, view: (b) => won(b.planKWon) },
-    { key: "finalKWon", label: "최종변경금액(천원)", type: "number", align: "center", th: "최종변경", nowrap: true, view: (b) => won(b.finalKWon) },
-    { key: "execKWon", label: "집행", th: "집행(천원)", align: "center", nowrap: true, editable: false, view: (b) => won(execK(b.category)) },
+    { key: "planKWon", label: "최초계획금액(원)", type: "number", align: "center", th: "최초계획", nowrap: true, view: (b) => won(b.planKWon) },
+    { key: "finalKWon", label: "최종변경금액(원)", type: "number", align: "center", th: "최종변경", nowrap: true, view: (b) => won(b.finalKWon) },
+    { key: "execKWon", label: "집행", th: "집행", align: "center", nowrap: true, editable: false, view: (b) => won(usedWon(b.category)) },
     {
       key: "note", label: "비고", th: "잔액(집행율)", align: "center", nowrap: true, editable: false,
       view: (b) => {
-        const f = b.finalKWon ?? 0, e = execK(b.category);
+        const f = b.finalKWon ?? 0, e = usedWon(b.category);
         const rate = f ? (e / f) * 100 : 0;
         return <span className="text-xs">{won(f - e)}{f ? <span className={rate > 100 ? "ml-1 font-semibold text-red-600" : "ml-1 text-slate-400"}>({rate.toFixed(0)}%)</span> : null}</span>;
       },
@@ -69,15 +66,15 @@ function BudgetInner({ data }: { data: Data }) {
   const USAGE_COLS: Col<BudgetUsage>[] = [
     { key: "usedAt", label: "집행일", type: "date", nowrap: true },
     { key: "desc", label: "적요(사용내역)", span: true },
-    { key: "amountKWon", label: "공급가(원)", type: "number", align: "center", th: "공급가(원)", nowrap: true, view: (u) => won(u.amountKWon) },
-    { key: "vatKWon", label: "부가세(원)", type: "number", align: "center", th: "부가세(원)", nowrap: true, view: (u) => won(u.vatKWon) },
-    { key: "note", label: "합계(실지출)", th: "합계(원)", align: "center", nowrap: true, editable: false, view: (u) => <span className="font-semibold">{won((u.amountKWon ?? 0) + (u.vatKWon ?? 0))}</span> },
+    { key: "amountKWon", label: "공급가(원)", type: "number", align: "center", th: "공급가", nowrap: true, view: (u) => won(u.amountKWon) },
+    { key: "vatKWon", label: "부가세(원)", type: "number", align: "center", th: "부가세", nowrap: true, view: (u) => won(u.vatKWon) },
+    { key: "note", label: "합계(실지출)", th: "합계", align: "center", nowrap: true, editable: false, view: (u) => <span className="font-semibold">{won((u.amountKWon ?? 0) + (u.vatKWon ?? 0))}</span> },
   ];
   const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, "금액(원)": u.amountKWon, "부가세(원)": u.vatKWon, 비고: u.note });
 
   return (
     <div className="space-y-5">
-      <Section title="💰 사업비 현황" sub="비목 예산은 천원 단위 · 사용내역은 원 단위. 부가세는 집행액에서 제외되고 공급가만 집행에 반영됩니다.">
+      <Section title="💰 사업비 현황" sub="단위: 원 · 비목을 클릭하면 사용내역을 입력할 수 있습니다. 부가세는 집행액에서 제외되고 공급가만 집행에 반영됩니다.">
         {template && (
           <div className="mb-3">
             <DocViewButton doc={template} label={<span className="text-xs font-semibold text-emerald-700">📄 정산 양식 보기 ↗</span>} />
@@ -115,13 +112,13 @@ function BudgetInner({ data }: { data: Data }) {
                 />
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <Info label="최초계획 합계" value={`${won(tot.plan)}천원`} />
-                  <Info label="최종변경 합계" value={`${won(tot.final)}천원`} />
-                  <Info label="집행 합계(공급가)" value={`${won(totExecK)}천원`} />
-                  <Info label="잔액 (집행율)" value={`${won(tot.final - totExecK)}천원${tot.final ? ` (${((totExecK / tot.final) * 100).toFixed(0)}%)` : ""}`} />
+                  <Info label="최초계획 합계" value={`${won(tot.plan)}원`} />
+                  <Info label="최종변경 합계" value={`${won(tot.final)}원`} />
+                  <Info label="집행 합계(공급가)" value={`${won(tot.exec)}원`} />
+                  <Info label="잔액 (집행율)" value={`${won(tot.final - tot.exec)}원${tot.final ? ` (${((tot.exec / tot.final) * 100).toFixed(0)}%)` : ""}`} />
                 </div>
 
-                {/* 선택 비목 사용내역 (원 단위) */}
+                {/* 선택 비목 사용내역 */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   {selCat ? (
                     <>
@@ -132,7 +129,7 @@ function BudgetInner({ data }: { data: Data }) {
                         requiredKey="desc" addLabel="사용내역 추가" entityLabel="사용내역"
                         emptyMessage="사용내역이 없습니다. '사용내역 추가'로 집행 내역(집행일·적요·공급가·부가세)을 기록하세요."
                       />
-                      <p className="mt-2 text-[11px] text-slate-400">※ 금액은 원 단위. 부가세는 집행액(비목)에서 제외되고 공급가만 반영됩니다.</p>
+                      <p className="mt-2 text-[11px] text-slate-400">※ 부가세는 집행액(비목)에서 제외되고 공급가만 반영됩니다.</p>
                     </>
                   ) : (
                     <p className="text-xs text-slate-400">위 표에서 <b className="text-slate-600">비목을 클릭</b>하면 해당 비목의 사용내역을 입력할 수 있습니다.</p>
