@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-19T23:27:45.725Z",
+ "fetchedAt": "2026-08-20T23:30:53.019Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -76,28 +76,6 @@
    "applyEnd": "2026-08-14",
    "announcedAt": "2026-06-30",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02871&buclCd=S9161&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "「2026년도 장성군 시군구연고산업육성사업」 장성군 스마트기계전자산업 활성화 지원사업 참여기업 모집 3차 공고",
-   "category": "비R&D",
-   "summary": "ㅇ (사업목적) 장성군 연고산업을 영위하는 중소기업 육성 및 일자리 창출 지원을 통해 지방소멸 대응 및 지역 경제 활력 제고 ㅇ (사업내용) 장성군 연고산업 분야 중소기업의 사업모델 발굴, 기술사업화를 위한 맞춤형 패키지 지원을 통해 지역 중소기업 경쟁력 강화",
-   "applyStart": "2026-07-27",
-   "applyEnd": "2026-08-19",
-   "announcedAt": "2026-07-27",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1114"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "「2026년도 화순군 시군구연고산업육성사업」 화순군 바이오산업 활성화 지원사업 참여기업 모집 3차 공고",
-   "category": "비R&D",
-   "summary": "ㅇ (사업목적) 지역 연고산업을 영위하는 중소기업 육성 및 일자리 창출 지원을 통해 지방소멸 대응 및 지역 경제 활력 제고 ㅇ (사업내용) 화순군 연고산업 분야 중소기업의 사업모델 발굴, 사업화, 생산성 향상 등 맞춤형 지원을 통해 지역 중소기업 경쟁력 강화",
-   "applyStart": "2026-07-27",
-   "applyEnd": "2026-08-19",
-   "announcedAt": "2026-07-27",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1116"
   },
   {
    "source": "JNTP",
