@@ -36,7 +36,7 @@ function BudgetInner({ data }: { data: Data }) {
   const todayUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
 
   const usageSum = (cat: string) =>
-    data.budgetUsages.filter((u) => u.code === p?.code && u.category === cat).reduce((s, u) => s + (u.amountKWon ?? 0), 0);
+    data.budgetUsages.filter((u) => u.code === p?.code && u.category === cat).reduce((s, u) => s + (u.amountKWon ?? 0) + (u.vatKWon ?? 0), 0);
 
   const items = p ? data.budgetItems.filter((b) => b.code === p.code) : [];
   const tot = items.reduce(
@@ -63,10 +63,11 @@ function BudgetInner({ data }: { data: Data }) {
   const USAGE_COLS: Col<BudgetUsage>[] = [
     { key: "usedAt", label: "집행일", type: "date", nowrap: true },
     { key: "desc", label: "적요(사용내역)", span: true },
-    { key: "amountKWon", label: "금액(천원)", type: "number", align: "center", th: "금액", nowrap: true, view: (u) => won(u.amountKWon) },
-    { key: "note", label: "비고", span: true, hide: true },
+    { key: "amountKWon", label: "공급가(천원)", type: "number", align: "center", th: "공급가", nowrap: true, view: (u) => won(u.amountKWon) },
+    { key: "vatKWon", label: "부가세(천원)", type: "number", align: "center", th: "부가세", nowrap: true, view: (u) => won(u.vatKWon) },
+    { key: "note", label: "합계", th: "합계", align: "center", nowrap: true, editable: false, view: (u) => <span className="font-semibold">{won((u.amountKWon ?? 0) + (u.vatKWon ?? 0))}</span> },
   ];
-  const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, "금액(천원)": u.amountKWon, 비고: u.note });
+  const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, "금액(천원)": u.amountKWon, "부가세(천원)": u.vatKWon, 비고: u.note });
 
   return (
     <div className="space-y-5">
@@ -121,7 +122,7 @@ function BudgetInner({ data }: { data: Data }) {
                       <p className="mb-2 text-sm font-semibold text-slate-700">📋 &lt;{selCat}&gt; 사용내역 — 합계 {won(usageSum(selCat))}천원</p>
                       <EditableTable
                         rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === selCat} cols={USAGE_COLS}
-                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, amountKWon: null, note: null }}
+                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, amountKWon: null, vatKWon: null, note: null }}
                         requiredKey="desc" addLabel="사용내역 추가" entityLabel="사용내역"
                         emptyMessage="사용내역이 없습니다. '사용내역 추가'로 집행 내역(집행일·적요·금액)을 기록하세요."
                       />
