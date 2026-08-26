@@ -155,7 +155,7 @@ function EditModal<T extends Record<string, unknown>>({
   const valid = String(r[requiredKey] ?? "").trim().length > 0;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" onClick={onClose} role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true">
       <div className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-2xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4">
           <h3 className="text-base font-bold tracking-tight text-slate-800">{entityLabel} {isNew ? "추가" : "수정"}</h3>

@@ -92,7 +92,7 @@ export default function DocViewButton({ doc, label }: { doc: DocRef | null; labe
       {isOpen && (
         <div
           className="fixed inset-0 z-[100] flex flex-col bg-black/70 p-3 sm:p-6"
-          onClick={close}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}
           role="dialog"
           aria-modal="true"
         >
