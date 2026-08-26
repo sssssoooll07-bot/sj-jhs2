@@ -7,8 +7,14 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import DocViewButton from "@/components/DocViewButton";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import { fmtKWon, fmtDate, type Data, type BudgetItem, type BudgetUsage } from "@/lib/excel";
+import * as XLSX from "xlsx";
 
 const won = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString("ko-KR"));
+
+// 사업별 지출부 양식의 집행내역 셀 매핑 (다운로드 시 채울 위치)
+const LEDGER_MAP: Record<string, { start: number; date: string; amt: string; desc: string; payee: string; vat: string; cols: Record<string, string> }> = {
+  "P2026-03": { start: 14, date: "B", amt: "C", desc: "E", payee: "F", vat: "K", cols: { "위원수당": "G", "자문수당": "H", "원고료": "I", "회의비": "J", "교통비": "L" } },
+};
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
@@ -20,7 +26,7 @@ function Info({ label, value }: { label: string; value: string }) {
 }
 
 function BudgetInner({ data }: { data: Data }) {
-  const { list, refresh } = useAgreementFiles();
+  const { list, refresh, getViewUrl } = useAgreementFiles();
   const active = data.projects.filter((p) => p.status === "진행중");
   const [sel, setSel] = useState(0);
   const [selCat, setSelCat] = useState<string | null>(null);
@@ -31,6 +37,36 @@ function BudgetInner({ data }: { data: Data }) {
   useEffect(() => { setSelCat(null); }, [idx]);
 
   const template = useMemo(() => list("budget").find((d) => /양식|서식|템플릿/.test(d.name)), [list]);
+  const ledgerTmpl = useMemo(() => (p ? list("budget").find((d) => d.name.includes("지출부") && d.name.includes(p.code)) : undefined), [list, p]);
+
+  async function downloadLedger() {
+    if (!p || !ledgerTmpl) return;
+    const map = LEDGER_MAP[p.code];
+    if (!map) { alert("이 사업의 지출부 양식 셀 매핑이 아직 없습니다."); return; }
+    const url = await getViewUrl(ledgerTmpl);
+    const buf = await (await fetch(url)).arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array", cellStyles: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const put = (addr: string, cell: XLSX.CellObject) => { ws[addr] = { ...(ws[addr] as object), ...cell }; };
+    data.budgetUsages.filter((u) => u.code === p.code).forEach((u, i) => {
+      const row = map.start + i;
+      put(`A${row}`, { t: "n", v: i + 1 });
+      put(`${map.date}${row}`, { t: "s", v: dateStr(u.usedAt) ?? "" });
+      put(`${map.amt}${row}`, { t: "n", v: (u.amountKWon ?? 0) + (u.vatKWon ?? 0) });
+      put(`${map.desc}${row}`, { t: "s", v: u.desc ?? "" });
+      put(`${map.payee}${row}`, { t: "s", v: u.note ?? "" });
+      const col = map.cols[u.category];
+      if (col) put(`${col}${row}`, { t: "n", v: u.amountKWon ?? 0 });
+      if (u.vatKWon) put(`${map.vat}${row}`, { t: "n", v: u.vatKWon });
+    });
+    const out = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+    const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `지출부_${p.title}.xlsx`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
 
   const now = new Date();
   const todayUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
@@ -79,11 +115,14 @@ function BudgetInner({ data }: { data: Data }) {
   return (
     <div className="space-y-5">
       <Section title="💰 사업비 현황" sub="단위: 원 · 비목을 클릭하면 사용내역을 입력할 수 있습니다. 부가세는 집행액에서 제외되고 공급가만 집행에 반영됩니다.">
-        {template && (
-          <div className="mb-3">
-            <DocViewButton doc={template} label={<span className="text-xs font-semibold text-emerald-700">📄 정산 양식 보기 ↗</span>} />
-          </div>
-        )}
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          {template && <DocViewButton doc={template} label={<span className="text-xs font-semibold text-emerald-700">📄 정산 양식 보기 ↗</span>} />}
+          {p && ledgerTmpl && LEDGER_MAP[p.code] && (
+            <button onClick={downloadLedger} className="rounded-md bg-emerald-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-emerald-700">
+              📥 지출부 양식으로 다운로드
+            </button>
+          )}
+        </div>
 
         {active.length === 0 ? (
           <p className="text-sm text-slate-400">진행중인 사업이 없습니다.</p>
