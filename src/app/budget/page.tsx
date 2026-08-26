@@ -7,7 +7,6 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import DocViewButton from "@/components/DocViewButton";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import { fmtKWon, fmtDate, type Data, type BudgetItem, type BudgetUsage } from "@/lib/excel";
-import * as XLSX from "xlsx";
 
 const won = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString("ko-KR"));
 
@@ -43,23 +42,24 @@ function BudgetInner({ data }: { data: Data }) {
     if (!p || !ledgerTmpl) return;
     const map = LEDGER_MAP[p.code];
     if (!map) { alert("이 사업의 지출부 양식 셀 매핑이 아직 없습니다."); return; }
+    const ExcelJS = (await import("exceljs")).default;
     const url = await getViewUrl(ledgerTmpl);
     const buf = await (await fetch(url)).arrayBuffer();
-    const wb = XLSX.read(buf, { type: "array", cellStyles: true });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const put = (addr: string, cell: XLSX.CellObject) => { ws[addr] = { ...(ws[addr] as object), ...cell }; };
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buf);
+    const ws = wb.worksheets[0];
     data.budgetUsages.filter((u) => u.code === p.code).forEach((u, i) => {
       const row = map.start + i;
-      put(`A${row}`, { t: "n", v: i + 1 });
-      put(`${map.date}${row}`, { t: "s", v: dateStr(u.usedAt) ?? "" });
-      put(`${map.amt}${row}`, { t: "n", v: (u.amountKWon ?? 0) + (u.vatKWon ?? 0) });
-      put(`${map.desc}${row}`, { t: "s", v: u.desc ?? "" });
-      put(`${map.payee}${row}`, { t: "s", v: u.note ?? "" });
+      ws.getCell(`A${row}`).value = i + 1;
+      ws.getCell(`${map.date}${row}`).value = dateStr(u.usedAt) ?? "";
+      ws.getCell(`${map.amt}${row}`).value = (u.amountKWon ?? 0) + (u.vatKWon ?? 0);
+      ws.getCell(`${map.desc}${row}`).value = u.desc ?? "";
+      ws.getCell(`${map.payee}${row}`).value = u.note ?? "";
       const col = map.cols[u.category];
-      if (col) put(`${col}${row}`, { t: "n", v: u.amountKWon ?? 0 });
-      if (u.vatKWon) put(`${map.vat}${row}`, { t: "n", v: u.vatKWon });
+      if (col) ws.getCell(`${col}${row}`).value = u.amountKWon ?? 0;
+      if (u.vatKWon) ws.getCell(`${map.vat}${row}`).value = u.vatKWon;
     });
-    const out = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+    const out = await wb.xlsx.writeBuffer();
     const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
