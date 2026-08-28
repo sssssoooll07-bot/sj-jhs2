@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-27T04:26:49.692Z",
+ "fetchedAt": "2026-08-28T06:50:05.638Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -100,6 +100,17 @@
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1105"
   },
   {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026 기술닥터제 컨설팅 참여기업 모집 공고",
+   "category": "비R&D",
+   "summary": "전남지역 기업이 당면한 애로기술, 사업화 지원, 역량강화 등의 애로사항 해결을 위하여 지역사업 전문가 매칭(전국단위 기술닥터 pool) 을 활용한 기술닥터 컨설팅 지원",
+   "applyStart": "2026-05-01",
+   "applyEnd": "2026-08-31",
+   "announcedAt": "2026-04-30",
+   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1032"
+  },
+  {
    "source": "SMTECH",
    "agency": "SMTECH",
    "title": "2026년 중소기업 연구인력지원사업(파견) 8월 공고",
@@ -131,17 +142,6 @@
    "applyEnd": "2026-09-30",
    "announcedAt": "2026-06-15",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1079"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026 기술닥터제 컨설팅 참여기업 모집 공고",
-   "category": "비R&D",
-   "summary": "전남지역 기업이 당면한 애로기술, 사업화 지원, 역량강화 등의 애로사항 해결을 위하여 지역사업 전문가 매칭(전국단위 기술닥터 pool) 을 활용한 기술닥터 컨설팅 지원",
-   "applyStart": "2026-05-01",
-   "applyEnd": "2026-09-30",
-   "announcedAt": "2026-04-30",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1032"
   },
   {
    "source": "JNTP",
