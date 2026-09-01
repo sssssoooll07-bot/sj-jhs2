@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-08-31T01:16:59.876Z",
+ "fetchedAt": "2026-09-01T01:44:49.114Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -9,6 +9,9 @@
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
+ ],
+ "errors": [
+  "JNTP: fetch failed"
  ],
  "items": [
   {
@@ -142,6 +145,17 @@
    "applyEnd": "2026-09-30",
    "announcedAt": "2026-06-15",
    "url": "https://data.jntp.or.kr/jntp/content/business/announcement/view.jsp?announcement=1079"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년 중소기업 연구인력지원사업(파견) 9월 공고",
+   "category": "공공연연구인력파견지원(참여기업접수용)",
+   "summary": null,
+   "applyStart": "2026-09-01",
+   "applyEnd": "2026-09-30",
+   "announcedAt": "2026-09-01",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=8&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
