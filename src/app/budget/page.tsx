@@ -7,7 +7,6 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import DocViewButton from "@/components/DocViewButton";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import { fmtKWon, fmtDate, type Data, type BudgetItem, type BudgetUsage } from "@/lib/excel";
-import * as XLSX from "xlsx";
 
 const won = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString("ko-KR"));
 
@@ -30,7 +29,6 @@ function BudgetInner({ data }: { data: Data }) {
   const active = data.projects.filter((p) => p.status === "진행중");
   const [sel, setSel] = useState(0);
   const [selCat, setSelCat] = useState<string | null>(null);
-  const [ledgerHtml, setLedgerHtml] = useState<string | null>(null);
   const idx = Math.min(sel, Math.max(active.length - 1, 0));
   const p = active[idx];
 
@@ -70,17 +68,6 @@ function BudgetInner({ data }: { data: Data }) {
     a.download = `지출부_${p.title}.xlsx`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  }
-  async function previewLedger() {
-    if (!p || !ledgerTmpl || !LEDGER_MAP[p.code]) return;
-    try {
-      const out = await buildLedgerBuffer();
-      const wb = XLSX.read(out, { type: "array" });
-      const html = wb.SheetNames.map((n) => `<h4 class="xl-sheet">${n}</h4>` + XLSX.utils.sheet_to_html(wb.Sheets[n])).join("");
-      setLedgerHtml(html || "<p class='text-slate-400'>표시할 내용이 없습니다.</p>");
-    } catch (e) {
-      alert("미리보기 실패: " + (e instanceof Error ? e.message : String(e)));
-    }
   }
 
   const now = new Date();
@@ -133,14 +120,9 @@ function BudgetInner({ data }: { data: Data }) {
         <div className="mb-3 flex flex-wrap items-center gap-2">
           {template && <DocViewButton doc={template} label={<span className="text-xs font-semibold text-emerald-700">📄 정산 양식 보기 ↗</span>} />}
           {p && ledgerTmpl && LEDGER_MAP[p.code] && (
-            <>
-              <button onClick={previewLedger} className="rounded-md border border-emerald-300 px-2.5 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-50">
-                👁 지출부 미리보기
-              </button>
-              <button onClick={downloadLedger} className="rounded-md bg-emerald-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-emerald-700">
-                📥 지출부 다운로드
-              </button>
-            </>
+            <button onClick={downloadLedger} className="rounded-md bg-emerald-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-emerald-700">
+              📥 지출부 다운로드
+            </button>
           )}
         </div>
 
@@ -204,18 +186,6 @@ function BudgetInner({ data }: { data: Data }) {
         )}
       </Section>
 
-      {ledgerHtml && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-black/70 p-3 sm:p-6" onMouseDown={(e) => { if (e.target === e.currentTarget) setLedgerHtml(null); }} role="dialog" aria-modal="true">
-          <div className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-            <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-2.5">
-              <p className="text-sm font-medium text-slate-800">📄 지출부 미리보기 — {p?.title}</p>
-              <button onClick={downloadLedger} className="ml-auto rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">⬇ 다운로드</button>
-              <button onClick={() => setLedgerHtml(null)} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">닫기 ✕</button>
-            </div>
-            <div className="flex-1 overflow-auto bg-white p-4 text-xs [&_h4.xl-sheet]:mb-1 [&_h4.xl-sheet]:mt-3 [&_h4.xl-sheet]:font-semibold [&_h4.xl-sheet]:text-slate-500 [&_table]:border-collapse [&_td]:border [&_td]:border-slate-200 [&_td]:px-2 [&_td]:py-1 [&_td]:whitespace-nowrap" dangerouslySetInnerHTML={{ __html: ledgerHtml }} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
