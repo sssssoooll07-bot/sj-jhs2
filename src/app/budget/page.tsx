@@ -7,6 +7,7 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import DocViewButton from "@/components/DocViewButton";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import { fmtKWon, fmtDate, type Data, type BudgetItem, type BudgetUsage } from "@/lib/excel";
+import * as XLSX from "xlsx";
 
 const won = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString("ko-KR"));
 
@@ -72,11 +73,14 @@ function BudgetInner({ data }: { data: Data }) {
   }
   async function previewLedger() {
     if (!p || !ledgerTmpl || !LEDGER_MAP[p.code]) return;
-    const out = await buildLedgerBuffer();
-    const XLSX = await import("xlsx");
-    const wb = XLSX.read(out, { type: "array" });
-    const html = wb.SheetNames.map((n) => `<h4 class="xl-sheet">${n}</h4>` + XLSX.utils.sheet_to_html(wb.Sheets[n])).join("");
-    setLedgerHtml(html);
+    try {
+      const out = await buildLedgerBuffer();
+      const wb = XLSX.read(out, { type: "array" });
+      const html = wb.SheetNames.map((n) => `<h4 class="xl-sheet">${n}</h4>` + XLSX.utils.sheet_to_html(wb.Sheets[n])).join("");
+      setLedgerHtml(html || "<p class='text-slate-400'>표시할 내용이 없습니다.</p>");
+    } catch (e) {
+      alert("미리보기 실패: " + (e instanceof Error ? e.message : String(e)));
+    }
   }
 
   const now = new Date();
