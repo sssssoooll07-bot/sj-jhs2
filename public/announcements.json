@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-02T00:55:50.322Z",
+ "fetchedAt": "2026-09-03T01:01:54.934Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -17,17 +17,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년 테크노파크 생산장비 고도화 제2차 지원계획 선정기관 과제접수 공고",
-   "category": "산업기술단지거점기능강화",
-   "summary": null,
-   "applyStart": "2026-07-08",
-   "applyEnd": "2026-07-28",
-   "announcedAt": "2026-07-07",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02866&buclCd=S8012&dtlAncmSn=1&schdSe=MO5005&aplySn=2&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년 중소기업 연구인력지원사업(파견) 7월 공고",
    "category": "공공연연구인력파견지원(참여기업접수용)",
    "summary": null,
@@ -39,17 +28,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-06-26",
-   "applyEnd": "2026-07-31",
-   "announcedAt": "2026-06-26",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
    "category": "중소벤처기업부 혁신제품 지정 연장사업",
    "summary": null,
@@ -57,6 +35,17 @@
    "applyEnd": "2026-07-31",
    "announcedAt": "2026-06-26",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-06-26",
+   "applyEnd": "2026-07-31",
+   "announcedAt": "2026-06-26",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "SMTECH",
@@ -134,6 +123,17 @@
    "applyEnd": "2026-09-03",
    "announcedAt": "2026-07-10",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02874&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년 제6차 중소기업 R&D 전담은행 투자지원 추천기업(방산 및 전략기술) 모집 공고",
+   "category": "전담은행 투자설명회(IR)",
+   "summary": null,
+   "applyStart": "2026-09-03",
+   "applyEnd": "2026-09-28",
+   "announcedAt": "2026-09-03",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02877&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
