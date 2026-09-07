@@ -1,11 +1,47 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { collectDeadlines, participationTotals, daysUntil, fmtKWon, fmtDate } from "@/lib/excel";
-import { Badge, Dday, Empty, Section, StatusBadge } from "@/components/ui";
+import { Badge, Dday, Empty, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 
+type FeedItem = {
+  source: string; agency: string; title: string; category: string | null; summary: string | null;
+  applyStart: string | null; applyEnd: string | null; announcedAt: string | null; url: string;
+};
+
+// 여수(본사)와 무관한 전남 내 다른 시·군 한정 공고는 제외 (AutoAnnouncements와 동일 기준)
+const OTHER_CITIES = [
+  "광양", "순천", "나주", "목포", "장성", "곡성", "구례", "고흥", "보성", "화순",
+  "장흥", "강진", "해남", "영암", "무안", "함평", "영광", "완도", "진도", "신안", "담양", "광주",
+];
+function feedRelevant(i: FeedItem): boolean {
+  const t = `${i.title} ${i.category ?? ""} ${i.summary ?? ""}`;
+  if (t.includes("여수")) return true;
+  if (OTHER_CITIES.some((c) => t.includes(c))) return false;
+  return true;
+}
+
 export default function Dashboard() {
+  // /funding 과 동일한 자동수집 피드를 읽어 '접수중' 공고를 대시보드에도 표시
+  const [feed, setFeed] = useState<FeedItem[] | null>(null);
+  useEffect(() => {
+    fetch("/announcements.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((d) => setFeed(d.items ?? []))
+      .catch(() => setFeed([]));
+  }, []);
+
+  const accepting = (feed ?? [])
+    .filter((i) => {
+      if (!feedRelevant(i)) return false;
+      if (i.applyEnd) { const d = daysUntil(new Date(i.applyEnd + "T00:00:00Z")); return d >= 0 && d <= 100; }
+      if (i.announcedAt) { const d = daysUntil(new Date(i.announcedAt + "T00:00:00Z")); return d >= -30 && d <= 0; }
+      return false;
+    })
+    .sort((a, b) => (a.applyEnd ?? "9999").localeCompare(b.applyEnd ?? "9999")); // 마감 임박순
+
   return (
     <WithData>
       {(data) => {
@@ -15,20 +51,16 @@ export default function Dashboard() {
         const registered = data.patents.filter((p) => p.status === "등록완료").length;
         const filed = data.patents.filter((p) => p.status === "출원완료").length;
         const renewable = data.certifications.filter((c) => c.renewable).length;
-        const fundingActive = data.funding.filter((f) => ["관심", "검토중", "신청준비", "신청완료"].includes(f.status)).length;
         const activeResearchers = data.researchers.filter((r) => r.active).length;
         const totals = participationTotals(data);
         const over = totals.filter((t) => t.total > 100);
         const projDeadlines = collectDeadlines(data, 90);
-        const fundingList = [...data.funding]
-          .filter((f) => !f.applyDue || daysUntil(f.applyDue) >= 0) // 마감 지난(D-day 경과) 공고 제외
-          .sort((a, b) => +(a.applyDue ?? Infinity) - +(b.applyDue ?? Infinity)); // 마감 임박순
 
         const cards = [
           { href: "/projects", label: "과제", value: `${data.projects.length}건`, sub: `진행중 ${active.length} · R&D ${rnd} / 비R&D ${biz}` },
           { href: "/patents", label: "특허", value: `${data.patents.length}건`, sub: `등록 ${registered} · 출원 ${filed}` },
           { href: "/certifications", label: "인증·면허", value: `${data.certifications.length}건`, sub: `갱신대상 ${renewable}건` },
-          { href: "/funding", label: "지원사업 공고", value: `${data.funding.length}건`, sub: `신청관리 ${fundingActive}건` },
+          { href: "/funding", label: "지원사업 공고", value: feed === null ? "…" : `접수중 ${accepting.length}건`, sub: "매일 08:00 자동 수집" },
           { href: "/compliance", label: "참여율", value: `${data.participations.length}건`, sub: `참여율 초과 ${over.length}명` },
           { href: "/researchers", label: "연구원", value: `${activeResearchers}명`, sub: `전체 ${data.researchers.length}명 (재직 기준)` },
         ];
@@ -108,30 +140,43 @@ export default function Dashboard() {
                 )}
               </Section>
 
-              {/* 지원사업 공고 */}
-              <Section title={`📢 지원사업 공고 — ${fundingList.length}건`} sub="마감 임박순 미리보기 · 마감 지난 공고 제외">
-                {fundingList.length === 0 ? (
-                  <Empty message="등록된 공고가 없습니다. 지원사업 공고 탭에서 추가하세요." />
+              {/* 지원사업 공고 (자동 수집 · 접수중) — 헤더/행 클릭으로 이동 */}
+              <section className="card p-5 sm:p-6">
+                <Link href="/funding" className="group mb-4 flex items-start gap-2.5">
+                  <span className="mt-1 h-4 w-1 shrink-0 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500" />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-base font-bold tracking-tight text-slate-800 group-hover:text-blue-700">
+                      📢 지원사업 공고 — 접수중 {feed === null ? "…" : `${accepting.length}건`}{" "}
+                      <span className="text-sm font-normal text-blue-600 group-hover:underline">전체보기 ↗</span>
+                    </h2>
+                    <p className="mt-0.5 text-xs leading-relaxed text-slate-400">전남 전체·여수 · 마감 임박순 · 매일 08:00 자동 수집</p>
+                  </div>
+                </Link>
+                {feed === null ? (
+                  <p className="py-6 text-center text-sm text-slate-400">불러오는 중…</p>
+                ) : accepting.length === 0 ? (
+                  <Empty message="현재 접수중인(전남 전체·여수) 공고가 없습니다." />
                 ) : (
                   <ul className="divide-y divide-slate-100">
-                    {fundingList.slice(0, 6).map((f, i) => {
-                      const isActive = ["관심", "검토중", "신청준비"].includes(f.status);
-                      return (
-                        <li key={i}>
-                          <Link href="/funding" className="flex items-center gap-3 py-2 hover:bg-slate-50">
-                            {f.applyDue && isActive ? <Dday days={daysUntil(f.applyDue)} /> : <StatusBadge status={f.status} />}
-                            <span className="min-w-0 flex-1 truncate text-sm">
-                              <span className="font-medium">{f.title}</span> <span className="text-xs text-slate-400">· {f.agency}</span>
-                            </span>
-                            <span className="whitespace-nowrap text-xs text-slate-400">{f.applyDue ? fmtDate(f.applyDue) : "—"}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                    {fundingList.length > 6 && <li className="pt-2 text-center text-xs text-slate-400">외 {fundingList.length - 6}건</li>}
+                    {accepting.slice(0, 6).map((f, i) => (
+                      <li key={i}>
+                        <a href={f.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 py-2 hover:bg-slate-50">
+                          {f.applyEnd ? <Dday days={daysUntil(new Date(f.applyEnd + "T00:00:00Z"))} /> : <span className="text-xs text-slate-400">—</span>}
+                          <span className="min-w-0 flex-1 truncate text-sm">
+                            <span className="font-medium">{f.title}</span> <span className="text-xs text-slate-400">· {f.agency}</span>
+                          </span>
+                          <span className="whitespace-nowrap text-xs text-slate-400">{f.applyEnd ?? "—"}</span>
+                        </a>
+                      </li>
+                    ))}
+                    {accepting.length > 6 && (
+                      <li className="pt-2 text-center text-xs">
+                        <Link href="/funding" className="text-blue-600 hover:underline">외 {accepting.length - 6}건 전체보기 →</Link>
+                      </li>
+                    )}
                   </ul>
                 )}
-              </Section>
+              </section>
             </div>
           </div>
         );
