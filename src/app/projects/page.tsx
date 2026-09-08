@@ -99,6 +99,23 @@ function PlanBox({ p }: { p: Project }) {
   );
 }
 
+/** 연구노트 최종본 PDF 1건 (R&D 과제 상세용) */
+function NoteBox({ p }: { p: Project }) {
+  const { getByPattern, loadFolder, uploading } = useAgreementFiles();
+  const noteRef = useRef<HTMLInputElement>(null);
+  const doc = getByPattern(p.code, "researchnote");
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+      <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">연구노트(최종본):</span> {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF)."}</p>
+      <button onClick={() => noteRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-indigo-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+        {uploading ? "업로드 중…" : "연구노트 업로드"}
+      </button>
+      <input ref={noteRef} type="file" accept=".pdf" multiple className="hidden"
+        onChange={(e) => e.target.files && loadFolder(e.target.files, "researchnote")} />
+    </div>
+  );
+}
+
 /** 과제별 협약서 — 정보 추가(추가 전용) + 파일 업로드·연결 보기 */
 function AgreementBox({ p, list }: { p: Project; list: Agreement[] }) {
   const { getByName } = useAgreementFiles();
@@ -133,11 +150,17 @@ function Info({ label, value, mono }: { label: string; value: string | null; mon
 /** 과제 상세 — 상단 요약 + 전용통장/사업계획서/협약서 탭 */
 function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: () => void }) {
   const { refresh } = useAgreementFiles();
-  const [tab, setTab] = useState<"account" | "plan" | "agreement">("agreement");
-  // 과제 상세 진입 시 협약서·사업계획서·통장 목록을 새로 읽는다(업로드 직후 재로그인 없이 반영)
+  const [tab, setTab] = useState<"account" | "plan" | "agreement" | "note">("agreement");
+  // 과제 상세 진입 시 협약서·사업계획서·통장·연구노트 목록을 새로 읽는다(업로드 직후 재로그인 없이 반영)
   useEffect(() => { void refresh(); }, [refresh]);
 
-  const TABS: [typeof tab, string][] = [["agreement", "📜 협약서"], ["plan", "📑 사업계획서"], ["account", "💳 전용통장"]];
+  const isRnd = p.type === "연구과제";
+  const TABS: [typeof tab, string][] = [
+    ["agreement", "📜 협약서"],
+    ["plan", "📑 사업계획서"],
+    ...(isRnd ? ([["note", "🔬 연구노트"]] as [typeof tab, string][]) : []),
+    ["account", "💳 전용통장"],
+  ];
 
   return (
     <div className="space-y-4">
@@ -172,6 +195,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
         <div className="mt-4">
           {tab === "account" && <AccountBox p={p} />}
           {tab === "plan" && <PlanBox p={p} />}
+          {tab === "note" && <NoteBox p={p} />}
           {tab === "agreement" && <AgreementBox p={p} list={data.agreements} />}
         </div>
       </div>

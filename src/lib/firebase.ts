@@ -49,3 +49,5 @@ export const BUSINESSPLAN_PREFIX = "businessplans";
 export const REFDOC_PREFIX = "refdocs";
 /** 사업비 정산 양식·파일이 저장되는 Storage 폴더 */
 export const BUDGET_PREFIX = "budgets";
+/** 연구노트(원본·최종본 스캔) 저장 폴더 */
+export const RESEARCHNOTE_PREFIX = "researchnotes";
