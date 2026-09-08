@@ -230,7 +230,7 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
 
   const vendors: Vendor[] = rows("거래처")
     .filter((r) => s(r["거래처명"]))
-    .map((r) => ({ name: s(r["거래처명"])!, bizNo: s(r["사업자등록번호"]), ceo: s(r["대표자"]), note: s(r["비고"]) }));
+    .map((r) => ({ name: s(r["거래처명"])!, bizNo: s(r["사업자등록번호"]), ceo: s(r["대표자"]), note: s(r["주소"]) ?? s(r["비고"]) }));
 
   const events: ScheduleEvent[] = rows("일정")
     .filter((r) => s(r["내용"]))
