@@ -165,7 +165,7 @@ export default function Dashboard() {
                           <span className="min-w-0 flex-1 truncate text-sm">
                             <span className="font-medium">{f.title}</span> <span className="text-xs text-slate-400">· {f.agency}</span>
                           </span>
-                          <span className="whitespace-nowrap text-xs text-slate-400">{f.applyEnd ?? "—"}</span>
+                          <span className="whitespace-nowrap text-xs text-slate-400">{f.applyEnd ?? (f.announcedAt ? `게시 ${f.announcedAt}` : "—")}</span>
                         </a>
                       </li>
                     ))}

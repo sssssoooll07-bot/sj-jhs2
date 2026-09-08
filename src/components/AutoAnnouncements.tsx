@@ -47,7 +47,13 @@ function SourceTable({ items, tone }: { items: Item[]; tone: "blue" | "violet" }
                 </a>
               </td>
               <td className="max-w-52 text-xs">{i.category ? <Badge tone={tone}>{i.category}</Badge> : "—"}</td>
-              <td className="whitespace-nowrap text-xs">{i.applyStart ?? "—"} ~ {i.applyEnd ?? "—"}</td>
+              <td className="whitespace-nowrap text-xs">
+                {i.applyStart || i.applyEnd
+                  ? `${i.applyStart ?? "—"} ~ ${i.applyEnd ?? "—"}`
+                  : i.announcedAt
+                    ? <span className="text-slate-400">게시 {i.announcedAt} · 마감은 공고문 확인</span>
+                    : "—"}
+              </td>
             </tr>
           ))}
         </tbody>
