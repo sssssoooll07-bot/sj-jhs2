@@ -59,7 +59,7 @@ export default function DashboardCalendar({ data }: { data: Data }) {
   const todayKey = keyOf(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())));
 
   const upcoming = useMemo(
-    () => events.filter((e) => e.date && daysUntil(e.date) >= 0).sort((a, b) => +(a.date ?? 0) - +(b.date ?? 0)),
+    () => events.filter((e) => e.date && daysUntil(e.date) >= 0 && daysUntil(e.date) <= 14).sort((a, b) => +(a.date ?? 0) - +(b.date ?? 0)),
     [events],
   );
 
@@ -152,9 +152,9 @@ export default function DashboardCalendar({ data }: { data: Data }) {
 
         {/* 다가오는 일정 (1/3) */}
         <div className="lg:col-span-1">
-          <p className="mb-1.5 text-xs font-semibold text-slate-500">다가오는 일정</p>
+          <p className="mb-1.5 text-xs font-semibold text-slate-500">다가오는 일정 <span className="font-normal text-slate-400">(D-14 이내)</span></p>
           {upcoming.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50/60 py-6 text-center text-xs text-slate-400">등록된 일정이 없습니다.<br />달력에서 날짜를 눌러 추가하세요.</p>
+            <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50/60 py-6 text-center text-xs text-slate-400">2주 내 예정된 일정이 없습니다.<br />달력에서 날짜를 눌러 추가하세요.</p>
           ) : (
             <ul className="max-h-[360px] divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-100">
               {upcoming.map((e, i) => (
