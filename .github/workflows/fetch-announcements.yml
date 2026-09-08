@@ -41,14 +41,15 @@ jobs:
           git push
 
       # ── Firebase Hosting에도 자동 반영 (Vercel과 별개로 web.app 사이트 갱신) ──
+      # 예약 실행: 변경분이 있을 때만. 수동 실행(Run workflow): 항상 배포(테스트·온디맨드 갱신용).
       - name: 의존성 설치 & 정적 빌드
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.diff.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           npm ci
           npm run build
 
       - name: Firebase Hosting 배포
-        if: steps.diff.outputs.changed == 'true'
+        if: steps.diff.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
