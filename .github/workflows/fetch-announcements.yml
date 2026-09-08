@@ -59,5 +59,8 @@ jobs:
           fi
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          # 시크릿(서비스계정 JSON) 유효성 검사 — 잘못 붙여넣었으면 여기서 명확히 실패
+          node -e "const j=JSON.parse(require('fs').readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS,'utf8')); if(!j.private_key||!j.client_email) throw 0; console.log('서비스계정 OK:', j.client_email);" \
+            || { echo '::error::FIREBASE_SERVICE_ACCOUNT 시크릿이 올바른 서비스계정 JSON이 아닙니다. serviceAccountKey.json 전체 내용을 다시 등록하세요.'; exit 1; }
           npx --yes firebase-tools@15 deploy --only hosting --project sj-jhs-deploy1 --non-interactive
           rm -f "$RUNNER_TEMP/sa.json"
