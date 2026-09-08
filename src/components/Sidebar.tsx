@@ -27,11 +27,15 @@ export default function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-20 flex w-60 flex-col bg-slate-900 text-slate-300">
       <div className="px-5 py-5">
-        <Link href="/" className="block">
-          <span className="text-lg font-extrabold tracking-tight text-white">신정개발</span>
-          <span className="mt-0.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-400">
-            연구소 관리 시스템
-          </span>
+        <Link href="/" className="flex items-center gap-2.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-mark.png" alt="신정개발" className="h-9 w-auto shrink-0" />
+          <div className="min-w-0">
+            <span className="block text-lg font-extrabold tracking-tight text-white">신정개발</span>
+            <span className="mt-0.5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-400">
+              연구소 관리 시스템
+            </span>
+          </div>
         </Link>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-1">
