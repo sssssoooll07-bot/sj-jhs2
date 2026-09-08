@@ -49,6 +49,7 @@ export type Agreement = {
 };
 
 export type Vendor = { name: string; bizNo: string | null; ceo: string | null; note: string | null };
+export type ScheduleEvent = { date: Date | null; title: string; note: string | null };
 export type BudgetItem = { code: string; category: string; planKWon: number | null; finalKWon: number | null; execKWon: number | null; note: string | null };
 export type BudgetUsage = { code: string; category: string; usedAt: Date | null; desc: string | null; payee: string | null; amountKWon: number | null; vatKWon: number | null; grossKWon: number | null; note: string | null };
 export type Data = {
@@ -62,6 +63,7 @@ export type Data = {
   participants: Participant[];
   employees: Employee[];
   vendors: Vendor[];
+  events: ScheduleEvent[];
   loadedAt: string;
 };
 
@@ -230,7 +232,11 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
     .filter((r) => s(r["거래처명"]))
     .map((r) => ({ name: s(r["거래처명"])!, bizNo: s(r["사업자등록번호"]), ceo: s(r["대표자"]), note: s(r["비고"]) }));
 
-  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, participants, employees, vendors, loadedAt: new Date().toISOString() };
+  const events: ScheduleEvent[] = rows("일정")
+    .filter((r) => s(r["내용"]))
+    .map((r) => ({ date: dt(r["일자"]), title: s(r["내용"])!, note: s(r["비고"]) }));
+
+  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, participants, employees, vendors, events, loadedAt: new Date().toISOString() };
 }
 
 const DAY = 86_400_000;

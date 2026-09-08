@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { collectDeadlines, participationTotals, daysUntil, fmtKWon, fmtDate } from "@/lib/excel";
 import { Badge, Dday, Empty, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
+import DashboardCalendar from "@/components/DashboardCalendar";
 
 type FeedItem = {
   source: string; agency: string; title: string; category: string | null; summary: string | null;
@@ -77,6 +78,9 @@ export default function Dashboard() {
                 </Link>
               ))}
             </div>
+
+            {/* 일정 캘린더 (직접 입력) */}
+            <DashboardCalendar data={data} />
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               {/* 과제 마감 임박 (과제만) */}
