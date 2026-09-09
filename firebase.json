@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "sj-jhs-deploy1",
     "public": "out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "cleanUrls": true,
