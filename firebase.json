@@ -7,5 +7,6 @@
     "trailingSlash": true,
     "rewrites": [{ "source": "**", "destination": "/404.html" }]
   },
-  "storage": { "rules": "storage.rules" }
+  "storage": { "rules": "storage.rules" },
+  "firestore": { "rules": "firestore.rules" }
 }

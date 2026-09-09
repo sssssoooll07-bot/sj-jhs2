@@ -1,51 +1,36 @@
 rules_version = '2';
 
-// Firebase Storage 보안 규칙 — 허용된 계정만 접근.
-// 문서 폴더는 {allPaths=**}로 매칭해 목록(list) 조회도 허용한다.
+// Firebase Storage 보안 규칙
+// - 소유자(sssssoooll07): 읽기+쓰기(편집)
+// - 접근 관리(Firestore config/access.viewers)에 등록된 이메일: 읽기 전용
 service firebase.storage {
   match /b/{bucket}/o {
-    // 허용된 계정만 접근 (Google 로그인은 아무 계정이나 로그인되므로 이메일로 제한)
-    function allowed() {
-      return request.auth != null && request.auth.token.email in [
-        'sssssoooll07@gmail.com'
-      ];
+    function isOwner() {
+      return request.auth != null && request.auth.token.email == 'sssssoooll07@gmail.com';
     }
-    // 마스터 엑셀
+    // 접근 관리 페이지에서 등록한 보기 전용 계정 (Firestore config/access 문서)
+    function isViewer() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/config/access)
+        && request.auth.token.email in firestore.get(/databases/(default)/documents/config/access).data.viewers;
+    }
+    function canRead() { return isOwner() || isViewer(); }
+
+    // 마스터 엑셀 — 읽기: 소유자·뷰어 / 쓰기: 소유자만
     match /master/{fileName} {
-      allow read, write: if allowed() && fileName.matches('.*[.]xlsx');
+      allow read: if canRead() && fileName.matches('.*[.]xlsx');
+      allow write: if isOwner() && fileName.matches('.*[.]xlsx');
     }
-    // 협약서
-    match /agreements/{allPaths=**} {
-      allow read, write: if allowed();
-    }
-    // 특허증
-    match /patents/{allPaths=**} {
-      allow read, write: if allowed();
-    }
-    // 통장거래내역
-    match /bankbook/{allPaths=**} {
-      allow read, write: if allowed();
-    }
-    // 사업계획서
-    match /businessplans/{allPaths=**} {
-      allow read, write: if allowed();
-    }
-    // 자료실 문서
-    match /refdocs/{allPaths=**} {
-      allow read, write: if allowed();
-    }
-    // 사업비 정산 양식·파일
-    match /budgets/{allPaths=**} {
-      allow read, write: if allowed();
-    }
-    // 연구노트(원본·최종본)
-    match /researchnotes/{allPaths=**} {
-      allow read, write: if allowed();
-    }
-    // 인증·면허·표창 증서
-    match /certs/{allPaths=**} {
-      allow read, write: if allowed();
-    }
+    // 문서 폴더 — 읽기: 소유자·뷰어 / 쓰기: 소유자만
+    match /agreements/{allPaths=**}    { allow read: if canRead(); allow write: if isOwner(); }
+    match /patents/{allPaths=**}       { allow read: if canRead(); allow write: if isOwner(); }
+    match /bankbook/{allPaths=**}      { allow read: if canRead(); allow write: if isOwner(); }
+    match /businessplans/{allPaths=**} { allow read: if canRead(); allow write: if isOwner(); }
+    match /refdocs/{allPaths=**}       { allow read: if canRead(); allow write: if isOwner(); }
+    match /budgets/{allPaths=**}       { allow read: if canRead(); allow write: if isOwner(); }
+    match /researchnotes/{allPaths=**} { allow read: if canRead(); allow write: if isOwner(); }
+    match /certs/{allPaths=**}         { allow read: if canRead(); allow write: if isOwner(); }
+
     // 그 외 경로는 전면 차단
     match /{allPaths=**} {
       allow read, write: if false;

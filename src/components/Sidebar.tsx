@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, FlaskConical, Lightbulb,
-  Megaphone, Percent, BadgeCheck, Users, FolderOpen, Wallet, Building2, type LucideIcon,
+  Megaphone, Percent, BadgeCheck, Users, FolderOpen, Wallet, Building2, KeyRound, type LucideIcon,
 } from "lucide-react";
 import { DataStatus } from "@/components/FileGate";
+import { useDataCtx } from "@/lib/data-context";
+import { OWNER_EMAIL } from "@/lib/firebase";
 
 const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/", label: "대시보드", Icon: LayoutDashboard },
@@ -24,6 +26,8 @@ const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
 /** 좌측 탭 내비게이션 (다크) */
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user } = useDataCtx();
+  const nav = user?.email === OWNER_EMAIL ? [...NAV, { href: "/access", label: "접근 관리", Icon: KeyRound }] : NAV;
   return (
     <aside className="fixed inset-y-0 left-0 z-20 flex w-60 flex-col bg-slate-900 text-slate-300">
       <div className="px-5 py-5">
@@ -39,7 +43,7 @@ export default function Sidebar() {
         </Link>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-1">
-        {NAV.map((n) => {
+        {nav.map((n) => {
           const active = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href + "/"));
           return (
             <Link

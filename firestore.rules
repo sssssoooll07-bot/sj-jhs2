@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Firestore — 접근 관리 목록(config/access)만 사용. 소유자만 읽기·쓰기.
+// (Storage 규칙은 firestore.get으로 서버측에서 이 문서를 읽으므로 클라이언트 규칙과 무관하게 동작한다.)
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /config/access {
+      allow read, write: if request.auth != null
+        && request.auth.token.email == 'sssssoooll07@gmail.com';
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

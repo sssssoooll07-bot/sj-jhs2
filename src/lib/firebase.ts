@@ -3,6 +3,7 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 /**
  * Firebase 초기화 — 환경변수(NEXT_PUBLIC_FIREBASE_*)가 모두 있을 때만 활성화된다.
@@ -28,15 +29,21 @@ export const firebaseEnabled = Boolean(cfg.apiKey && cfg.projectId && cfg.storag
 let app: FirebaseApp | null = null;
 let authInstance: Auth | null = null;
 let storageInstance: FirebaseStorage | null = null;
+let dbInstance: Firestore | null = null;
 
 if (firebaseEnabled) {
   app = getApps().length ? getApps()[0] : initializeApp(cfg as Record<string, string>);
   authInstance = getAuth(app);
   storageInstance = getStorage(app);
+  dbInstance = getFirestore(app);
 }
 
 export const auth = authInstance;
 export const storage = storageInstance;
+export const db = dbInstance;
+
+/** 소유자(편집 권한). 그 외 접근 관리에 등록된 이메일은 '보기 전용'. */
+export const OWNER_EMAIL = "sssssoooll07@gmail.com";
 
 /** 마스터 엑셀이 저장되는 Storage 경로 (고정) */
 export const MASTER_PATH = "master/신정개발_RLMS_마스터데이터.xlsx";
