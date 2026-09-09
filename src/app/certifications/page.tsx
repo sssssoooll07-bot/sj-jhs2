@@ -42,8 +42,8 @@ const toRow = (c: Certification) => ({
 const yr = (c: Certification) => String(c.year ?? "").trim();
 
 function CertInner({ data }: { data: Data }) {
-  const [year, setYear] = useState("전체");
   const years = ["전체", ...Array.from(new Set(data.certifications.map(yr).filter(Boolean))).sort((a, b) => b.localeCompare(a))];
+  const [year, setYear] = useState(() => years[1] ?? "전체"); // 기본: 최신 연도
   const shown = data.certifications.filter((c) => year === "전체" || yr(c) === year).length;
 
   return (
