@@ -20,45 +20,60 @@ const clean = (s) =>
     .trim();
 
 /**
- * JNTP — 사업공고 게시판(www.jntp.or.kr, boardManagementNo=16) HTML 파싱.
- * 구 API(data.jntp.or.kr)는 2026 사이트 개편으로 폐기됨. 새 게시판 목록에는 접수마감일이 없고
- * 첨부문서 안에만 있으므로, 게시일(announcedAt) 기준으로 최근 공고를 수집한다(applyEnd=null).
- * 앱은 마감일이 없는 항목을 '게시 30일 이내'면 접수중으로 간주해 표시한다.
- * 열: 번호 / 공고명 / 기관 / 게시일 / 조회수
+ * JNTP — 전남테크노파크 공고.
+ *  (1) 지역사업공고: /base/apiAnnouncement/List (menuNo=45) — 접수기간·상태(접수중) 제공, 상세는 pms.jntp.or.kr
+ *  (2) 정부사업공고: /base/board/list?boardManagementNo=13 (menuNo=46) — 게시일 기준
+ * 한 소스가 실패해도 나머지는 반영한다(둘 다 0건일 때만 에러 → 이전 수집분 유지).
  */
 async function fetchJNTP() {
   const BASE = "https://www.jntp.or.kr";
-  const LIST = `${BASE}/base/board/list?boardManagementNo=16&menuLevel=2&menuNo=60`;
-  // 채용·행정 등 지원사업이 아닌 게시글 제외
-  const EXCLUDE = /(채용|합격|불합격|면접|발표|낙찰|입찰|정기총회|워크숍|설명회|간담회|공청회|폐기|매각)/;
-  const res = await fetch(LIST, { headers: { "User-Agent": UA } });
-  if (!res.ok) throw new Error(`JNTP 목록 HTTP ${res.status}`);
-  const html = await res.text();
-  const rows = [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].map((m) => m[1]);
+  const H = { "User-Agent": UA };
   const items = [];
-  for (const row of rows) {
-    const tds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]));
-    if (tds.length < 5) continue;
-    if (!/^\d+$/.test(tds[0])) continue; // 실제 게시글(번호 숫자)만 — 상단 공지/헤더 제외
-    const title = tds[1].replace(/\s*N\s*ew\s*$/i, "").trim();
-    if (!title || EXCLUDE.test(title)) continue;
-    const boardNo = row.match(/boardNo=(\d+)/)?.[1];
-    if (!boardNo) continue;
-    const dm = tds[3].match(/(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/);
-    const announcedAt = dm ? `${dm[1]}-${dm[2].padStart(2, "0")}-${dm[3].padStart(2, "0")}` : null;
-    items.push({
-      source: "JNTP",
-      agency: tds[2] || "전남테크노파크",
-      title,
-      category: null,
-      summary: null,
-      applyStart: null,
-      applyEnd: null,
-      announcedAt,
-      url: `${BASE}/base/board/read?boardManagementNo=16&boardNo=${boardNo}&menuLevel=2&menuNo=60`,
-    });
-  }
-  if (items.length === 0) throw new Error("JNTP 목록 파싱 0건 — 게시판(bm=16) 구조 변경 여부 확인");
+  const errs = [];
+
+  // (1) 지역사업공고 — 접수기간/상태 있음
+  try {
+    const res = await fetch(`${BASE}/base/apiAnnouncement/List?menuLevel=2&menuNo=45`, { headers: H });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const html = await res.text();
+    for (const row of html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) ?? []) {
+      const tds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]));
+      if (tds.length < 4 || !/^\d+$/.test(tds[0])) continue; // 번호 있는 실제 행만
+      const title = tds[1];
+      if (!title) continue;
+      const dm = [...(tds[2] || "").matchAll(/(\d{4})-(\d{2})-(\d{2})/g)].map((m) => `${m[1]}-${m[2]}-${m[3]}`);
+      const href = (row.match(/href="([^"]+)"/)?.[1] || "").replace(/&amp;/g, "&");
+      items.push({
+        source: "JNTP", agency: "전남테크노파크", title, category: "지역사업", summary: null,
+        applyStart: dm[0] ?? null, applyEnd: dm[1] ?? null, announcedAt: dm[0] ?? null,
+        url: href || `${BASE}/base/apiAnnouncement/List?menuLevel=2&menuNo=45`,
+      });
+    }
+  } catch (e) { errs.push(`지역:${e.message}`); }
+
+  // (2) 정부사업공고 — 게시일 기준 (접수마감일은 목록에 없음)
+  try {
+    const res = await fetch(`${BASE}/base/board/list?boardManagementNo=13&menuLevel=2&menuNo=46`, { headers: H });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const html = await res.text();
+    const EXCLUDE = /(채용|합격|불합격|면접|발표|낙찰|입찰|정기총회|워크숍|설명회|간담회|공청회|폐기|매각)/;
+    for (const row of html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) ?? []) {
+      const tds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]));
+      if (tds.length < 5) continue;
+      const title = tds[2];
+      const boardNo = row.match(/boardNo=(\d+)/)?.[1];
+      if (!title || !boardNo || EXCLUDE.test(title)) continue;
+      const dm = tds[4].match(/(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/);
+      items.push({
+        source: "JNTP", agency: "전남테크노파크", title, category: tds[1] || "정부사업", summary: null,
+        applyStart: null, applyEnd: null,
+        announcedAt: dm ? `${dm[1]}-${dm[2].padStart(2, "0")}-${dm[3].padStart(2, "0")}` : null,
+        url: `${BASE}/base/board/read?boardManagementNo=13&boardNo=${boardNo}&menuLevel=2&menuNo=46`,
+      });
+    }
+  } catch (e) { errs.push(`정부:${e.message}`); }
+
+  if (items.length === 0) throw new Error(`JNTP 파싱 0건 (${errs.join(" / ") || "구조 변경 확인"})`);
   return items;
 }
 
