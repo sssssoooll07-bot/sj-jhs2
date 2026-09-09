@@ -51,3 +51,5 @@ export const REFDOC_PREFIX = "refdocs";
 export const BUDGET_PREFIX = "budgets";
 /** 연구노트(원본·최종본 스캔) 저장 폴더 */
 export const RESEARCHNOTE_PREFIX = "researchnotes";
+/** 인증·면허·표창 증서 저장 폴더 */
+export const CERT_PREFIX = "certs";

@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { getBlob, listAll, ref, uploadBytes } from "firebase/storage";
-import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX, BANKBOOK_PREFIX, BUSINESSPLAN_PREFIX, REFDOC_PREFIX, BUDGET_PREFIX, RESEARCHNOTE_PREFIX } from "@/lib/firebase";
+import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX, BANKBOOK_PREFIX, BUSINESSPLAN_PREFIX, REFDOC_PREFIX, BUDGET_PREFIX, RESEARCHNOTE_PREFIX, CERT_PREFIX } from "@/lib/firebase";
 
 /**
  * 문서 파일 컨텍스트 — 협약서·특허증·통장거래내역·사업계획서 원본을 연다(카테고리별로 구분 저장).
@@ -11,7 +11,7 @@ import { auth, storage, firebaseEnabled, AGREEMENTS_PREFIX, PATENTS_PREFIX, BANK
  * 어느 경우든 "보기"만 제공한다(다운로드 버튼 없음, 엑셀은 표로 미리보기).
  */
 
-export type Category = "agreements" | "patents" | "bankbook" | "businessplan" | "refdoc" | "budget" | "researchnote";
+export type Category = "agreements" | "patents" | "bankbook" | "businessplan" | "refdoc" | "budget" | "researchnote" | "cert";
 
 export type DocRef =
   | { name: string; kind: "local"; file: File; category: Category }
@@ -25,6 +25,7 @@ const PREFIX: Record<Category, string> = {
   refdoc: REFDOC_PREFIX,
   budget: BUDGET_PREFIX,
   researchnote: RESEARCHNOTE_PREFIX,
+  cert: CERT_PREFIX,
 };
 const PREFIX_CAT: [string, Category][] = [
   [AGREEMENTS_PREFIX, "agreements"],
@@ -34,6 +35,7 @@ const PREFIX_CAT: [string, Category][] = [
   [REFDOC_PREFIX, "refdoc"],
   [BUDGET_PREFIX, "budget"],
   [RESEARCHNOTE_PREFIX, "researchnote"],
+  [CERT_PREFIX, "cert"],
 ];
 
 type Ctx = {
