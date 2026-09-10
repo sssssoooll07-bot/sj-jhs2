@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-09T00:37:35.718Z",
+ "fetchedAt": "2026-09-10T00:56:30.653Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -89,17 +89,6 @@
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=7&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "「철강·금속 제조기업 DX·AX 전환 혁신 기업지원 사업」 DX·AX 전환 전략 수립 수행기관(기업) 모집 공고",
-   "category": "지역사업",
-   "summary": null,
-   "applyStart": "2026-08-28",
-   "applyEnd": "2026-09-03",
-   "announcedAt": "2026-08-28",
-   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000045"
-  },
-  {
    "source": "SMTECH",
    "agency": "SMTECH",
    "title": "2026년도 하반기 중소벤처기업부 혁신제품 신규지정 수정공고",
@@ -157,13 +146,13 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
-   "title": "첨단로봇·AI 활용 중소기업 제조혁신 기업지원 2차 모집 공고_실증지원",
+   "title": "2026년 전남 탄소중립 제조혁신 고도화 2단계 사업 추가모집 공고",
    "category": "지역사업",
    "summary": null,
-   "applyStart": "2026-09-01",
-   "applyEnd": "2026-09-15",
-   "announcedAt": "2026-09-01",
-   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000046"
+   "applyStart": "2026-09-09",
+   "applyEnd": "2026-09-18",
+   "announcedAt": "2026-09-09",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000057"
   },
   {
    "source": "JNTP",
@@ -175,6 +164,17 @@
    "applyEnd": "2026-09-18",
    "announcedAt": "2026-09-07",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000054"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 서남권 지역혁신클러스터육성(비R&D) BIXPO 2026 전시 공동홍보관 참가 기업 모집 공고",
+   "category": "지역사업",
+   "summary": null,
+   "applyStart": "2026-09-10",
+   "applyEnd": "2026-09-23",
+   "announcedAt": "2026-09-10",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000056"
   },
   {
    "source": "SMTECH",
