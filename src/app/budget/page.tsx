@@ -106,12 +106,23 @@ function BudgetInner({ data }: { data: Data }) {
     { key: "desc", label: "적요(사용내역)", span: true },
     { key: "payee", label: "거래처(지급처)", th: "거래처", nowrap: true, view: (u) => u.payee ?? "—" },
     {
-      key: "grossKWon", label: "총액(원) — 입력하면 부가세 자동계산", type: "number", align: "center", th: "총액", nowrap: true, placeholder: "총액 입력",
+      key: "amountKWon", label: "공급가액(원) — 입력하면 부가세·총액 자동", type: "number", align: "center", th: "공급가", nowrap: true, placeholder: "공급가 입력",
+      view: (u) => won(u.amountKWon),
+      // 공급가 입력 → 부가세 10%, 총액 = 공급가+부가세
+      derive: (v) => { const a = Number(v) || 0; const vat = Math.round(a * 0.1); return a ? { vatKWon: vat, grossKWon: a + vat } : { vatKWon: null, grossKWon: null }; },
+    },
+    {
+      key: "vatKWon", label: "부가세(원) — 입력하면 공급가·총액 자동", type: "number", align: "center", th: "부가세", nowrap: true, placeholder: "부가세 입력",
+      view: (u) => won(u.vatKWon),
+      // 부가세 입력 → 공급가 = 부가세×10, 총액 = 부가세×11
+      derive: (v) => { const vat = Number(v) || 0; return vat ? { amountKWon: vat * 10, grossKWon: vat * 11 } : { amountKWon: null, grossKWon: null }; },
+    },
+    {
+      key: "grossKWon", label: "총액(원) — 입력하면 공급가·부가세 자동", type: "number", align: "center", th: "총액", nowrap: true, placeholder: "총액 입력",
       view: (u) => won(u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0))),
+      // 총액 입력 → 부가세 = 총액/11, 공급가 = 총액-부가세
       derive: (v) => { const g = Number(v) || 0; const vat = Math.round(g / 11); return g ? { vatKWon: vat, amountKWon: g - vat } : { vatKWon: null, amountKWon: null }; },
     },
-    { key: "amountKWon", label: "공급가(원) — 자동·수정가능", type: "number", align: "center", th: "공급가", nowrap: true, view: (u) => won(u.amountKWon) },
-    { key: "vatKWon", label: "부가세(원) — 자동·수정가능", type: "number", align: "center", th: "부가세", nowrap: true, view: (u) => won(u.vatKWon) },
   ];
   const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, 거래처: u.payee, "총액(원)": u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0)), "금액(원)": u.amountKWon, "부가세(원)": u.vatKWon, 비고: u.note });
 
