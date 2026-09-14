@@ -28,7 +28,7 @@ const HOLIDAYS: Record<string, string> = {
   "2027-10-03": "개천절", "2027-10-04": "대체공휴일", "2027-10-09": "한글날", "2027-10-11": "대체공휴일", "2027-12-25": "성탄절",
 };
 
-type ModalState = { idx: number; date: string; title: string; note: string };
+type ModalState = { idx: number; date: string; title: string; note: string; done: boolean };
 
 /** 대시보드 전용 월간 캘린더 — 날짜 클릭으로 일정 입력, 공휴일 표시, D-day 확인. */
 export default function DashboardCalendar({ data }: { data: Data }) {
@@ -58,16 +58,17 @@ export default function DashboardCalendar({ data }: { data: Data }) {
   while (cells.length % 7) cells.push(null);
   const todayKey = keyOf(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())));
 
+  // 다가오는 일정: 미처리 + D-14 이내
   const upcoming = useMemo(
-    () => events.filter((e) => e.date && daysUntil(e.date) >= 0 && daysUntil(e.date) <= 14).sort((a, b) => +(a.date ?? 0) - +(b.date ?? 0)),
+    () => events.filter((e) => !e.done && e.date && daysUntil(e.date) >= 0 && daysUntil(e.date) <= 14).sort((a, b) => +(a.date ?? 0) - +(b.date ?? 0)),
     [events],
   );
 
-  async function persist(list: ScheduleEvent[]) {
+  async function persist(list: ScheduleEvent[], closeModal = true) {
     setSaving(true);
     try {
-      await saveSheet("일정", list.map((e) => ({ 일자: dateStr(e.date), 내용: e.title, 비고: e.note })));
-      setModal(null);
+      await saveSheet("일정", list.map((e) => ({ 일자: dateStr(e.date), 내용: e.title, 비고: e.note, 완료: e.done ? "Y" : "" })));
+      if (closeModal) setModal(null);
     } catch {
       /* 오류는 데이터 컨텍스트가 표시 */
     } finally {
@@ -76,12 +77,16 @@ export default function DashboardCalendar({ data }: { data: Data }) {
   }
   function commit() {
     if (!modal || !modal.title.trim() || !modal.date) return;
-    const ev: ScheduleEvent = { date: new Date(modal.date + "T00:00:00Z"), title: modal.title.trim(), note: modal.note.trim() || null };
+    const ev: ScheduleEvent = { date: new Date(modal.date + "T00:00:00Z"), title: modal.title.trim(), note: modal.note.trim() || null, done: modal.done };
     persist(modal.idx < 0 ? [...events, ev] : events.map((x, i) => (i === modal.idx ? ev : x)));
   }
   function remove() {
     if (!modal || modal.idx < 0) return;
     persist(events.filter((_, i) => i !== modal.idx));
+  }
+  // 완료 체크 토글 (모달 안 열고 바로 저장)
+  function toggleDone(idx: number) {
+    persist(events.map((x, i) => (i === idx ? { ...x, done: !x.done } : x)), false);
   }
 
   return (
@@ -130,7 +135,7 @@ export default function DashboardCalendar({ data }: { data: Data }) {
               const isRed = wd === 0 || !!hol;
               const list = byDay.get(k) ?? [];
               return (
-                <div key={i} onClick={() => setModal({ idx: -1, date: dateStr(d)!, title: "", note: "" })}
+                <div key={i} onClick={() => setModal({ idx: -1, date: dateStr(d)!, title: "", note: "", done: false })}
                   className="min-h-[72px] cursor-pointer bg-white p-1 transition-colors hover:bg-blue-50/50">
                   <div className="flex items-center gap-1">
                     <span className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-xs font-semibold ${isToday ? "bg-blue-600 text-white" : isRed ? "text-red-500" : wd === 6 ? "text-blue-500" : "text-slate-600"}`}>{day}</span>
@@ -138,9 +143,9 @@ export default function DashboardCalendar({ data }: { data: Data }) {
                   </div>
                   <div className="mt-0.5 space-y-0.5">
                     {list.map(({ ev, idx }) => (
-                      <button key={idx} onClick={(e) => { e.stopPropagation(); setModal({ idx, date: ev.date ? dateStr(ev.date)! : "", title: ev.title, note: ev.note ?? "" }); }}
-                        className="block w-full truncate rounded bg-blue-100 px-1 py-0.5 text-left text-[11px] font-medium text-blue-800 hover:bg-blue-200" title={ev.title}>
-                        {ev.title}
+                      <button key={idx} onClick={(e) => { e.stopPropagation(); setModal({ idx, date: ev.date ? dateStr(ev.date)! : "", title: ev.title, note: ev.note ?? "", done: ev.done }); }}
+                        className={`block w-full truncate rounded px-1 py-0.5 text-left text-[11px] font-medium ${ev.done ? "bg-slate-100 text-slate-400 line-through" : "bg-blue-100 text-blue-800 hover:bg-blue-200"}`} title={ev.title}>
+                        {ev.done ? "✓ " : ""}{ev.title}
                       </button>
                     ))}
                   </div>
@@ -152,15 +157,17 @@ export default function DashboardCalendar({ data }: { data: Data }) {
 
         {/* 다가오는 일정 (1/3) */}
         <div className="lg:col-span-1">
-          <p className="mb-1.5 text-xs font-semibold text-slate-500">다가오는 일정 <span className="font-normal text-slate-400">(D-14 이내)</span></p>
+          <p className="mb-1.5 text-xs font-semibold text-slate-500">다가오는 일정 <span className="font-normal text-slate-400">(D-14 이내 · 체크☑=처리완료)</span></p>
           {upcoming.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50/60 py-6 text-center text-xs text-slate-400">2주 내 예정된 일정이 없습니다.<br />달력에서 날짜를 눌러 추가하세요.</p>
+            <p className="rounded-lg border border-dashed border-slate-200 bg-slate-50/60 py-6 text-center text-xs text-slate-400">처리할 일정이 없습니다.<br />달력에서 날짜를 눌러 추가하세요.</p>
           ) : (
             <ul className="max-h-[360px] divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-100">
               {upcoming.map((e, i) => (
-                <li key={i}>
-                  <button onClick={() => { const idx = events.indexOf(e); setModal({ idx, date: e.date ? dateStr(e.date)! : "", title: e.title, note: e.note ?? "" }); }}
-                    className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-left hover:bg-slate-50">
+                <li key={i} className="flex items-start gap-2 px-2.5 py-2 hover:bg-slate-50">
+                  <button onClick={() => toggleDone(events.indexOf(e))} disabled={saving} title="처리 완료로 표시"
+                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-slate-300 text-[10px] text-transparent transition-colors hover:border-emerald-500 hover:text-emerald-500">✓</button>
+                  <button onClick={() => { const idx = events.indexOf(e); setModal({ idx, date: e.date ? dateStr(e.date)! : "", title: e.title, note: e.note ?? "", done: e.done }); }}
+                    className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
                     <div className="flex items-center gap-2">
                       {e.date && <Dday days={daysUntil(e.date)} />}
                       <span className="whitespace-nowrap text-[11px] text-slate-400">{fmtDate(e.date)}</span>
@@ -200,7 +207,11 @@ function EventModal({ modal, setModal, saving, onSave, onDelete }: {
         <label className="mb-1 block text-xs font-medium text-slate-500">내용</label>
         <input autoFocus value={modal.title} onChange={(e) => setModal({ ...modal, title: e.target.value })} placeholder="예: 성장사다리 중간점검" className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
         <label className="mb-1 block text-xs font-medium text-slate-500">비고 (선택)</label>
-        <input value={modal.note} onChange={(e) => setModal({ ...modal, note: e.target.value })} className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        <input value={modal.note} onChange={(e) => setModal({ ...modal, note: e.target.value })} className="mb-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+        <label className="mb-4 flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+          <input type="checkbox" checked={modal.done} onChange={(e) => setModal({ ...modal, done: e.target.checked })} className="h-4 w-4 accent-emerald-600" />
+          처리 완료 {modal.done && <span className="text-xs text-emerald-600">✓ 완료됨</span>}
+        </label>
         <div className="flex items-center gap-2">
           <button onClick={onSave} disabled={saving || !modal.title.trim() || !modal.date} className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">{saving ? "저장 중…" : "저장"}</button>
           {modal.idx >= 0 && <button onClick={onDelete} disabled={saving} className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50">삭제</button>}
