@@ -80,10 +80,22 @@ function BudgetInner({ data }: { data: Data }) {
     data.budgetUsages.filter((u) => u.code === p?.code && u.category === cat).reduce((s, u) => s + (u.amountKWon ?? 0) + (u.vatKWon ?? 0), 0);
 
   const items = p ? data.budgetItems.filter((b) => b.code === p.code) : [];
+  const isInKind = (cat: string) => (cat ?? "").includes("현물");
   const tot = items.reduce(
-    (a, b) => ({ plan: a.plan + (b.planKWon ?? 0), final: a.final + (b.finalKWon ?? 0), exec: a.exec + usedWon(b.category) }),
-    { plan: 0, final: 0, exec: 0 },
+    (a, b) => {
+      const fin = b.finalKWon ?? 0;
+      const kind = isInKind(b.category);
+      return {
+        plan: a.plan + (b.planKWon ?? 0),
+        final: a.final + fin,
+        exec: a.exec + usedWon(b.category),
+        inKind: a.inKind + (kind ? fin : 0), // 현물(비집행) 최종변경 기준
+        cashFinal: a.cashFinal + (kind ? 0 : fin), // 현금 집행대상
+      };
+    },
+    { plan: 0, final: 0, exec: 0, inKind: 0, cashFinal: 0 },
   );
+  const execBase = tot.inKind > 0 ? tot.cashFinal : tot.final; // 집행율 분모(현물 제외)
 
   const BUDGET_COLS: Col<BudgetItem>[] = [
     { key: "category", label: "비목(세목)", span: true, view: (b) => <span className="font-medium">{b.category}</span> },
@@ -168,12 +180,16 @@ function BudgetInner({ data }: { data: Data }) {
                   emptyMessage="등록된 비목이 없습니다. '비목 추가'로 세목을 등록하세요."
                 />
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className={`grid grid-cols-2 gap-3 ${tot.inKind > 0 ? "sm:grid-cols-3 lg:grid-cols-5" : "sm:grid-cols-4"}`}>
                   <Info label="최초계획 합계" value={`${won(tot.plan)}원`} />
                   <Info label="최종변경 합계" value={`${won(tot.final)}원`} />
+                  {tot.inKind > 0 && <Info label="↳ 현물(비집행)" value={`${won(tot.inKind)}원`} />}
                   <Info label="집행 합계(공급가)" value={`${won(tot.exec)}원`} />
-                  <Info label="잔액 (집행율)" value={`${won(tot.final - tot.exec)}원${tot.final ? ` (${((tot.exec / tot.final) * 100).toFixed(0)}%)` : ""}`} />
+                  <Info label={tot.inKind > 0 ? "잔액 (현금 집행율)" : "잔액 (집행율)"} value={`${won(execBase - tot.exec)}원${execBase ? ` (${((tot.exec / execBase) * 100).toFixed(0)}%)` : ""}`} />
                 </div>
+                {tot.inKind > 0 && (
+                  <p className="text-[11px] text-slate-400">※ 현물(비집행) {won(tot.inKind)}원은 현금 집행 대상이 아니므로 집행율 계산(현금 집행대상 {won(tot.cashFinal)}원)에서 제외됩니다.</p>
+                )}
 
                 {/* 선택 비목 사용내역 */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
