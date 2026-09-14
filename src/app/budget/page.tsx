@@ -183,7 +183,7 @@ function BudgetInner({ data }: { data: Data }) {
                       <EditableTable
                         rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === selCat} cols={USAGE_COLS}
                         sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
-                        requiredKey="desc" addLabel="사용내역 추가" entityLabel="사용내역"
+                        requiredKey="code" addLabel="사용내역 추가" entityLabel="사용내역"
                         emptyMessage="사용내역이 없습니다. '사용내역 추가'로 집행 내역(집행일·적요·공급가·부가세)을 기록하세요."
                       />
                       <p className="mt-2 text-[11px] text-slate-400">※ 부가세는 집행액(비목)에서 제외되고 공급가만 반영됩니다.</p>
