@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, FileSpreadsheet, Plus, Trash2, Download, X } from "lucide-react";
+import { Search, FileSpreadsheet, Plus, Trash2, Download, X, Eye, Printer } from "lucide-react";
 import { WithData } from "@/components/FileGate";
 import { Section } from "@/components/ui";
 import { EditableTable, type Col } from "@/components/EditableTable";
 import type { Data, Vendor } from "@/lib/excel";
 
 const won = (v: number) => (v ? v.toLocaleString("ko-KR") : "");
+const esc = (s: string) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const COLS: Col<Vendor>[] = [
   { key: "name", label: "거래처명", span: true, view: (v) => <span className="font-medium text-slate-800">{v.name}</span> },
@@ -46,6 +47,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
   const [date, setDate] = useState(todayStr());
   const [items, setItems] = useState<POItem[]>([blankItem()]);
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState(false);
 
   const totSupply = items.reduce((s, it) => s + supplyOf(it), 0);
   const totVat = items.reduce((s, it) => s + vatOf(it), 0);
@@ -97,6 +99,51 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
     }
   }
 
+  // 미리보기·인쇄용 문서 HTML
+  function bodyHtml() {
+    const rows = items.filter((it) => it.name || supplyOf(it) > 0);
+    const rowsHtml = (rows.length ? rows : [blankItem()]).map((it, i) => {
+      const sup = supplyOf(it), vat = vatOf(it);
+      return `<tr><td style="text-align:center">${i + 1}</td><td>${esc(it.name)}</td><td>${esc(it.spec)}</td><td style="text-align:center">${esc(it.unit)}</td><td style="text-align:right">${it.qty ? won(Number(it.qty)) : ""}</td><td style="text-align:right">${it.price ? won(Number(it.price)) : ""}</td><td style="text-align:right">${won(sup)}</td><td style="text-align:right">${won(vat)}</td><td style="text-align:right">${won(sup + vat)}</td></tr>`;
+    }).join("");
+    return `
+      <h1 style="text-align:center;letter-spacing:8px;margin:0 0 14px">발 주 서</h1>
+      <table class="kv"><tr>
+        <th>발주번호</th><td>${esc(no)}</td><th>발주일</th><td>${esc(date)}</td>
+      </tr></table>
+      <table class="box"><tr>
+        <th rowspan="4" class="side">공급자</th><th>업체명</th><td>${esc(company)}</td><th>대표자</th><td>${esc(ceo)}</td></tr>
+        <tr><th>전화</th><td>${esc(tel)}</td><th>주소</th><td>${esc(addr)}</td></tr>
+        <tr><th rowspan="2" class="side">발주자</th><th>업체명</th><td>㈜신정개발</td><th>담당자</th><td>정한솔</td></tr>
+        <tr><th>전화</th><td>061-682-5537</td><th>팩스</th><td>061-683-5567</td></tr>
+      </table>
+      <p style="font-weight:bold;margin:12px 0 4px">■ 발주내역</p>
+      <table class="items">
+        <thead><tr><th>NO</th><th>품목</th><th>규격/재질</th><th>단위</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th><th>합계금액</th></tr></thead>
+        <tbody>${rowsHtml}
+          <tr class="sum"><td colspan="6" style="text-align:center">합 계</td><td style="text-align:right">${won(totSupply)}</td><td style="text-align:right">${won(totVat)}</td><td style="text-align:right">${won(grand)}</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:8px;font-size:12px">비고 : 부가세 포함</p>`;
+  }
+  const DOC_CSS = `body{font-family:'Malgun Gothic',sans-serif;color:#222;margin:0}
+    h1{font-size:26px} table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px}
+    .kv th,.kv td,.box th,.box td,.items th,.items td{border:1px solid #888;padding:5px 7px}
+    .kv th,.box th,.items th{background:#eef2f8} .box .side{background:#e2e8f0;font-weight:bold}
+    .items th{text-align:center} .items .sum td{background:#eef2f8;font-weight:bold}
+    @page{size:A4;margin:15mm}`;
+  function printPDF() {
+    const ifr = document.createElement("iframe");
+    ifr.style.position = "fixed"; ifr.style.right = "0"; ifr.style.bottom = "0"; ifr.style.width = "0"; ifr.style.height = "0"; ifr.style.border = "0";
+    document.body.appendChild(ifr);
+    const doc = ifr.contentWindow!.document;
+    doc.open();
+    doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>발주서_${esc(company)}</title><style>${DOC_CSS}</style></head><body>${bodyHtml()}</body></html>`);
+    doc.close();
+    ifr.contentWindow!.focus();
+    setTimeout(() => { ifr.contentWindow!.print(); setTimeout(() => document.body.removeChild(ifr), 1000); }, 300);
+  }
+
   const field = "rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-blue-400 focus:outline-none";
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-black/60 p-3 sm:p-6" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true">
@@ -104,8 +151,14 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
         <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-2.5">
           <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
           <p className="text-sm font-bold text-slate-800">발주서 — {vendor.name}</p>
-          <button onClick={download} disabled={busy} className="ml-auto inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-            <Download className="h-3.5 w-3.5" /> {busy ? "생성 중…" : "엑셀 다운로드"}
+          <button onClick={() => setPreview(true)} className="ml-auto inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
+            <Eye className="h-3.5 w-3.5" /> 미리보기
+          </button>
+          <button onClick={printPDF} className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700">
+            <Printer className="h-3.5 w-3.5" /> PDF 저장
+          </button>
+          <button onClick={download} disabled={busy} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+            <Download className="h-3.5 w-3.5" /> {busy ? "생성 중…" : "엑셀"}
           </button>
           <button onClick={onClose} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50"><X className="h-4 w-4" /></button>
         </div>
@@ -177,6 +230,21 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
           </div>
         </div>
       </div>
+
+      {preview && (
+        <div className="fixed inset-0 z-[110] flex flex-col bg-black/70 p-3 sm:p-6" onMouseDown={(e) => { if (e.target === e.currentTarget) setPreview(false); }} role="dialog" aria-modal="true">
+          <div className="mx-auto flex h-full w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
+            <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-2.5">
+              <p className="text-sm font-bold text-slate-800">발주서 미리보기</p>
+              <button onClick={printPDF} className="ml-auto inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"><Printer className="h-3.5 w-3.5" /> PDF 저장</button>
+              <button onClick={() => setPreview(false)} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">닫기</button>
+            </div>
+            <div className="flex-1 overflow-auto bg-slate-100 p-4">
+              <div className="mx-auto max-w-2xl bg-white p-6 shadow [&_h1]:mb-3 [&_table]:mb-2 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-slate-400 [&_td]:px-2 [&_td]:py-1 [&_td]:text-sm [&_th]:border [&_th]:border-slate-400 [&_th]:bg-slate-100 [&_th]:px-2 [&_th]:py-1 [&_th]:text-sm" dangerouslySetInnerHTML={{ __html: bodyHtml() }} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
