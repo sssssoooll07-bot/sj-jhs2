@@ -31,7 +31,7 @@ function choOf(name: string): string {
 
 // ── 발주서 ──
 type POItem = { name: string; spec: string; unit: string; qty: string; price: string };
-const blankItem = (): POItem => ({ name: "", spec: "", unit: "원", qty: "", price: "" });
+const blankItem = (): POItem => ({ name: "", spec: "", unit: "", qty: "", price: "" });
 const supplyOf = (it: POItem) => (Number(it.qty) || 0) * (Number(it.price) || 0);
 const vatOf = (it: POItem) => Math.round(supplyOf(it) * 0.1);
 
