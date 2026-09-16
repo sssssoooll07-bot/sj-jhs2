@@ -48,7 +48,7 @@ export type Agreement = {
   totalKWon: number | null; agency: string | null; note: string | null;
 };
 
-export type Vendor = { name: string; bizNo: string | null; ceo: string | null; note: string | null };
+export type Vendor = { name: string; bizNo: string | null; ceo: string | null; tel: string | null; note: string | null };
 export type ScheduleEvent = { date: Date | null; title: string; note: string | null; done: boolean };
 export type BudgetItem = { code: string; category: string; planKWon: number | null; finalKWon: number | null; execKWon: number | null; note: string | null };
 export type BudgetUsage = { code: string; category: string; usedAt: Date | null; desc: string | null; payee: string | null; amountKWon: number | null; vatKWon: number | null; grossKWon: number | null; note: string | null };
@@ -230,7 +230,7 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
 
   const vendors: Vendor[] = rows("거래처")
     .filter((r) => s(r["거래처명"]))
-    .map((r) => ({ name: s(r["거래처명"])!, bizNo: s(r["사업자등록번호"]), ceo: s(r["대표자"]), note: s(r["주소"]) ?? s(r["비고"]) }));
+    .map((r) => ({ name: s(r["거래처명"])!, bizNo: s(r["사업자등록번호"]), ceo: s(r["대표자"]), tel: s(r["연락처"]) ?? s(r["전화"]) ?? s(r["전화번호"]), note: s(r["주소"]) ?? s(r["비고"]) }));
 
   const events: ScheduleEvent[] = rows("일정")
     .filter((r) => s(r["내용"]))

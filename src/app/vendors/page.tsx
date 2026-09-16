@@ -15,9 +15,10 @@ const COLS: Col<Vendor>[] = [
   { key: "bizNo", label: "사업자등록번호", th: "사업자등록번호", nowrap: true, align: "center", view: (v) => v.bizNo ?? "—" },
   { key: "ceo", label: "대표자", th: "대표자", nowrap: true, align: "center", view: (v) => v.ceo ?? "—" },
   { key: "note", label: "주소", th: "주소", view: (v) => <span className="text-xs text-slate-500">{v.note ?? "—"}</span> },
+  { key: "tel", label: "연락처", hide: true, span: true, placeholder: "예: 061-000-0000 / 010-0000-0000" },
 ];
-const toRow = (v: Vendor) => ({ 거래처명: v.name, 사업자등록번호: v.bizNo, 대표자: v.ceo, 주소: v.note });
-const EMPTY: Vendor = { name: "", bizNo: null, ceo: null, note: null };
+const toRow = (v: Vendor) => ({ 거래처명: v.name, 사업자등록번호: v.bizNo, 대표자: v.ceo, 연락처: v.tel, 주소: v.note });
+const EMPTY: Vendor = { name: "", bizNo: null, ceo: null, tel: null, note: null };
 
 // 초성
 const CHO = ["ㄱ", "ㄱ", "ㄴ", "ㄷ", "ㄷ", "ㄹ", "ㅁ", "ㅂ", "ㅂ", "ㅅ", "ㅅ", "ㅇ", "ㅈ", "ㅈ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
@@ -42,7 +43,7 @@ function defaultNo() { const d = new Date(); return `제${d.getFullYear()}${Stri
 function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () => void }) {
   const [company, setCompany] = useState(vendor.name);
   const [ceo, setCeo] = useState(vendor.ceo ?? "");
-  const [tel, setTel] = useState("");
+  const [tel, setTel] = useState(vendor.tel ?? "");
   const [fax, setFax] = useState("");
   const [no, setNo] = useState(defaultNo());
   const [date, setDate] = useState(todayStr());
