@@ -36,8 +36,8 @@ const COLS: Col<Project>[] = [
   { key: "bank", label: "전용통장 은행", hide: true },
   { key: "account", label: "전용통장 계좌번호", hide: true },
   { key: "accountHolder", label: "예금주", hide: true },
-  { key: "vatPaid", label: "부가세 입금완료", type: "toggle", th: "부가세입금", align: "center", nowrap: true, view: (p) => <OX on={p.vatPaid} /> },
   { key: "selfPaid", label: "자부담(민간부담금) 입금완료", type: "toggle", th: "자부담입금", align: "center", nowrap: true, view: (p) => <OX on={p.selfPaid} /> },
+  { key: "vatPaid", label: "부가세 입금완료", type: "toggle", th: "부가세입금", align: "center", nowrap: true, view: (p) => <OX on={p.vatPaid} /> },
 ];
 /** 입금현황 O/X 표시 */
 const OX = ({ on }: { on: boolean }) => (
