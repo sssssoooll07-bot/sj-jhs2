@@ -30,9 +30,9 @@ function choOf(name: string): string {
 }
 
 // ── 발주서 ──
-type POItem = { name: string; spec: string; unit: string; qty: string; price: string };
-const blankItem = (): POItem => ({ name: "", spec: "", unit: "", qty: "", price: "" });
-const supplyOf = (it: POItem) => (Number(it.qty) || 0) * (Number(it.price) || 0);
+type POItem = { name: string; spec: string; unit: string; qty: string; price: string; supply: string };
+const blankItem = (): POItem => ({ name: "", spec: "", unit: "", qty: "", price: "", supply: "" });
+const supplyOf = (it: POItem) => Number(it.supply) || 0; // 공급가액(직접 입력 또는 수량×단가 자동)
 const vatOf = (it: POItem) => Math.round(supplyOf(it) * 0.1);
 
 function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
@@ -53,8 +53,17 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
   const totVat = items.reduce((s, it) => s + vatOf(it), 0);
   const grand = totSupply + totVat;
 
-  const setItem = (i: number, patch: Partial<POItem>) => setItems((p) => p.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
-  const addItem = () => setItems((p) => (p.length >= 28 ? p : [...p, blankItem()]));
+  const setItem = (i: number, patch: Partial<POItem>) => setItems((p) => p.map((x, idx) => {
+    if (idx !== i) return x;
+    const n = { ...x, ...patch };
+    // 수량·단가를 입력하면 공급가액 자동 계산 (공급가액 직접 입력도 가능)
+    if ("qty" in patch || "price" in patch) {
+      const s = (Number(n.qty) || 0) * (Number(n.price) || 0);
+      n.supply = s ? String(s) : "";
+    }
+    return n;
+  }));
+  const addItem = () => setItems((p) => (p.length >= 20 ? p : [...p, blankItem()]));
   const delItem = (i: number) => setItems((p) => (p.length <= 1 ? p : p.filter((_, idx) => idx !== i)));
 
   async function download() {
@@ -71,7 +80,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       ws.getCell("G5").value = ceo;
       ws.getCell("C6").value = tel;
       ws.getCell("G6").value = fax;
-      items.slice(0, 28).forEach((it, i) => {
+      items.slice(0, 20).forEach((it, i) => {
         const r = 13 + i, sup = supplyOf(it), vat = vatOf(it);
         ws.getCell(`B${r}`).value = it.name || "";
         ws.getCell(`C${r}`).value = it.spec || "";
@@ -82,10 +91,10 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
         ws.getCell(`H${r}`).value = vat || null;
         ws.getCell(`I${r}`).value = sup ? sup + vat : null;
       });
-      ws.getCell("G41").value = totSupply || null;
-      ws.getCell("H41").value = totVat || null;
-      ws.getCell("I41").value = grand || null;
-      ws.getCell("A47").value = date ? `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일` : "";
+      ws.getCell("G33").value = totSupply || null;
+      ws.getCell("H33").value = totVat || null;
+      ws.getCell("I33").value = grand || null;
+      ws.getCell("A39").value = date ? `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일` : "";
       const out = await wb.xlsx.writeBuffer();
       const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const a = document.createElement("a");
@@ -138,10 +147,14 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
   }
   const DOC_CSS = `body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;color:#222;margin:0}
     h1{font-size:26px;text-align:center;letter-spacing:10px;margin:0 0 16px}
-    table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px;table-layout:fixed}
-    th,td{border:1px solid #888;padding:5px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px}
+    .kv,.box{table-layout:auto} .items{table-layout:fixed}
+    th,td{border:1px solid #888;padding:5px 7px}
     th{background:#eef2f8;text-align:center} .box .side{background:#e2e8f0;font-weight:bold}
-    td{text-align:left} .items td{text-align:right} .items td:nth-child(2),.items td:nth-child(3){text-align:left}
+    td{text-align:left}
+    .kv th,.kv td,.box th,.box td{white-space:nowrap}
+    .items td{text-align:right;white-space:nowrap}
+    .items td:nth-child(2),.items td:nth-child(3){text-align:left;white-space:normal;word-break:break-all}
     .items td:nth-child(1),.items td:nth-child(4){text-align:center}
     .items .sum td{background:#eef2f8;font-weight:bold;text-align:center} .items .sum td.r{text-align:right}
     .sec{font-weight:bold;margin:12px 0 4px} .note2{text-align:center;margin:22px 0 4px;font-size:13px}
@@ -222,7 +235,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
                       <td className="w-12"><input value={it.unit} onChange={(e) => setItem(i, { unit: e.target.value })} className="text-center" /></td>
                       <td className="w-16"><input inputMode="numeric" value={it.qty} onChange={(e) => setItem(i, { qty: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
                       <td className="w-24"><input inputMode="numeric" value={it.price ? Number(it.price).toLocaleString("ko-KR") : ""} onChange={(e) => setItem(i, { price: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
-                      <td className="w-24 text-right text-slate-600">{won(supplyOf(it))}</td>
+                      <td className="w-24"><input inputMode="numeric" value={it.supply ? Number(it.supply).toLocaleString("ko-KR") : ""} onChange={(e) => setItem(i, { supply: e.target.value.replace(/[^\d]/g, "") })} className="text-right" placeholder="공급가액" /></td>
                       <td className="w-20 text-right text-slate-600">{won(vatOf(it))}</td>
                       <td className="w-24 text-right font-medium text-slate-700">{won(supplyOf(it) + vatOf(it))}</td>
                       <td className="w-7 text-center">{items.length > 1 && <button onClick={() => delItem(i)} className="text-slate-300 hover:text-red-500"><Trash2 className="mx-auto h-3.5 w-3.5" /></button>}</td>
@@ -238,7 +251,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
                 </tbody>
               </table>
             </div>
-            {items.length < 28 && (
+            {items.length < 20 && (
               <button onClick={addItem} className="mt-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"><Plus className="h-3.5 w-3.5" /> 품목 추가</button>
             )}
             <p className="mt-2 text-[11px] text-slate-400">※ 수량·단가를 입력하면 공급가액·세액(10%)·합계가 자동 계산됩니다. 비고: 부가세 포함.</p>
@@ -255,7 +268,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
               <button onClick={() => setPreview(false)} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">닫기</button>
             </div>
             <div className="flex-1 overflow-auto bg-slate-100 p-4">
-              <div className="mx-auto max-w-2xl bg-white p-6 shadow [&_h1]:mb-3 [&_table]:mb-2 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-slate-400 [&_td]:px-2 [&_td]:py-1 [&_td]:text-sm [&_th]:border [&_th]:border-slate-400 [&_th]:bg-slate-100 [&_th]:px-2 [&_th]:py-1 [&_th]:text-sm" dangerouslySetInnerHTML={{ __html: bodyHtml() }} />
+              <div className="mx-auto bg-white p-6 shadow" style={{ width: "794px", maxWidth: "100%" }} dangerouslySetInnerHTML={{ __html: `<style>${DOC_CSS}</style>` + bodyHtml() }} />
             </div>
           </div>
         </div>
