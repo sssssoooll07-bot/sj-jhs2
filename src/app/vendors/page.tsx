@@ -93,11 +93,21 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
         ws.getCell(`G${r}`).value = sup || null;
         ws.getCell(`H${r}`).value = vat || null;
         ws.getCell(`I${r}`).value = sup ? sup + vat : null;
+        for (const col of ["E", "F", "G", "H", "I"]) ws.getCell(`${col}${r}`).numFmt = "#,##0";
       });
       ws.getCell("G33").value = totSupply || null;
       ws.getCell("H33").value = totVat || null;
       ws.getCell("I33").value = grand || null;
+      for (const col of ["G", "H", "I"]) ws.getCell(`${col}33`).numFmt = "#,##0";
       ws.getCell("A39").value = dateKor(date);
+      // 한 페이지에 맞춰 인쇄
+      ws.pageSetup.orientation = "portrait";
+      ws.pageSetup.fitToPage = true;
+      ws.pageSetup.fitToWidth = 1;
+      ws.pageSetup.fitToHeight = 1;
+      ws.pageSetup.horizontalCentered = true;
+      ws.pageSetup.margins = { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 };
+      ws.pageSetup.printArea = "A1:I41";
       const out = await wb.xlsx.writeBuffer();
       const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const a = document.createElement("a");
