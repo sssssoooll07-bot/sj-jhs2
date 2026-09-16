@@ -5,7 +5,13 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "cleanUrls": true,
     "trailingSlash": true,
-    "rewrites": [{ "source": "**", "destination": "/404.html" }]
+    "rewrites": [{ "source": "**", "destination": "/404.html" }],
+    "headers": [
+      { "source": "**/*.html", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] },
+      { "source": "/", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] },
+      { "source": "/announcements.json", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] },
+      { "source": "**/*.@(js|css|woff2|woff|ttf|png|jpg|jpeg|svg|ico)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] }
+    ]
   },
   "storage": { "rules": "storage.rules" },
   "firestore": { "rules": "firestore.rules" }
