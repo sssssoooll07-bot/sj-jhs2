@@ -56,9 +56,11 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
   const setItem = (i: number, patch: Partial<POItem>) => setItems((p) => p.map((x, idx) => {
     if (idx !== i) return x;
     const n = { ...x, ...patch };
-    // 수량·단가를 입력하면 공급가액 자동 계산 (공급가액 직접 입력도 가능)
+    // 수량·단가를 입력하면 공급가액(=수량×단가) 자동 계산. 수량 미입력 시 1로 계산.
     if ("qty" in patch || "price" in patch) {
-      const s = (Number(n.qty) || 0) * (Number(n.price) || 0);
+      const price = Number(n.price) || 0;
+      const q = n.qty.trim() === "" ? 1 : Number(n.qty) || 0;
+      const s = q * price;
       n.supply = s ? String(s) : "";
     }
     return n;
