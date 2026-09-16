@@ -9,7 +9,7 @@ import { useDataCtx } from "@/lib/data-context";
 export type Col<T> = {
   key: Extract<keyof T, string>;
   label: string;
-  type?: "text" | "number" | "date" | "toggle" | "select";
+  type?: "text" | "number" | "money" | "date" | "toggle" | "select";
   options?: string[];
   span?: boolean; // 폼에서 2열 차지
   hide?: boolean; // 보기 테이블에서 숨김(폼엔 표시)
@@ -179,6 +179,12 @@ function EditModal<T extends Record<string, unknown>>({
                 <input type="date" className="field" value={dateStr(r[c.key]) ?? ""} onChange={(e) => set(c.key, inputToDate(e.target.value))} />
               ) : c.type === "number" ? (
                 <input type="number" className="field" value={(r[c.key] as number | null) ?? ""} onChange={(e) => set(c.key, e.target.value === "" ? null : Number(e.target.value))} placeholder={c.placeholder} />
+              ) : c.type === "money" ? (
+                // 입력과 동시에 천단위 구분기호(콤마) 표시 — 저장은 숫자로
+                <input type="text" inputMode="numeric" className="field"
+                  value={r[c.key] == null || r[c.key] === "" ? "" : Number(r[c.key]).toLocaleString("ko-KR")}
+                  onChange={(e) => { const d = e.target.value.replace(/[^\d]/g, ""); set(c.key, d === "" ? null : Number(d)); }}
+                  placeholder={c.placeholder} />
               ) : (
                 <input className="field" value={(r[c.key] as string | null) ?? ""} onChange={(e) => set(c.key, e.target.value || null)} placeholder={c.placeholder} autoFocus={c.key === requiredKey} />
               )}
