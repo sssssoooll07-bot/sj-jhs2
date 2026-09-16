@@ -73,13 +73,26 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
     const el = document.querySelector<HTMLInputElement>(`[data-po="${r}-${c}"]`);
     el?.focus(); el?.select?.();
   };
+  const CELL_ORDER = ["name", "spec", "unit", "qty", "price", "supply"];
   const onCellKey = (e: KeyboardEvent<HTMLInputElement>, i: number, c: string) => {
+    const el = e.currentTarget;
     if (e.key === "ArrowDown" || e.key === "Enter") {
       e.preventDefault();
       if (i + 1 >= items.length) { if (items.length < 20) { addItem(); requestAnimationFrame(() => focusCell(i + 1, c)); } }
       else focusCell(i + 1, c);
     } else if (e.key === "ArrowUp") {
       e.preventDefault(); if (i > 0) focusCell(i - 1, c);
+    } else if (e.key === "ArrowRight") {
+      // 커서가 칸 끝일 때만 다음 열로 (아니면 일반 커서 이동)
+      if (el.selectionStart === el.value.length && el.selectionEnd === el.value.length) {
+        const ci = CELL_ORDER.indexOf(c);
+        if (ci < CELL_ORDER.length - 1) { e.preventDefault(); focusCell(i, CELL_ORDER[ci + 1]); }
+      }
+    } else if (e.key === "ArrowLeft") {
+      if (el.selectionStart === 0 && el.selectionEnd === 0) {
+        const ci = CELL_ORDER.indexOf(c);
+        if (ci > 0) { e.preventDefault(); focusCell(i, CELL_ORDER[ci - 1]); }
+      }
     }
   };
   const nav = (i: number, c: string) => ({ "data-po": `${i}-${c}`, onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => onCellKey(e, i, c) });
@@ -139,10 +152,10 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
 
   // 미리보기·인쇄용 문서 HTML
   function bodyHtml() {
-    const rows = items.filter((it) => it.name || supplyOf(it) > 0);
-    const rowsHtml = (rows.length ? rows : [blankItem()]).map((it, i) => {
+    const rowsHtml = Array.from({ length: 20 }, (_, i) => {
+      const it = items[i] ?? blankItem();
       const sup = supplyOf(it), vat = vatOf(it);
-      return `<tr><td style="text-align:center">${i + 1}</td><td>${esc(it.name)}</td><td>${esc(it.spec)}</td><td style="text-align:center">${esc(it.unit)}</td><td style="text-align:right">${it.qty ? won(Number(it.qty)) : ""}</td><td style="text-align:right">${it.price ? won(Number(it.price)) : ""}</td><td style="text-align:right">${won(sup)}</td><td style="text-align:right">${won(vat)}</td><td style="text-align:right">${won(sup + vat)}</td></tr>`;
+      return `<tr><td>${i + 1}</td><td>${esc(it.name)}</td><td>${esc(it.spec)}</td><td>${esc(it.unit)}</td><td>${it.qty ? won(Number(it.qty)) : ""}</td><td>${it.price ? won(Number(it.price)) : ""}</td><td>${sup ? won(sup) : ""}</td><td>${vat ? won(vat) : ""}</td><td>${sup ? won(sup + vat) : ""}</td></tr>`;
     }).join("");
     const dateK = dateKor(date);
     return `
@@ -181,7 +194,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
     th{background:#eef2f8;text-align:center} .box .side{background:#e2e8f0;font-weight:bold}
     td{text-align:left}
     .kv th,.kv td,.box th,.box td{white-space:nowrap}
-    .items td{text-align:right;white-space:nowrap}
+    .items th,.items td{padding:2px 6px} .items td{text-align:right;white-space:nowrap;font-size:12px}
     .items td:nth-child(2),.items td:nth-child(3){text-align:left;white-space:normal;word-break:break-all}
     .items td:nth-child(1),.items td:nth-child(4){text-align:center}
     .items .sum td{background:#eef2f8;font-weight:bold;text-align:center} .items .sum td.r{text-align:right}
@@ -296,7 +309,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
               <button onClick={() => setPreview(false)} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">닫기</button>
             </div>
             <div className="flex-1 overflow-auto bg-slate-100 p-4">
-              <div className="mx-auto bg-white p-6 shadow" style={{ width: "794px", maxWidth: "100%" }} dangerouslySetInnerHTML={{ __html: `<style>${DOC_CSS}</style>` + bodyHtml() }} />
+              <div className="mx-auto bg-white shadow" style={{ width: "794px", maxWidth: "100%", minHeight: "1123px", padding: "40px" }} dangerouslySetInnerHTML={{ __html: `<style>${DOC_CSS}</style>` + bodyHtml() }} />
             </div>
           </div>
         </div>
