@@ -171,7 +171,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       </table>
       <p class="sec">■ 발주내역</p>
       <table class="items">
-        <colgroup><col style="width:6%"><col style="width:20%"><col style="width:18%"><col style="width:7%"><col style="width:7%"><col style="width:12%"><col style="width:12%"><col style="width:9%"><col style="width:9%"></colgroup>
+        <colgroup><col style="width:6%"><col style="width:22%"><col style="width:20%"><col style="width:5%"><col style="width:5%"><col style="width:12%"><col style="width:12%"><col style="width:9%"><col style="width:9%"></colgroup>
         <thead>
           <tr><th rowspan="2">NO</th><th rowspan="2">품목</th><th rowspan="2">규격 및 재질</th><th rowspan="2">단위</th><th rowspan="2">수량</th><th colspan="3">금액</th><th rowspan="2">합계금액</th></tr>
           <tr><th>단가</th><th>공급가액</th><th>세액</th></tr>
