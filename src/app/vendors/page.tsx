@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type KeyboardEvent } from "react";
 import { Search, FileSpreadsheet, Plus, Trash2, Download, X, Eye, Printer } from "lucide-react";
 import { WithData } from "@/components/FileGate";
 import { Section } from "@/components/ui";
@@ -68,6 +68,21 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
   }));
   const addItem = () => setItems((p) => (p.length >= 20 ? p : [...p, blankItem()]));
   const delItem = (i: number) => setItems((p) => (p.length <= 1 ? p : p.filter((_, idx) => idx !== i)));
+  // ↓/Enter → 아래 칸, ↑ → 위 칸 (엑셀식 이동)
+  const focusCell = (r: number, c: string) => {
+    const el = document.querySelector<HTMLInputElement>(`[data-po="${r}-${c}"]`);
+    el?.focus(); el?.select?.();
+  };
+  const onCellKey = (e: KeyboardEvent<HTMLInputElement>, i: number, c: string) => {
+    if (e.key === "ArrowDown" || e.key === "Enter") {
+      e.preventDefault();
+      if (i + 1 >= items.length) { if (items.length < 20) { addItem(); requestAnimationFrame(() => focusCell(i + 1, c)); } }
+      else focusCell(i + 1, c);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault(); if (i > 0) focusCell(i - 1, c);
+    }
+  };
+  const nav = (i: number, c: string) => ({ "data-po": `${i}-${c}`, onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => onCellKey(e, i, c) });
 
   async function download() {
     setBusy(true);
@@ -243,12 +258,12 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
                   {items.map((it, i) => (
                     <tr key={i}>
                       <td className="text-center text-slate-400">{i + 1}</td>
-                      <td><input value={it.name} onChange={(e) => setItem(i, { name: e.target.value })} placeholder="품목" /></td>
-                      <td><input value={it.spec} onChange={(e) => setItem(i, { spec: e.target.value })} /></td>
-                      <td className="w-12"><input value={it.unit} onChange={(e) => setItem(i, { unit: e.target.value })} className="text-center" /></td>
-                      <td className="w-16"><input inputMode="numeric" value={it.qty} onChange={(e) => setItem(i, { qty: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
-                      <td className="w-24"><input inputMode="numeric" value={it.price ? Number(it.price).toLocaleString("ko-KR") : ""} onChange={(e) => setItem(i, { price: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
-                      <td className="w-24"><input inputMode="numeric" value={it.supply ? Number(it.supply).toLocaleString("ko-KR") : ""} onChange={(e) => setItem(i, { supply: e.target.value.replace(/[^\d]/g, "") })} className="text-right" placeholder="공급가액" /></td>
+                      <td><input {...nav(i, "name")} value={it.name} onChange={(e) => setItem(i, { name: e.target.value })} placeholder="품목" /></td>
+                      <td><input {...nav(i, "spec")} value={it.spec} onChange={(e) => setItem(i, { spec: e.target.value })} /></td>
+                      <td className="w-12"><input {...nav(i, "unit")} value={it.unit} onChange={(e) => setItem(i, { unit: e.target.value })} className="text-center" /></td>
+                      <td className="w-16"><input {...nav(i, "qty")} inputMode="numeric" value={it.qty} onChange={(e) => setItem(i, { qty: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
+                      <td className="w-24"><input {...nav(i, "price")} inputMode="numeric" value={it.price ? Number(it.price).toLocaleString("ko-KR") : ""} onChange={(e) => setItem(i, { price: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
+                      <td className="w-24"><input {...nav(i, "supply")} inputMode="numeric" value={it.supply ? Number(it.supply).toLocaleString("ko-KR") : ""} onChange={(e) => setItem(i, { supply: e.target.value.replace(/[^\d]/g, "") })} className="text-right" placeholder="공급가액" /></td>
                       <td className="w-20 text-right text-slate-600">{won(vatOf(it))}</td>
                       <td className="w-24 text-right font-medium text-slate-700">{won(supplyOf(it) + vatOf(it))}</td>
                       <td className="w-7 text-center">{items.length > 1 && <button onClick={() => delItem(i)} className="text-slate-300 hover:text-red-500"><Trash2 className="mx-auto h-3.5 w-3.5" /></button>}</td>
