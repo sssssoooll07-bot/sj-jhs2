@@ -31,7 +31,7 @@ function choOf(name: string): string {
 
 // ── 발주서 ──
 type POItem = { name: string; spec: string; unit: string; qty: string; price: string };
-const blankItem = (): POItem => ({ name: "", spec: "", unit: "EA", qty: "", price: "" });
+const blankItem = (): POItem => ({ name: "", spec: "", unit: "원", qty: "", price: "" });
 const supplyOf = (it: POItem) => (Number(it.qty) || 0) * (Number(it.price) || 0);
 const vatOf = (it: POItem) => Math.round(supplyOf(it) * 0.1);
 
@@ -205,8 +205,8 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
                       <td><input value={it.name} onChange={(e) => setItem(i, { name: e.target.value })} placeholder="품목" /></td>
                       <td><input value={it.spec} onChange={(e) => setItem(i, { spec: e.target.value })} /></td>
                       <td className="w-12"><input value={it.unit} onChange={(e) => setItem(i, { unit: e.target.value })} className="text-center" /></td>
-                      <td className="w-16"><input type="number" value={it.qty} onChange={(e) => setItem(i, { qty: e.target.value })} className="text-right" /></td>
-                      <td className="w-24"><input type="number" value={it.price} onChange={(e) => setItem(i, { price: e.target.value })} className="text-right" /></td>
+                      <td className="w-16"><input inputMode="numeric" value={it.qty} onChange={(e) => setItem(i, { qty: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
+                      <td className="w-24"><input inputMode="numeric" value={it.price ? Number(it.price).toLocaleString("ko-KR") : ""} onChange={(e) => setItem(i, { price: e.target.value.replace(/[^\d]/g, "") })} className="text-right" /></td>
                       <td className="w-24 text-right text-slate-600">{won(supplyOf(it))}</td>
                       <td className="w-20 text-right text-slate-600">{won(vatOf(it))}</td>
                       <td className="w-24 text-right font-medium text-slate-700">{won(supplyOf(it) + vatOf(it))}</td>
