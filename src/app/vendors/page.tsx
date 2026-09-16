@@ -42,7 +42,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
   const [company, setCompany] = useState(vendor.name);
   const [ceo, setCeo] = useState(vendor.ceo ?? "");
   const [tel, setTel] = useState("");
-  const [addr, setAddr] = useState(vendor.note ?? "");
+  const [fax, setFax] = useState("");
   const [no, setNo] = useState(defaultNo());
   const [date, setDate] = useState(todayStr());
   const [items, setItems] = useState<POItem[]>([blankItem()]);
@@ -54,7 +54,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
   const grand = totSupply + totVat;
 
   const setItem = (i: number, patch: Partial<POItem>) => setItems((p) => p.map((x, idx) => (idx === i ? { ...x, ...patch } : x)));
-  const addItem = () => setItems((p) => (p.length >= 10 ? p : [...p, blankItem()]));
+  const addItem = () => setItems((p) => (p.length >= 28 ? p : [...p, blankItem()]));
   const delItem = (i: number) => setItems((p) => (p.length <= 1 ? p : p.filter((_, idx) => idx !== i)));
 
   async function download() {
@@ -70,8 +70,8 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       ws.getCell("C5").value = company;
       ws.getCell("G5").value = ceo;
       ws.getCell("C6").value = tel;
-      ws.getCell("C7").value = addr;
-      items.slice(0, 10).forEach((it, i) => {
+      ws.getCell("G6").value = fax;
+      items.slice(0, 28).forEach((it, i) => {
         const r = 13 + i, sup = supplyOf(it), vat = vatOf(it);
         ws.getCell(`B${r}`).value = it.name || "";
         ws.getCell(`C${r}`).value = it.spec || "";
@@ -82,9 +82,10 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
         ws.getCell(`H${r}`).value = vat || null;
         ws.getCell(`I${r}`).value = sup ? sup + vat : null;
       });
-      ws.getCell("G23").value = totSupply || null;
-      ws.getCell("H23").value = totVat || null;
-      ws.getCell("I23").value = grand || null;
+      ws.getCell("G41").value = totSupply || null;
+      ws.getCell("H41").value = totVat || null;
+      ws.getCell("I41").value = grand || null;
+      ws.getCell("A47").value = date ? `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일` : "";
       const out = await wb.xlsx.writeBuffer();
       const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const a = document.createElement("a");
@@ -106,32 +107,46 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       const sup = supplyOf(it), vat = vatOf(it);
       return `<tr><td style="text-align:center">${i + 1}</td><td>${esc(it.name)}</td><td>${esc(it.spec)}</td><td style="text-align:center">${esc(it.unit)}</td><td style="text-align:right">${it.qty ? won(Number(it.qty)) : ""}</td><td style="text-align:right">${it.price ? won(Number(it.price)) : ""}</td><td style="text-align:right">${won(sup)}</td><td style="text-align:right">${won(vat)}</td><td style="text-align:right">${won(sup + vat)}</td></tr>`;
     }).join("");
+    const dateK = date ? `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일` : "";
     return `
-      <h1 style="text-align:center;letter-spacing:8px;margin:0 0 14px">발 주 서</h1>
-      <table class="kv"><tr>
+      <h1>발 주 서</h1>
+      <table class="kv"><colgroup><col style="width:14%"><col style="width:36%"><col style="width:14%"><col style="width:36%"></colgroup><tr>
         <th>발주번호</th><td>${esc(no)}</td><th>발주일</th><td>${esc(date)}</td>
       </tr></table>
-      <table class="box"><tr>
-        <th rowspan="4" class="side">공급자</th><th>업체명</th><td>${esc(company)}</td><th>대표자</th><td>${esc(ceo)}</td></tr>
-        <tr><th>전화</th><td>${esc(tel)}</td><th>주소</th><td>${esc(addr)}</td></tr>
+      <table class="box">
+        <colgroup><col style="width:8%"><col style="width:10%"><col style="width:32%"><col style="width:10%"><col style="width:40%"></colgroup>
+        <tr><th rowspan="2" class="side">공급자</th><th>업체명</th><td>${esc(company)}</td><th>대표자</th><td>${esc(ceo)}</td></tr>
+        <tr><th>전화</th><td>${esc(tel)}</td><th>팩스</th><td>${esc(fax)}</td></tr>
         <tr><th rowspan="2" class="side">발주자</th><th>업체명</th><td>㈜신정개발</td><th>담당자</th><td>정한솔</td></tr>
         <tr><th>전화</th><td>061-682-5537</td><th>팩스</th><td>061-683-5567</td></tr>
       </table>
-      <p style="font-weight:bold;margin:12px 0 4px">■ 발주내역</p>
+      <p class="sec">■ 발주내역</p>
       <table class="items">
-        <thead><tr><th>NO</th><th>품목</th><th>규격/재질</th><th>단위</th><th>수량</th><th>단가</th><th>공급가액</th><th>세액</th><th>합계금액</th></tr></thead>
+        <colgroup><col style="width:6%"><col style="width:20%"><col style="width:18%"><col style="width:7%"><col style="width:7%"><col style="width:12%"><col style="width:12%"><col style="width:9%"><col style="width:9%"></colgroup>
+        <thead>
+          <tr><th rowspan="2">NO</th><th rowspan="2">품목</th><th rowspan="2">규격 및 재질</th><th rowspan="2">단위</th><th rowspan="2">수량</th><th colspan="3">금액</th><th rowspan="2">합계금액</th></tr>
+          <tr><th>단가</th><th>공급가액</th><th>세액</th></tr>
+        </thead>
         <tbody>${rowsHtml}
-          <tr class="sum"><td colspan="6" style="text-align:center">합 계</td><td style="text-align:right">${won(totSupply)}</td><td style="text-align:right">${won(totVat)}</td><td style="text-align:right">${won(grand)}</td></tr>
+          <tr class="sum"><td colspan="6">합 계</td><td class="r">${won(totSupply)}</td><td class="r">${won(totVat)}</td><td class="r">${won(grand)}</td></tr>
         </tbody>
       </table>
-      <p style="margin-top:8px;font-size:12px">비고 : 부가세 포함</p>`;
+      <table class="kv"><tr><th style="width:14%">비고사항</th><td style="text-align:left">- 부가세 포함</td></tr></table>
+      <p class="note2">위와 같은 내용으로 발주하오니 납기를 준수하여 납품해 주시기 바랍니다.</p>
+      <p class="date">${dateK}</p>
+      <p class="sign">㈜ 신 정 개 발</p>`;
   }
-  const DOC_CSS = `body{font-family:'Malgun Gothic',sans-serif;color:#222;margin:0}
-    h1{font-size:26px} table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px}
-    .kv th,.kv td,.box th,.box td,.items th,.items td{border:1px solid #888;padding:5px 7px}
-    .kv th,.box th,.items th{background:#eef2f8} .box .side{background:#e2e8f0;font-weight:bold}
-    .items th{text-align:center} .items .sum td{background:#eef2f8;font-weight:bold}
-    @page{size:A4;margin:15mm}`;
+  const DOC_CSS = `body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;color:#222;margin:0}
+    h1{font-size:26px;text-align:center;letter-spacing:10px;margin:0 0 16px}
+    table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px;table-layout:fixed}
+    th,td{border:1px solid #888;padding:5px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    th{background:#eef2f8;text-align:center} .box .side{background:#e2e8f0;font-weight:bold}
+    td{text-align:left} .items td{text-align:right} .items td:nth-child(2),.items td:nth-child(3){text-align:left}
+    .items td:nth-child(1),.items td:nth-child(4){text-align:center}
+    .items .sum td{background:#eef2f8;font-weight:bold;text-align:center} .items .sum td.r{text-align:right}
+    .sec{font-weight:bold;margin:12px 0 4px} .note2{text-align:center;margin:22px 0 4px;font-size:13px}
+    .date{text-align:center;font-size:14px;margin:6px 0} .sign{text-align:center;font-size:16px;font-weight:bold;letter-spacing:2px;margin:4px 0}
+    @page{size:A4;margin:14mm}`;
   function printPDF() {
     const ifr = document.createElement("iframe");
     ifr.style.position = "fixed"; ifr.style.right = "0"; ifr.style.bottom = "0"; ifr.style.width = "0"; ifr.style.height = "0"; ifr.style.border = "0";
@@ -179,7 +194,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
                   <label className="flex items-center gap-2"><span className="w-12 shrink-0 text-xs text-slate-500">업체명</span><input value={company} onChange={(e) => setCompany(e.target.value)} className={`${field} flex-1`} /></label>
                   <label className="flex items-center gap-2"><span className="w-12 shrink-0 text-xs text-slate-500">대표자</span><input value={ceo} onChange={(e) => setCeo(e.target.value)} className={`${field} flex-1`} /></label>
                   <label className="flex items-center gap-2"><span className="w-12 shrink-0 text-xs text-slate-500">전화</span><input value={tel} onChange={(e) => setTel(e.target.value)} className={`${field} flex-1`} /></label>
-                  <label className="flex items-center gap-2"><span className="w-12 shrink-0 text-xs text-slate-500">주소</span><input value={addr} onChange={(e) => setAddr(e.target.value)} className={`${field} flex-1`} /></label>
+                  <label className="flex items-center gap-2"><span className="w-12 shrink-0 text-xs text-slate-500">팩스</span><input value={fax} onChange={(e) => setFax(e.target.value)} className={`${field} flex-1`} /></label>
                 </div>
               </div>
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -223,7 +238,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
                 </tbody>
               </table>
             </div>
-            {items.length < 10 && (
+            {items.length < 28 && (
               <button onClick={addItem} className="mt-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"><Plus className="h-3.5 w-3.5" /> 품목 추가</button>
             )}
             <p className="mt-2 text-[11px] text-slate-400">※ 수량·단가를 입력하면 공급가액·세액(10%)·합계가 자동 계산됩니다. 비고: 부가세 포함.</p>
