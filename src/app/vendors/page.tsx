@@ -36,6 +36,7 @@ const supplyOf = (it: POItem) => Number(it.supply) || 0; // 공급가액(직접 
 const vatOf = (it: POItem) => Math.round(supplyOf(it) * 0.1);
 
 function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+const dateKor = (d: string) => (d ? `${d.slice(0, 4)}년 ${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일` : "");
 function defaultNo() { const d = new Date(); return `제${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}-01호`; }
 
 function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () => void }) {
@@ -77,7 +78,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       await wb.xlsx.load(buf);
       const ws = wb.worksheets[0];
       ws.getCell("B3").value = no;
-      ws.getCell("G3").value = date;
+      ws.getCell("G3").value = dateKor(date);
       ws.getCell("C5").value = company;
       ws.getCell("G5").value = ceo;
       ws.getCell("C6").value = tel;
@@ -96,7 +97,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       ws.getCell("G33").value = totSupply || null;
       ws.getCell("H33").value = totVat || null;
       ws.getCell("I33").value = grand || null;
-      ws.getCell("A39").value = date ? `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일` : "";
+      ws.getCell("A39").value = dateKor(date);
       const out = await wb.xlsx.writeBuffer();
       const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const a = document.createElement("a");
@@ -118,11 +119,11 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       const sup = supplyOf(it), vat = vatOf(it);
       return `<tr><td style="text-align:center">${i + 1}</td><td>${esc(it.name)}</td><td>${esc(it.spec)}</td><td style="text-align:center">${esc(it.unit)}</td><td style="text-align:right">${it.qty ? won(Number(it.qty)) : ""}</td><td style="text-align:right">${it.price ? won(Number(it.price)) : ""}</td><td style="text-align:right">${won(sup)}</td><td style="text-align:right">${won(vat)}</td><td style="text-align:right">${won(sup + vat)}</td></tr>`;
     }).join("");
-    const dateK = date ? `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월 ${Number(date.slice(8, 10))}일` : "";
+    const dateK = dateKor(date);
     return `
       <h1>발 주 서</h1>
       <table class="kv"><colgroup><col style="width:14%"><col style="width:36%"><col style="width:14%"><col style="width:36%"></colgroup><tr>
-        <th>발주번호</th><td>${esc(no)}</td><th>발주일</th><td>${esc(date)}</td>
+        <th>발주번호</th><td>${esc(no)}</td><th>발주일</th><td>${esc(dateK)}</td>
       </tr></table>
       <table class="box">
         <colgroup><col style="width:8%"><col style="width:10%"><col style="width:32%"><col style="width:10%"><col style="width:40%"></colgroup>
