@@ -128,11 +128,9 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       ws.getCell("I33").value = grand || null;
       for (const col of ["G", "H", "I"]) ws.getCell(`${col}33`).numFmt = "#,##0";
       ws.getCell("A39").value = dateKor(date);
-      // 한 페이지에 맞춰 인쇄
+      // 한 페이지에 맞춰 인쇄 — fitToPage는 exceljs가 scale과 충돌 출력해 파일이 손상되므로 축소배율(scale) 사용
       ws.pageSetup.orientation = "portrait";
-      ws.pageSetup.fitToPage = true;
-      ws.pageSetup.fitToWidth = 1;
-      ws.pageSetup.fitToHeight = 1;
+      ws.pageSetup.scale = 70;
       ws.pageSetup.horizontalCentered = true;
       ws.pageSetup.margins = { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 };
       ws.pageSetup.printArea = "A1:I41";
