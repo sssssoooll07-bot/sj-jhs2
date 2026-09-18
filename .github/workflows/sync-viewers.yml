@@ -1,0 +1,32 @@
+name: 접근권한 클레임 동기화
+
+# 접근 관리(/access)에서 뷰어를 추가·수정·삭제한 뒤 실행하면
+# Firestore 목록이 각 계정의 Auth 커스텀 클레임(viewer, scopes)에 반영됩니다.
+# - 수동(Run workflow): 계정 추가 직후 즉시 반영용
+# - 예약(6시간마다): 안전망
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 의존성 설치
+        run: npm ci
+      - name: Firestore → 커스텀 클레임 동기화
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::error::FIREBASE_SERVICE_ACCOUNT 시크릿이 없습니다."; exit 1
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          node scripts/sync-viewers.mjs
+          rm -f "$RUNNER_TEMP/sa.json"

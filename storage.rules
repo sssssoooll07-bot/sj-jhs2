@@ -2,29 +2,21 @@ rules_version = '2';
 
 // Firebase Storage 보안 규칙
 // - 소유자(sssssoooll07): 읽기+쓰기(편집)
-// - 접근 관리(Firestore config/access.viewers)에 등록된 이메일: 읽기 전용
-//   · 계정별 열람 범위(config/access.scopes[email])에 따라 문서 폴더 접근을 제한한다.
-//   · scopes에 항목이 없거나 "*"이면 전체 허용(하위호환).
+// - 보기 전용 뷰어: 커스텀 클레임 viewer==true (접근 관리 목록 → Auth 클레임 동기화)
+//   · 계정별 열람 범위는 클레임 scopes(섹션키 배열, "*"=전체)로 제한한다.
+//   · (이 프로젝트의 firebasestorage.app 버킷은 Storage 규칙의 cross-service firestore.get이
+//      동작하지 않아, Firestore 대신 커스텀 클레임으로 판별한다.)
 service firebase.storage {
   match /b/{bucket}/o {
     function isOwner() {
       return request.auth != null && request.auth.token.email == 'sssssoooll07@gmail.com';
     }
-    function accessData() {
-      return firestore.get(/databases/(default)/documents/config/access).data;
-    }
-    // 접근 관리 페이지에서 등록한 보기 전용 계정
     function isViewer() {
-      return request.auth != null
-        && firestore.exists(/databases/(default)/documents/config/access)
-        && request.auth.token.email in accessData().viewers;
+      return request.auth != null && request.auth.token.viewer == true;
     }
     function canRead() { return isOwner() || isViewer(); }
-    // 해당 뷰어의 열람 범위 목록(없으면 전체['*'])
-    function viewerScopes() {
-      return accessData().get('scopes', {}).get(request.auth.token.email, ['*']);
-    }
-    // 섹션 접근 가능 여부: 소유자 또는 (뷰어 & (전체 또는 해당 섹션 포함))
+    // 뷰어의 열람 범위(클레임). 없으면 전체['*'].
+    function viewerScopes() { return request.auth.token.get('scopes', ['*']); }
     function scopeAllows(section) {
       return isOwner() || ( isViewer() && ( ('*' in viewerScopes()) || (section in viewerScopes()) ) );
     }

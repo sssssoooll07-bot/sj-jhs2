@@ -183,10 +183,10 @@ export default function AccessPage() {
           </ul>
         )}
 
-        <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
-          ※ 추가된 계정은 해당 이메일로 <b>Google 로그인</b> 후 지정된 범위만 열람합니다(반영까지 1~2분). 편집·삭제·업로드는 불가합니다.
-          범위에 포함된 메뉴만 보이며, 특허·과제·사업비·인증·자료실의 <b>원본 문서 파일</b>도 범위에 따라 열람이 제한됩니다.
-        </p>
+        <div className="mt-3 space-y-1 text-[11px] leading-relaxed text-slate-400">
+          <p>※ 추가된 계정은 해당 이메일로 <b>Google 로그인</b>하면 지정된 범위만 열람합니다. 편집·삭제·업로드는 불가하고, 범위에 포함된 메뉴만 보이며 특허·과제·사업비·인증·자료실의 <b>원본 문서 파일</b>도 범위에 따라 제한됩니다.</p>
+          <p>⚙ 계정 추가·범위 변경 후 <b>파일 열람 권한</b>이 반영되려면 GitHub → Actions → <b>“접근권한 클레임 동기화”</b>를 <b>Run workflow</b>로 실행하세요(자동은 6시간마다). 실행 뒤 해당 계정이 새로고침하면 바로 반영됩니다.</p>
+        </div>
       </Section>
     </div>
   );

@@ -90,6 +90,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setAuthReady(true);
       if (u) {
         setReady(false);
+        // 최신 커스텀 클레임(viewer/scopes)을 반영하기 위해 토큰 강제 갱신 후 로드
+        try { await u.getIdToken(true); } catch { /* 네트워크 문제면 캐시 토큰으로 진행 */ }
         await loadFromFirebase();
         setReady(true);
       } else {
