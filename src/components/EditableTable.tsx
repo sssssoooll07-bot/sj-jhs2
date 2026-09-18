@@ -41,7 +41,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -60,6 +60,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   rowFilter?: (r: T) => boolean;
   /** 행 클릭 시 호출 (수정 버튼 제외) — 상세 보기 등 */
   onRowClick?: (r: T) => void;
+  /** onRowClick 없이도 ✎ 수정 열을 표시하고, 행 배경 클릭은 아무 동작도 하지 않게 한다 */
+  editColumn?: boolean;
 }) {
   const { saveSheet, error } = useDataCtx();
   const { canEdit } = useAccess();
@@ -84,6 +86,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   const tableCols = cols.filter((c) => !c.hide);
   const formCols = cols.filter((c) => c.editable !== false);
   const visible = rows.map((r, i) => ({ r, i })).filter(({ r }) => !rowFilter || rowFilter(r));
+  const showEditCol = (!!onRowClick || editColumn) && !addOnly && !ro; // ✎ 수정 열 표시 여부
+  const rowClickEdits = !onRowClick && !editColumn && !addOnly && !ro; // 행 배경 클릭으로 수정 열림 여부
 
   return (
     <div>
@@ -103,18 +107,18 @@ export function EditableTable<T extends Record<string, unknown>>({
             <thead>
               <tr>
                 {tableCols.map((c, ci) => <th key={ci} className={c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""}>{c.th ?? c.label}</th>)}
-                {onRowClick && !addOnly && !ro && <th className="text-right">수정</th>}
+                {showEditCol && <th className="text-right">수정</th>}
               </tr>
             </thead>
             <tbody>
               {visible.map(({ r, i }) => (
-                <tr key={i} onClick={() => { if (onRowClick) onRowClick(r); else if (!addOnly && !ro) setModal({ r: { ...r }, isNew: false, index: i }); }} className={`hover:bg-slate-50 ${onRowClick || (!addOnly && !ro) ? "cursor-pointer" : ""}`}>
+                <tr key={i} onClick={() => { if (onRowClick) onRowClick(r); else if (rowClickEdits) setModal({ r: { ...r }, isNew: false, index: i }); }} className={`hover:bg-slate-50 ${onRowClick || rowClickEdits ? "cursor-pointer" : ""}`}>
                   {tableCols.map((c, ci) => (
                     <td key={ci} className={`${c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""} ${c.nowrap ? "whitespace-nowrap" : ""}`}>
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
                     </td>
                   ))}
-                  {onRowClick && !addOnly && !ro && (
+                  {showEditCol && (
                     <td className="text-right">
                       <button onClick={(e) => { e.stopPropagation(); setModal({ r: { ...r }, isNew: false, index: i }); }} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
                         <Pencil className="h-4 w-4" />

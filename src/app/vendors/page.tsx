@@ -10,8 +10,21 @@ import type { Data, Vendor } from "@/lib/excel";
 const won = (v: number) => (v ? v.toLocaleString("ko-KR") : "");
 const esc = (s: string) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const COLS: Col<Vendor>[] = [
-  { key: "name", label: "거래처명", span: true, view: (v) => <span className="font-medium text-slate-800">{v.name}</span> },
+// 거래처명 셀만 클릭하면 발주서가 열리도록, 이름 클릭 핸들러를 받아 컬럼을 만든다.
+const makeCols = (openPO: (v: Vendor) => void): Col<Vendor>[] => [
+  {
+    key: "name", label: "거래처명", span: true,
+    view: (v) => (
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); openPO(v); }}
+        className="text-left font-medium text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-800 hover:decoration-blue-500"
+        title="발주서 작성"
+      >
+        {v.name}
+      </button>
+    ),
+  },
   { key: "bizNo", label: "사업자등록번호", th: "사업자등록번호", nowrap: true, align: "center", view: (v) => v.bizNo ?? "—" },
   { key: "ceo", label: "대표자", th: "대표자", nowrap: true, align: "center", view: (v) => v.ceo ?? "—" },
   { key: "note", label: "주소", th: "주소", view: (v) => <span className="text-xs text-slate-500">{v.note ?? "—"}</span> },
@@ -364,8 +377,8 @@ function VendorsInner({ data }: { data: Data }) {
         <EditableTable
           rows={data.vendors}
           rowFilter={rowFilter}
-          onRowClick={(v) => setPo(v)}
-          cols={COLS}
+          editColumn
+          cols={makeCols(setPo)}
           sheetName="거래처"
           toSheetRow={toRow}
           blank={EMPTY}
