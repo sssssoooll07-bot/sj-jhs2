@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-17T01:14:00.427Z",
+ "fetchedAt": "2026-09-18T01:09:23.389Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -14,17 +14,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-06-26",
-   "applyEnd": "2026-07-31",
-   "announcedAt": "2026-06-26",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년도 제2차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
    "category": "중소벤처기업부 혁신제품 지정 연장사업",
    "summary": null,
@@ -32,6 +21,17 @@
    "applyEnd": "2026-07-31",
    "announcedAt": "2026-06-26",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02870&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-06-26",
+   "applyEnd": "2026-07-31",
+   "announcedAt": "2026-06-26",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02869&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "SMTECH",
@@ -98,17 +98,6 @@
    "applyEnd": "2026-09-03",
    "announcedAt": "2026-07-10",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02874&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "보성군 새싹 키움터 사업 3차 모집공고",
-   "category": "지역사업",
-   "summary": null,
-   "applyStart": "2026-08-28",
-   "applyEnd": "2026-09-11",
-   "announcedAt": "2026-08-28",
-   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000052"
   },
   {
    "source": "JNTP",
@@ -186,6 +175,17 @@
    "applyEnd": "2026-09-28",
    "announcedAt": "2026-09-03",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02877&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 전남 중소기업 연구조직 설립 및 R&D 기획지원 사업 3차 공고",
+   "category": "지역사업",
+   "summary": null,
+   "applyStart": "2026-09-18",
+   "applyEnd": "2026-09-30",
+   "announcedAt": "2026-09-18",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000063"
   },
   {
    "source": "SMTECH",
