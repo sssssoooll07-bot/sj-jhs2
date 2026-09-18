@@ -5,6 +5,7 @@ import { fmtDate, daysUntil, type Data, type Certification } from "@/lib/excel";
 import { Badge, Dday, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
+import { useAccess } from "@/lib/access-context";
 import DocViewButton from "@/components/DocViewButton";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 
@@ -25,6 +26,7 @@ const yr = (c: Certification) => String(c.year ?? "").trim();
 
 function CertInner({ data }: { data: Data }) {
   const { getByPattern, loadFolder, uploading, refresh } = useAgreementFiles();
+  const { canEdit } = useAccess();
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => { void refresh(); }, [refresh]);
 
@@ -61,13 +63,15 @@ function CertInner({ data }: { data: Data }) {
 
   return (
     <Section title={`🏅 인증 · 면허 · 표창 — ${shown}건${year !== "전체" ? ` (${year}년)` : ""}`} sub="갱신형은 '갱신 대상'을 켜고 만료일을 입력하면 D-day가 표시됩니다. 파일명에 명칭을 넣어 업로드하면 명칭 클릭 시 증서가 열립니다.">
-      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-        <p className="text-xs text-emerald-800">📎 인증서·확인서·표창장 파일 업로드(PDF·이미지). 명칭과 파일명이 같으면 명칭 클릭 시 열립니다.</p>
-        <button onClick={() => fileRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-          {uploading ? "업로드 중…" : "파일 업로드"}
-        </button>
-        <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => e.target.files && loadFolder(e.target.files, "cert")} />
-      </div>
+      {canEdit && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+          <p className="text-xs text-emerald-800">📎 인증서·확인서·표창장 파일 업로드(PDF·이미지). 명칭과 파일명이 같으면 명칭 클릭 시 열립니다.</p>
+          <button onClick={() => fileRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+            {uploading ? "업로드 중…" : "파일 업로드"}
+          </button>
+          <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => e.target.files && loadFolder(e.target.files, "cert")} />
+        </div>
+      )}
 
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>

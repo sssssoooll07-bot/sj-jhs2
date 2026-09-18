@@ -5,6 +5,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Empty } from "@/components/ui";
 import { fmtDate } from "@/lib/excel";
 import { useDataCtx } from "@/lib/data-context";
+import { useAccess } from "@/lib/access-context";
 
 export type Col<T> = {
   key: Extract<keyof T, string>;
@@ -61,6 +62,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   onRowClick?: (r: T) => void;
 }) {
   const { saveSheet, error } = useDataCtx();
+  const { canEdit } = useAccess();
+  const ro = readOnly || !canEdit; // 소유자가 아니면 편집·추가·삭제 비활성(보기 전용)
   const [modal, setModal] = useState<{ r: T; isNew: boolean; index: number } | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -84,7 +87,7 @@ export function EditableTable<T extends Record<string, unknown>>({
 
   return (
     <div>
-      {!readOnly && (
+      {!ro && (
         <div className="mb-4 flex items-center gap-2">
           <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700">
             <Plus className="h-3.5 w-3.5" /> {addLabel}
@@ -100,18 +103,18 @@ export function EditableTable<T extends Record<string, unknown>>({
             <thead>
               <tr>
                 {tableCols.map((c, ci) => <th key={ci} className={c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""}>{c.th ?? c.label}</th>)}
-                {onRowClick && !addOnly && !readOnly && <th className="text-right">수정</th>}
+                {onRowClick && !addOnly && !ro && <th className="text-right">수정</th>}
               </tr>
             </thead>
             <tbody>
               {visible.map(({ r, i }) => (
-                <tr key={i} onClick={() => { if (onRowClick) onRowClick(r); else if (!addOnly && !readOnly) setModal({ r: { ...r }, isNew: false, index: i }); }} className={`hover:bg-slate-50 ${onRowClick || (!addOnly && !readOnly) ? "cursor-pointer" : ""}`}>
+                <tr key={i} onClick={() => { if (onRowClick) onRowClick(r); else if (!addOnly && !ro) setModal({ r: { ...r }, isNew: false, index: i }); }} className={`hover:bg-slate-50 ${onRowClick || (!addOnly && !ro) ? "cursor-pointer" : ""}`}>
                   {tableCols.map((c, ci) => (
                     <td key={ci} className={`${c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""} ${c.nowrap ? "whitespace-nowrap" : ""}`}>
                       {c.view ? c.view(r) : cellText(r[c.key], c.type)}
                     </td>
                   ))}
-                  {onRowClick && !addOnly && !readOnly && (
+                  {onRowClick && !addOnly && !ro && (
                     <td className="text-right">
                       <button onClick={(e) => { e.stopPropagation(); setModal({ r: { ...r }, isNew: false, index: i }); }} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-600" title="수정">
                         <Pencil className="h-4 w-4" />

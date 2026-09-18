@@ -7,6 +7,7 @@ import { fmtKWon, fmtDate, type Data, type Project, type Agreement } from "@/lib
 import { Badge, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
+import { useAccess } from "@/lib/access-context";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
 
@@ -54,6 +55,7 @@ const toRow = (p: Project) => ({
 /** 전용통장 1건 + 통장거래내역 (상세용) */
 function AccountBox({ p }: { p: Project }) {
   const { getByPattern, loadFolder, uploading } = useAgreementFiles();
+  const { canEdit } = useAccess();
   const bankRef = useRef<HTMLInputElement>(null);
   const stmt = getByPattern(p.code, "bankbook");
   return (
@@ -72,13 +74,17 @@ function AccountBox({ p }: { p: Project }) {
       </div>
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
         <p className="text-xs text-emerald-800">통장거래내역: {stmt ? <DocViewButton doc={stmt} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다."}</p>
-        <button onClick={() => bankRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-          {uploading ? "업로드 중…" : "거래내역 업로드"}
-        </button>
-        <input ref={bankRef} type="file"
-          // @ts-expect-error webkitdirectory는 표준 타입에 없음
-          webkitdirectory="" directory="" multiple className="hidden"
-          onChange={(e) => e.target.files && loadFolder(e.target.files, "bankbook")} />
+        {canEdit && (
+          <>
+            <button onClick={() => bankRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+              {uploading ? "업로드 중…" : "거래내역 업로드"}
+            </button>
+            <input ref={bankRef} type="file"
+              // @ts-expect-error webkitdirectory는 표준 타입에 없음
+              webkitdirectory="" directory="" multiple className="hidden"
+              onChange={(e) => e.target.files && loadFolder(e.target.files, "bankbook")} />
+          </>
+        )}
       </div>
     </div>
   );
@@ -87,18 +93,23 @@ function AccountBox({ p }: { p: Project }) {
 /** 사업계획서 1건 (상세용) */
 function PlanBox({ p }: { p: Project }) {
   const { getByPattern, loadFolder, uploading } = useAgreementFiles();
+  const { canEdit } = useAccess();
   const planRef = useRef<HTMLInputElement>(null);
   const doc = getByPattern(p.code, "businessplan");
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
       <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">사업계획서:</span> {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF 권장)."}</p>
-      <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-slate-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-slate-700 disabled:opacity-50">
-        {uploading ? "업로드 중…" : "사업계획서 업로드"}
-      </button>
-      <input ref={planRef} type="file"
-        // @ts-expect-error webkitdirectory는 표준 타입에 없음
-        webkitdirectory="" directory="" multiple className="hidden"
-        onChange={(e) => e.target.files && loadFolder(e.target.files, "businessplan")} />
+      {canEdit && (
+        <>
+          <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-slate-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-slate-700 disabled:opacity-50">
+            {uploading ? "업로드 중…" : "사업계획서 업로드"}
+          </button>
+          <input ref={planRef} type="file"
+            // @ts-expect-error webkitdirectory는 표준 타입에 없음
+            webkitdirectory="" directory="" multiple className="hidden"
+            onChange={(e) => e.target.files && loadFolder(e.target.files, "businessplan")} />
+        </>
+      )}
     </div>
   );
 }
@@ -106,16 +117,21 @@ function PlanBox({ p }: { p: Project }) {
 /** 연구노트 최종본 PDF 1건 (R&D 과제 상세용) */
 function NoteBox({ p }: { p: Project }) {
   const { getByPattern, loadFolder, uploading } = useAgreementFiles();
+  const { canEdit } = useAccess();
   const noteRef = useRef<HTMLInputElement>(null);
   const doc = getByPattern(p.code, "researchnote");
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
       <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">연구노트(최종본):</span> {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF)."}</p>
-      <button onClick={() => noteRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-indigo-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
-        {uploading ? "업로드 중…" : "연구노트 업로드"}
-      </button>
-      <input ref={noteRef} type="file" accept=".pdf" multiple className="hidden"
-        onChange={(e) => e.target.files && loadFolder(e.target.files, "researchnote")} />
+      {canEdit && (
+        <>
+          <button onClick={() => noteRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-indigo-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+            {uploading ? "업로드 중…" : "연구노트 업로드"}
+          </button>
+          <input ref={noteRef} type="file" accept=".pdf" multiple className="hidden"
+            onChange={(e) => e.target.files && loadFolder(e.target.files, "researchnote")} />
+        </>
+      )}
     </div>
   );
 }

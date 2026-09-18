@@ -7,8 +7,8 @@ import {
   Megaphone, Percent, BadgeCheck, Users, FolderOpen, Wallet, Building2, KeyRound, type LucideIcon,
 } from "lucide-react";
 import { DataStatus } from "@/components/FileGate";
-import { useDataCtx } from "@/lib/data-context";
-import { OWNER_EMAIL } from "@/lib/firebase";
+import { useAccess } from "@/lib/access-context";
+import { sectionForHref } from "@/lib/sections";
 
 const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/", label: "대시보드", Icon: LayoutDashboard },
@@ -26,8 +26,11 @@ const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
 /** 좌측 탭 내비게이션 (다크) */
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user } = useDataCtx();
-  const nav = user?.email === OWNER_EMAIL ? [...NAV, { href: "/access", label: "접근 관리", Icon: KeyRound }] : NAV;
+  const { isOwner, allowed } = useAccess();
+  // 소유자: 전체 + 접근 관리 / 뷰어: 열람 범위에 포함된 메뉴만
+  const nav = isOwner
+    ? [...NAV, { href: "/access", label: "접근 관리", Icon: KeyRound }]
+    : NAV.filter((n) => allowed(sectionForHref(n.href)));
   return (
     <aside className="fixed inset-y-0 left-0 z-20 flex w-60 flex-col bg-slate-900 text-slate-300">
       <div className="px-5 py-5">

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { DataProvider } from "@/lib/data-context";
+import { AccessProvider } from "@/lib/access-context";
 import { AgreementFilesProvider } from "@/lib/agreement-files";
 import Sidebar from "@/components/Sidebar";
+import SectionGuard from "@/components/SectionGuard";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,15 +16,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko">
       <body>
         <DataProvider>
-          <AgreementFilesProvider>
-            <Sidebar />
-            <div className="pl-60">
-              <main className="mx-auto max-w-6xl space-y-5 px-6 py-8">{children}</main>
-              <footer className="mx-auto max-w-6xl px-6 pb-8 text-xs text-slate-400">
-                🔒 데이터·협약서는 사용자가 브라우저에서 연 파일에서만 읽으며, 서버·저장소로 전송되지 않습니다.
-              </footer>
-            </div>
-          </AgreementFilesProvider>
+          <AccessProvider>
+            <AgreementFilesProvider>
+              <Sidebar />
+              <div className="pl-60">
+                <main className="mx-auto max-w-6xl space-y-5 px-6 py-8">
+                  <SectionGuard>{children}</SectionGuard>
+                </main>
+                <footer className="mx-auto max-w-6xl px-6 pb-8 text-xs text-slate-400">
+                  🔒 데이터·협약서는 사용자가 브라우저에서 연 파일에서만 읽으며, 서버·저장소로 전송되지 않습니다.
+                </footer>
+              </div>
+            </AgreementFilesProvider>
+          </AccessProvider>
         </DataProvider>
       </body>
     </html>

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useDataCtx } from "@/lib/data-context";
+import { useAccess } from "@/lib/access-context";
 
 /** Firebase 로그인 화면 (Firebase 사용 시, 미로그인 상태) */
 function LoginScreen() {
@@ -117,6 +118,7 @@ export function NeedFile() {
 /** 데이터 상태 표시 + 교체/제거/로그아웃 (vertical: 사이드바용) */
 export function DataStatus({ vertical = false }: { vertical?: boolean }) {
   const { data, fileName, remembered, clear, loadFile, uploadMaster, firebaseEnabled, user, signOutUser, source } = useDataCtx();
+  const { canEdit } = useAccess();
   const inputRef = useRef<HTMLInputElement>(null);
   if (!data && !user) return null;
 
@@ -136,16 +138,18 @@ export function DataStatus({ vertical = false }: { vertical?: boolean }) {
       )}
       {firebaseEnabled && user && <p className="truncate text-slate-400">👤 {user.email}</p>}
       <div className="flex flex-wrap gap-1.5">
-        <button onClick={() => inputRef.current?.click()} className="rounded-lg border border-white/15 px-2 py-1 text-slate-300 transition-colors hover:bg-white/10">
-          {firebaseEnabled ? "엑셀 갱신" : "파일 교체"}
-        </button>
+        {canEdit && (
+          <button onClick={() => inputRef.current?.click()} className="rounded-lg border border-white/15 px-2 py-1 text-slate-300 transition-colors hover:bg-white/10">
+            {firebaseEnabled ? "엑셀 갱신" : "파일 교체"}
+          </button>
+        )}
         {firebaseEnabled ? (
           <button onClick={signOutUser} className="rounded-lg border border-red-500/30 px-2 py-1 text-red-400 transition-colors hover:bg-red-500/10">로그아웃</button>
         ) : (
           <button onClick={clear} className="rounded-lg border border-red-500/30 px-2 py-1 text-red-400 transition-colors hover:bg-red-500/10">데이터 제거</button>
         )}
       </div>
-      <input ref={inputRef} type="file" accept=".xlsx,.xlsm" className="hidden" onChange={(e) => onReplace(e.target.files)} />
+      {canEdit && <input ref={inputRef} type="file" accept=".xlsx,.xlsm" className="hidden" onChange={(e) => onReplace(e.target.files)} />}
     </div>
   );
 }

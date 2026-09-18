@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { StatusBadge, Badge, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
+import { useAccess } from "@/lib/access-context";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
 import type { Patent } from "@/lib/excel";
@@ -32,6 +33,7 @@ const patentYear = (p: Patent): string => {
 
 export default function PatentsPage() {
   const { count, cloud, uploading, error, loadFolder, getByPattern, refresh } = useAgreementFiles();
+  const { canEdit } = useAccess();
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("2025");
 
@@ -98,16 +100,18 @@ export default function PatentsPage() {
               </a>
             </div>
 
-            <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-              <p className="text-xs text-emerald-800">🏅 특허증은 파일명에 <b>등록번호</b>(예: 10-2693397) 또는 특허명이 들어가면 자동 연결됩니다{cloud ? ` · ${count}건 로드됨` : ""}. 로그인 사용자만 열람.</p>
-              <button onClick={() => certRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-                {uploading ? "업로드 중…" : "특허증 폴더 업로드"}
-              </button>
-              <input ref={certRef} type="file"
-                // @ts-expect-error webkitdirectory는 표준 타입에 없음
-                webkitdirectory="" directory="" multiple className="hidden"
-                onChange={(e) => e.target.files && loadFolder(e.target.files, "patents")} />
-            </div>
+            {canEdit && (
+              <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <p className="text-xs text-emerald-800">🏅 특허증은 파일명에 <b>등록번호</b>(예: 10-2693397) 또는 특허명이 들어가면 자동 연결됩니다{cloud ? ` · ${count}건 로드됨` : ""}. 로그인 사용자만 열람.</p>
+                <button onClick={() => certRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                  {uploading ? "업로드 중…" : "특허증 폴더 업로드"}
+                </button>
+                <input ref={certRef} type="file"
+                  // @ts-expect-error webkitdirectory는 표준 타입에 없음
+                  webkitdirectory="" directory="" multiple className="hidden"
+                  onChange={(e) => e.target.files && loadFolder(e.target.files, "patents")} />
+              </div>
+            )}
             {error && <p className="mb-2 text-sm font-medium text-red-600">⚠ {error}</p>}
 
             <EditableTable rows={data.patents} rowFilter={inYear} cols={cols} sheetName="특허" toSheetRow={toRow} blank={EMPTY} requiredKey="title" addLabel="특허 추가" entityLabel="특허" />
