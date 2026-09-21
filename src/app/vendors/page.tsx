@@ -152,7 +152,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `발주서_${company || "거래처"}.xlsx`;
+      a.download = `발주서.xlsx`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     } catch (e) {
@@ -219,7 +219,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
     document.body.appendChild(ifr);
     const doc = ifr.contentWindow!.document;
     doc.open();
-    doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>발주서_${esc(company)}</title><style>${DOC_CSS}</style></head><body>${bodyHtml()}</body></html>`);
+    doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>발주서</title><style>${DOC_CSS}</style></head><body>${bodyHtml()}</body></html>`);
     doc.close();
     ifr.contentWindow!.focus();
     setTimeout(() => { ifr.contentWindow!.print(); setTimeout(() => document.body.removeChild(ifr), 1000); }, 300);
