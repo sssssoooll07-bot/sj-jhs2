@@ -122,20 +122,26 @@ function BudgetInner({ data }: { data: Data }) {
     {
       key: "amountKWon", label: "공급가액(원) — 입력하면 부가세·총액 자동", type: "money", align: "center", th: "공급가", nowrap: true, placeholder: "공급가 입력",
       view: (u) => won(u.amountKWon),
-      // 공급가 입력 → 부가세 10%(여비는 0), 총액 = 공급가+부가세
-      derive: (v, r) => { const a = Number(v) || 0; if (!a) return { vatKWon: null, grossKWon: null }; const vat = noVat(r.category) ? 0 : Math.round(a * 0.1); return { vatKWon: vat, grossKWon: a + vat }; },
+      // 공급가 입력 → 부가세 10%(여비는 0), 총액 = 공급가+부가세. (칸을 비우면 null, 0은 0으로 유지)
+      derive: (v, r) => { if (v == null) return { vatKWon: null, grossKWon: null }; const a = Number(v) || 0; const vat = noVat(r.category) ? 0 : Math.round(a * 0.1); return { vatKWon: vat, grossKWon: a + vat }; },
     },
     {
-      key: "vatKWon", label: "부가세(원) — 입력하면 공급가·총액 자동", type: "money", align: "center", th: "부가세", nowrap: true, placeholder: "부가세 입력",
+      key: "vatKWon", label: "부가세(원) — 0도 직접 입력 가능", type: "money", align: "center", th: "부가세", nowrap: true, placeholder: "부가세 입력",
       view: (u) => won(u.vatKWon),
-      // 부가세 입력 → 공급가 = 부가세×10, 총액 = 부가세×11 (여비는 부가세 없음)
-      derive: (v, r) => { if (noVat(r.category)) return { vatKWon: 0 }; const vat = Number(v) || 0; return vat ? { amountKWon: vat * 10, grossKWon: vat * 11 } : { amountKWon: null, grossKWon: null }; },
+      // 부가세 직접 입력(0 허용): 공급가가 있으면 총액만 갱신, 없으면 부가세로 역산. 여비는 항상 0.
+      derive: (v, r) => {
+        if (noVat(r.category)) return { vatKWon: 0, grossKWon: r.amountKWon ?? null };
+        if (v == null) return { grossKWon: r.amountKWon ?? null };
+        const vat = Number(v) || 0;
+        if (r.amountKWon != null) return { grossKWon: (Number(r.amountKWon) || 0) + vat };
+        return vat ? { amountKWon: vat * 10, grossKWon: vat * 11 } : { amountKWon: null, grossKWon: null };
+      },
     },
     {
       key: "grossKWon", label: "총액(원) — 입력하면 공급가·부가세 자동", type: "money", align: "center", th: "총액", nowrap: true, placeholder: "총액 입력",
       view: (u) => won(u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0))),
-      // 총액 입력 → 부가세 = 총액/11, 공급가 = 총액-부가세 (여비는 총액=공급가, 부가세 0)
-      derive: (v, r) => { const g = Number(v) || 0; if (!g) return { vatKWon: null, amountKWon: null }; if (noVat(r.category)) return { vatKWon: 0, amountKWon: g }; const vat = Math.round(g / 11); return { vatKWon: vat, amountKWon: g - vat }; },
+      // 총액 입력 → 부가세 = 총액/11, 공급가 = 총액-부가세 (여비는 총액=공급가, 부가세 0). 0 허용.
+      derive: (v, r) => { if (v == null) return { vatKWon: null, amountKWon: null }; const g = Number(v) || 0; if (noVat(r.category)) return { vatKWon: 0, amountKWon: g }; const vat = Math.round(g / 11); return { vatKWon: vat, amountKWon: g - vat }; },
     },
   ];
   const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, 거래처: u.payee, "총액(원)": u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0)), "금액(원)": u.amountKWon, "부가세(원)": u.vatKWon, 비고: u.note });
