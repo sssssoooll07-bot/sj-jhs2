@@ -176,7 +176,7 @@ export default function PatentsPage() {
             )}
             {error && <p className="mb-2 text-sm font-medium text-red-600">⚠ {error}</p>}
 
-            <EditableTable rows={data.patents} rowFilter={match} cols={cols} sheetName="특허" toSheetRow={toRow} blank={EMPTY} requiredKey="title" addLabel="특허 추가" entityLabel="특허" />
+            <EditableTable rows={data.patents} rowFilter={match} editColumn cols={cols} sheetName="특허" toSheetRow={toRow} blank={EMPTY} requiredKey="title" addLabel="특허 추가" entityLabel="특허" />
           </Section>
         );
       }}
