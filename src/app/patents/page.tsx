@@ -130,7 +130,7 @@ export default function PatentsPage() {
         const reg = data.patents.filter((p) => p.status === "등록완료").length;
         const filed = data.patents.filter((p) => p.status === "출원완료").length;
         const shown = data.patents.filter(match).length;
-        const kindLabel = kind === "등록" ? "등록특허" : kind === "출원" ? "출원" : "전체";
+        const kindLabel = kind === "등록" ? "등록완료" : kind === "출원" ? "출원완료" : "전체";
 
         return (
           <Section title={`💡 특허 — ${shown}건${kind !== "전체" ? ` · ${kindLabel}` : ""}${year !== "전체" ? ` · ${year}년` : kind === "전체" ? ` (등록 ${reg} · 출원 ${filed})` : ""}`} sub="행의 특허증 '보기 ↗'로 등록증 미리보기. ✎로 수정(연계사업 포함), '특허 추가'로 등록.">
@@ -139,7 +139,7 @@ export default function PatentsPage() {
               <span className="mr-1 text-xs font-semibold text-slate-400">분류</span>
               {(["전체", "등록", "출원"] as const).map((k) => (
                 <button key={k} onClick={() => setKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${kind === k ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
-                  {k === "전체" ? "전체" : k === "등록" ? "등록특허" : "출원"}
+                  {k === "전체" ? "전체" : k === "등록" ? "등록완료" : "출원완료"}
                 </button>
               ))}
             </div>
