@@ -44,7 +44,7 @@ function printPatents(rows: Patent[], subtitle: string) {
       <td class="c">${dt(p.filedAt)}</td>
       <td class="c">${dt(p.registeredAt)}</td>
       <td class="c">${esc(p.owner ?? "")}</td>
-      <td class="l">${esc(p.inventors ?? "")}</td>
+      <td class="ln">${esc(p.inventors ?? "")}</td>
       <td class="l">${esc(p.note ?? "")}</td>
     </tr>`).join("");
   const today = new Date();
@@ -56,7 +56,7 @@ function printPatents(rows: Patent[], subtitle: string) {
     table{border-collapse:collapse;width:100%;font-size:11px}
     th,td{border:1px solid #999;padding:4px 6px;vertical-align:middle}
     th{background:#eef2f8;text-align:center;white-space:nowrap}
-    td.c{text-align:center;white-space:nowrap} td.l{text-align:left}
+    td.c{text-align:center;white-space:nowrap} td.l{text-align:left} td.ln{text-align:left;white-space:nowrap}
     .foot{margin-top:14px;text-align:right;font-size:12px;font-weight:bold}`;
   const html = `<h1>특허 현황</h1><p class="sub">㈜신정개발 · ${esc(subtitle)} · 출력일 ${dateK}</p>
     <table><thead><tr>
