@@ -7,7 +7,7 @@ import { fmtKWon, fmtDate, type Data, type Project, type Agreement } from "@/lib
 import { Badge, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
-import { useAccess } from "@/lib/access-context";
+import { useCanEditHere } from "@/lib/access-context";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
 
@@ -55,7 +55,7 @@ const toRow = (p: Project) => ({
 /** 전용통장 1건 + 통장거래내역 (상세용) */
 function AccountBox({ p }: { p: Project }) {
   const { getByPattern, loadFolder, uploading } = useAgreementFiles();
-  const { canEdit } = useAccess();
+  const canEdit = useCanEditHere();
   const bankRef = useRef<HTMLInputElement>(null);
   const stmt = getByPattern(p.code, "bankbook");
   return (
@@ -93,7 +93,7 @@ function AccountBox({ p }: { p: Project }) {
 /** 사업계획서 1건 (상세용) */
 function PlanBox({ p }: { p: Project }) {
   const { getByPattern, loadFolder, uploading } = useAgreementFiles();
-  const { canEdit } = useAccess();
+  const canEdit = useCanEditHere();
   const planRef = useRef<HTMLInputElement>(null);
   const doc = getByPattern(p.code, "businessplan");
   return (
@@ -117,7 +117,7 @@ function PlanBox({ p }: { p: Project }) {
 /** 연구노트 최종본 PDF 1건 (R&D 과제 상세용) */
 function NoteBox({ p }: { p: Project }) {
   const { getByPattern, loadFolder, uploading } = useAgreementFiles();
-  const { canEdit } = useAccess();
+  const canEdit = useCanEditHere();
   const noteRef = useRef<HTMLInputElement>(null);
   const doc = getByPattern(p.code, "researchnote");
   return (

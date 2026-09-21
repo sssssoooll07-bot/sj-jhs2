@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { StatusBadge, Badge, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
-import { useAccess } from "@/lib/access-context";
+import { useCanEditHere } from "@/lib/access-context";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
 import { fmtDate, type Patent } from "@/lib/excel";
@@ -100,7 +100,7 @@ function AttachBtn({ p }: { p: Patent }) {
 
 export default function PatentsPage() {
   const { count, cloud, uploading, error, loadFolder, list, refresh } = useAgreementFiles();
-  const { canEdit } = useAccess();
+  const canEdit = useCanEditHere();
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("2025");
   const [kind, setKind] = useState<"전체" | "등록" | "출원">("전체"); // 분류: 등록특허 / 출원건

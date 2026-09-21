@@ -26,24 +26,34 @@ const normScope = (s) => {
   if (!Array.isArray(s) || s.length === 0 || s.includes("*") || s.length >= ALL.length) return ["*"];
   return s.filter((k) => ALL.includes(k));
 };
+// 수정범위: 없으면 [](수정 없음), 전부면 ["*"]
+const normEdit = (s) => {
+  if (!Array.isArray(s) || s.length === 0) return [];
+  if (s.includes("*") || s.length >= ALL.length) return ["*"];
+  return s.filter((k) => ALL.includes(k));
+};
+const pickCI = (m, em) => (m ? (m[em] ?? m[Object.keys(m).find((k) => k.toLowerCase() === em)]) : undefined);
 
 const snap = await db.collection("config").doc("access").get();
 const d = snap.exists ? snap.data() : {};
 const viewers = (d.viewers ?? []).map((v) => String(v).toLowerCase());
 const scopes = d.scopes ?? {};
-const wanted = new Map(); // email → scope[]
-for (const em of viewers) wanted.set(em, normScope(scopes[em] ?? scopes[Object.keys(scopes).find((k) => k.toLowerCase() === em)] ?? ["*"]));
+const editScopes = d.editScopes ?? {};
+const wanted = new Map(); // email → { scope[], edit[] }
+for (const em of viewers) wanted.set(em, { scope: normScope(pickCI(scopes, em) ?? ["*"]), edit: normEdit(pickCI(editScopes, em)) });
 
 let set = 0, cleared = 0, pending = 0;
 
 // 1) 목록의 계정에 클레임 설정
-for (const [em, scope] of wanted) {
+for (const [em, { scope, edit }] of wanted) {
   try {
     const u = await auth.getUserByEmail(em);
     const cur = u.customClaims ?? {};
-    const same = cur.viewer === true && JSON.stringify(cur.scopes ?? ["*"]) === JSON.stringify(scope);
-    if (!same) { await auth.setCustomUserClaims(u.uid, { viewer: true, scopes: scope }); set++; console.log("설정:", em, "->", scope); }
-    else console.log("유지:", em, "->", scope);
+    const same = cur.viewer === true
+      && JSON.stringify(cur.scopes ?? ["*"]) === JSON.stringify(scope)
+      && JSON.stringify(cur.editScopes ?? []) === JSON.stringify(edit);
+    if (!same) { await auth.setCustomUserClaims(u.uid, { viewer: true, scopes: scope, editScopes: edit }); set++; console.log("설정:", em, "보기", scope, "수정", edit); }
+    else console.log("유지:", em, "보기", scope, "수정", edit);
   } catch (e) {
     if (e.code === "auth/user-not-found") { pending++; console.log("대기(로그인 이력 없음):", em); }
     else throw e;

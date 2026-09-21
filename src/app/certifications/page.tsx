@@ -5,7 +5,7 @@ import { fmtDate, daysUntil, type Data, type Certification } from "@/lib/excel";
 import { Badge, Dday, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
-import { useAccess } from "@/lib/access-context";
+import { useCanEditHere } from "@/lib/access-context";
 import DocViewButton from "@/components/DocViewButton";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 
@@ -26,7 +26,7 @@ const yr = (c: Certification) => String(c.year ?? "").trim();
 
 function CertInner({ data }: { data: Data }) {
   const { getByPattern, loadFolder, uploading, refresh } = useAgreementFiles();
-  const { canEdit } = useAccess();
+  const canEdit = useCanEditHere();
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => { void refresh(); }, [refresh]);
 

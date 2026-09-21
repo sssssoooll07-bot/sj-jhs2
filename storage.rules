@@ -1,11 +1,11 @@
 rules_version = '2';
 
 // Firebase Storage 보안 규칙
-// - 소유자(sssssoooll07): 읽기+쓰기(편집)
+// - 소유자(sssssoooll07): 전체 읽기+쓰기
 // - 보기 전용 뷰어: 커스텀 클레임 viewer==true (접근 관리 목록 → Auth 클레임 동기화)
-//   · 계정별 열람 범위는 클레임 scopes(섹션키 배열, "*"=전체)로 제한한다.
-//   · (이 프로젝트의 firebasestorage.app 버킷은 Storage 규칙의 cross-service firestore.get이
-//      동작하지 않아, Firestore 대신 커스텀 클레임으로 판별한다.)
+//   · 열람 범위 scopes(섹션키 배열, "*"=전체) → 문서 폴더 읽기 제한
+//   · 수정 범위 editScopes(섹션키 배열) → 문서 폴더 쓰기 + (하나라도 있으면) 마스터 쓰기
+//   · (firebasestorage.app 버킷은 규칙의 cross-service firestore.get이 동작하지 않아 클레임 사용)
 service firebase.storage {
   match /b/{bucket}/o {
     function isOwner() {
@@ -15,26 +15,31 @@ service firebase.storage {
       return request.auth != null && request.auth.token.viewer == true;
     }
     function canRead() { return isOwner() || isViewer(); }
-    // 뷰어의 열람 범위(클레임). 없으면 전체['*'].
     function viewerScopes() { return request.auth.token.get('scopes', ['*']); }
+    function viewerEdits() { return request.auth.token.get('editScopes', []); }
     function scopeAllows(section) {
       return isOwner() || ( isViewer() && ( ('*' in viewerScopes()) || (section in viewerScopes()) ) );
     }
+    function editAllows(section) {
+      return isOwner() || ( isViewer() && ( ('*' in viewerEdits()) || (section in viewerEdits()) ) );
+    }
+    // 마스터(전 데이터 1파일)는 섹션 격리 불가 → 수정 권한이 하나라도 있으면 쓰기 허용
+    function canWriteData() { return isOwner() || ( isViewer() && viewerEdits().size() > 0 ); }
 
-    // 마스터 엑셀 — 읽기: 소유자·뷰어(공통) / 쓰기: 소유자만
+    // 마스터 엑셀 — 읽기: 소유자·뷰어 / 쓰기: 소유자 또는 수정권한 보유 뷰어
     match /master/{fileName} {
       allow read: if canRead() && fileName.matches('.*[.]xlsx');
-      allow write: if isOwner() && fileName.matches('.*[.]xlsx');
+      allow write: if canWriteData() && fileName.matches('.*[.]xlsx');
     }
-    // 문서 폴더 — 읽기: 범위(scope)에 맞는 뷰어·소유자 / 쓰기: 소유자만
-    match /agreements/{allPaths=**}    { allow read: if scopeAllows('projects');       allow write: if isOwner(); }
-    match /bankbook/{allPaths=**}      { allow read: if scopeAllows('projects');       allow write: if isOwner(); }
-    match /businessplans/{allPaths=**} { allow read: if scopeAllows('projects');       allow write: if isOwner(); }
-    match /researchnotes/{allPaths=**} { allow read: if scopeAllows('projects');       allow write: if isOwner(); }
-    match /patents/{allPaths=**}       { allow read: if scopeAllows('patents');        allow write: if isOwner(); }
-    match /budgets/{allPaths=**}       { allow read: if scopeAllows('budget');         allow write: if isOwner(); }
-    match /certs/{allPaths=**}         { allow read: if scopeAllows('certifications'); allow write: if isOwner(); }
-    match /refdocs/{allPaths=**}       { allow read: if scopeAllows('library');        allow write: if isOwner(); }
+    // 문서 폴더 — 읽기: 열람범위 / 쓰기: 수정범위
+    match /agreements/{allPaths=**}    { allow read: if scopeAllows('projects');       allow write: if editAllows('projects'); }
+    match /bankbook/{allPaths=**}      { allow read: if scopeAllows('projects');       allow write: if editAllows('projects'); }
+    match /businessplans/{allPaths=**} { allow read: if scopeAllows('projects');       allow write: if editAllows('projects'); }
+    match /researchnotes/{allPaths=**} { allow read: if scopeAllows('projects');       allow write: if editAllows('projects'); }
+    match /patents/{allPaths=**}       { allow read: if scopeAllows('patents');        allow write: if editAllows('patents'); }
+    match /budgets/{allPaths=**}       { allow read: if scopeAllows('budget');         allow write: if editAllows('budget'); }
+    match /certs/{allPaths=**}         { allow read: if scopeAllows('certifications'); allow write: if editAllows('certifications'); }
+    match /refdocs/{allPaths=**}       { allow read: if scopeAllows('library');        allow write: if editAllows('library'); }
 
     // 그 외 경로는 전면 차단
     match /{allPaths=**} {

@@ -5,7 +5,7 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Empty } from "@/components/ui";
 import { fmtDate } from "@/lib/excel";
 import { useDataCtx } from "@/lib/data-context";
-import { useAccess } from "@/lib/access-context";
+import { useCanEditHere } from "@/lib/access-context";
 
 export type Col<T> = {
   key: Extract<keyof T, string>;
@@ -64,8 +64,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   editColumn?: boolean;
 }) {
   const { saveSheet, error } = useDataCtx();
-  const { canEdit } = useAccess();
-  const ro = readOnly || !canEdit; // 소유자가 아니면 편집·추가·삭제 비활성(보기 전용)
+  const canEdit = useCanEditHere(); // 소유자 또는 이 섹션 수정권한이 있는 뷰어
+  const ro = readOnly || !canEdit; // 권한 없으면 편집·추가·삭제 비활성(보기 전용)
   const [modal, setModal] = useState<{ r: T; isNew: boolean; index: number } | null>(null);
   const [saving, setSaving] = useState(false);
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useDataCtx } from "@/lib/data-context";
 import { useAgreementFiles } from "@/lib/agreement-files";
-import { useAccess } from "@/lib/access-context";
+import { useCanEditHere } from "@/lib/access-context";
 import { Badge, Empty, Section, Dday } from "@/components/ui";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
@@ -33,7 +33,7 @@ const libRow = (d: LibraryDoc) => ({ 구분: d.category, 서류명: d.name, "발
 export default function LibraryPage() {
   const { data } = useDataCtx();
   const { getByPattern, loadFolder, refresh, uploading, error } = useAgreementFiles();
-  const { canEdit } = useAccess();
+  const canEdit = useCanEditHere();
   const fileRef = useRef<HTMLInputElement>(null);
 
   // 사내보관함 파일 목록을 새로 읽는다(업로드 직후 반영)
