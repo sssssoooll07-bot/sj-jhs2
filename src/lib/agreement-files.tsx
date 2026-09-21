@@ -45,6 +45,8 @@ type Ctx = {
   uploading: boolean;
   error: string | null;
   loadFolder: (fileList: FileList, category: Category) => Promise<void>;
+  /** 파일 1개를 지정한 이름으로 업로드(특허별 첨부 등 정확한 연결이 필요할 때) */
+  uploadNamed: (file: File, category: Category, fileName: string) => Promise<void>;
   getByName: (name: string | null, category?: Category) => DocRef | null;
   getByPattern: (pattern: string | null, category?: Category) => DocRef | null;
   list: (category: Category) => DocRef[];
@@ -134,6 +136,31 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
     [refresh]
   );
 
+  // 파일 1개를 지정한 이름으로 업로드 (특허별 첨부 등 정확한 연결용)
+  const uploadNamed = useCallback(
+    async (file: File, category: Category, fileName: string) => {
+      if (firebaseEnabled && storage) {
+        setUploading(true);
+        setError(null);
+        try {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          await uploadBytes(ref(storage, `${PREFIX[category]}/${fileName}`), bytes);
+          await refresh();
+        } catch (e) {
+          const code = (e as { code?: string })?.code ?? "";
+          if (code === "storage/unauthorized") setError("업로드가 거부됐습니다 — 권한(소유자)인지 확인하세요.");
+          else if (code === "storage/unauthenticated") setError("로그인이 필요합니다.");
+          else setError(e instanceof Error ? e.message : "업로드에 실패했습니다.");
+        } finally {
+          setUploading(false);
+        }
+      } else {
+        setDocs((prev) => new Map(prev).set(norm(fileName), { name: fileName, kind: "local", file, category }));
+      }
+    },
+    [refresh]
+  );
+
   const getByName = useCallback(
     (name: string | null, category?: Category) => {
       if (!name) return null;
@@ -179,7 +206,7 @@ export function AgreementFilesProvider({ children }: { children: React.ReactNode
 
   return (
     <DocCtx.Provider
-      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, getByName, getByPattern, list, refresh, getViewUrl, clear }}
+      value={{ count: docs.size, cloud: firebaseEnabled, loading, uploading, error, loadFolder, uploadNamed, getByName, getByPattern, list, refresh, getViewUrl, clear }}
     >
       {children}
     </DocCtx.Provider>

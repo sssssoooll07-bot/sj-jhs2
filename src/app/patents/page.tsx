@@ -74,6 +74,30 @@ function printPatents(rows: Patent[], subtitle: string) {
   setTimeout(() => { ifr.contentWindow!.print(); setTimeout(() => document.body.removeChild(ifr), 1000); }, 300);
 }
 
+/** 특허별 파일 첨부(📎) — 그 특허에 정확히 연결되도록 파일명을 자동 지정해 업로드 */
+function AttachBtn({ p }: { p: Patent }) {
+  const { uploadNamed, uploading } = useAgreementFiles();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const onFile = async (f?: File) => {
+    if (!f) return;
+    const dot = f.name.lastIndexOf(".");
+    const ext = dot >= 0 ? f.name.slice(dot) : ".pdf";
+    const safe = (s: string) => s.replace(/[\\/:*?"<>|]/g, " ").replace(/\s+/g, " ").trim();
+    // 등록건: 등록번호로, PCT: (PCT) 표시로, 그 외 국내출원: 명칭으로 → findCert가 정확히 연결
+    const base = p.status === "등록완료" && p.regNumber ? `${p.regNumber} ${p.title}` : p.isPCT ? `${p.title}(PCT)` : p.title;
+    await uploadNamed(f, "patents", safe(base) + ext);
+  };
+  return (
+    <>
+      <button type="button" title="이 특허에 특허증/문서 첨부"
+        onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }} disabled={uploading}
+        className="shrink-0 rounded p-0.5 text-slate-300 transition-colors hover:text-emerald-600 disabled:opacity-50">📎</button>
+      <input ref={inputRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; void onFile(f); e.target.value = ""; }} />
+    </>
+  );
+}
+
 export default function PatentsPage() {
   const { count, cloud, uploading, error, loadFolder, list, refresh } = useAgreementFiles();
   const { canEdit } = useAccess();
@@ -114,8 +138,13 @@ export default function PatentsPage() {
       view: (p) => {
         const cert = findCert(p);
         const name = <>{p.title} {p.isPCT && <Badge tone="cyan">PCT</Badge>}</>;
-        // 특허증(문서) 링크 클릭이 행의 수정 모달까지 열지 않도록 전파 차단
-        return cert ? <span onClick={(e) => e.stopPropagation()}><DocViewButton doc={cert} label={name} /></span> : <span className="font-medium">{name}</span>;
+        // 특허증(문서) 링크 클릭이 행의 수정 모달까지 열지 않도록 전파 차단 + 소유자는 📎로 파일 첨부
+        return (
+          <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {cert ? <DocViewButton doc={cert} label={name} /> : <span className="font-medium">{name}</span>}
+            {canEdit && <AttachBtn p={p} />}
+          </span>
+        );
       },
     },
     { key: "regNumber", label: "등록번호", nowrap: true },
