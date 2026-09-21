@@ -104,7 +104,8 @@ export default function PatentsPage() {
       view: (p) => {
         const cert = findCert(p);
         const name = <>{p.title} {p.isPCT && <Badge tone="cyan">PCT</Badge>}</>;
-        return cert ? <DocViewButton doc={cert} label={name} /> : <span className="font-medium">{name}</span>;
+        // 특허증(문서) 링크 클릭이 행의 수정 모달까지 열지 않도록 전파 차단
+        return cert ? <span onClick={(e) => e.stopPropagation()}><DocViewButton doc={cert} label={name} /></span> : <span className="font-medium">{name}</span>;
       },
     },
     { key: "regNumber", label: "등록번호", nowrap: true },
