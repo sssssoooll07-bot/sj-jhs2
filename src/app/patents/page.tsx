@@ -7,7 +7,7 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import { useAccess } from "@/lib/access-context";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
-import type { Patent } from "@/lib/excel";
+import { fmtDate, type Patent } from "@/lib/excel";
 
 const EMPTY: Patent = {
   status: "출원완료", title: "", regNumber: null, appNumber: null, filedAt: null, registeredAt: null,
@@ -30,6 +30,49 @@ const patentYear = (p: Patent): string => {
   const m = (p.appNumber ?? p.regNumber ?? "").match(/(20\d{2})/);
   return m ? m[1] : "기타";
 };
+
+/** 특허 목록 화면출력(인쇄/PDF) — 현재 표시 중인 목록을 표로 인쇄한다 */
+function printPatents(rows: Patent[], subtitle: string) {
+  const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const dt = (d: Date | null) => { const s = fmtDate(d); return s === "—" ? "" : s; };
+  const body = rows.map((p, i) => `<tr>
+      <td class="c">${i + 1}</td>
+      <td class="c">${esc(p.status)}${p.isPCT ? "<br>(PCT)" : ""}</td>
+      <td class="l">${esc(p.title)}</td>
+      <td class="c">${esc(p.regNumber ?? "")}</td>
+      <td class="c">${esc(p.appNumber ?? "")}</td>
+      <td class="c">${dt(p.filedAt)}</td>
+      <td class="c">${dt(p.registeredAt)}</td>
+      <td class="c">${esc(p.owner ?? "")}</td>
+      <td class="l">${esc(p.inventors ?? "")}</td>
+      <td class="l">${esc(p.note ?? "")}</td>
+    </tr>`).join("");
+  const today = new Date();
+  const dateK = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}.`;
+  const css = `@page{size:A4 landscape;margin:12mm}
+    body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;color:#222;margin:0}
+    h1{font-size:20px;text-align:center;margin:0 0 4px}
+    .sub{text-align:center;color:#555;font-size:12px;margin:0 0 12px}
+    table{border-collapse:collapse;width:100%;font-size:11px}
+    th,td{border:1px solid #999;padding:4px 6px;vertical-align:middle}
+    th{background:#eef2f8;text-align:center;white-space:nowrap}
+    td.c{text-align:center;white-space:nowrap} td.l{text-align:left}
+    .foot{margin-top:14px;text-align:right;font-size:12px;font-weight:bold}`;
+  const html = `<h1>특허 현황</h1><p class="sub">㈜신정개발 · ${esc(subtitle)} · 출력일 ${dateK}</p>
+    <table><thead><tr>
+      <th>No</th><th>상태</th><th>특허 명칭</th><th>등록번호</th><th>출원번호</th><th>출원일</th><th>등록일</th><th>특허권자</th><th>발명자</th><th>비고</th>
+    </tr></thead><tbody>${body}</tbody></table>
+    <p class="foot">㈜ 신 정 개 발</p>`;
+  const ifr = document.createElement("iframe");
+  ifr.style.position = "fixed"; ifr.style.right = "0"; ifr.style.bottom = "0"; ifr.style.width = "0"; ifr.style.height = "0"; ifr.style.border = "0";
+  document.body.appendChild(ifr);
+  const doc = ifr.contentWindow!.document;
+  doc.open();
+  doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>특허현황</title><style>${css}</style></head><body>${html}</body></html>`);
+  doc.close();
+  ifr.contentWindow!.focus();
+  setTimeout(() => { ifr.contentWindow!.print(); setTimeout(() => document.body.removeChild(ifr), 1000); }, 300);
+}
 
 export default function PatentsPage() {
   const { count, cloud, uploading, error, loadFolder, getByPattern, refresh } = useAgreementFiles();
@@ -95,7 +138,12 @@ export default function PatentsPage() {
                   {y === "전체" ? "전체" : `${y}년`}
                 </button>
               ))}
-              <a href="https://www.kipris.or.kr/khome/search/searchResult.do?tab=patent" target="_blank" rel="noreferrer" className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50">
+              <button
+                onClick={() => printPatents(data.patents.filter(inYear), year === "전체" ? `전체 ${shown}건` : `${year}년 ${shown}건`)}
+                className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50">
+                🖨 화면출력(인쇄·PDF)
+              </button>
+              <a href="https://www.kipris.or.kr/khome/search/searchResult.do?tab=patent" target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50">
                 🔍 KIPRIS 특허검색 ↗
               </a>
             </div>
