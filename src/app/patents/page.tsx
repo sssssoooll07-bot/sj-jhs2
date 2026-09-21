@@ -79,6 +79,7 @@ export default function PatentsPage() {
   const { canEdit } = useAccess();
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("2025");
+  const [kind, setKind] = useState<"전체" | "등록" | "출원">("전체"); // 분류: 등록특허 / 출원건
 
   // 특허 탭 진입 시 특허증 목록을 새로 읽는다(업로드 직후에도 재로그인 없이 반영)
   useEffect(() => {
@@ -124,12 +125,24 @@ export default function PatentsPage() {
       {(data) => {
         const years = ["전체", ...Array.from(new Set(data.patents.map(patentYear))).sort().reverse()];
         const inYear = (p: Patent) => year === "전체" || patentYear(p) === year;
+        const inKind = (p: Patent) => kind === "전체" || (kind === "등록" ? p.status === "등록완료" : p.status === "출원완료");
+        const match = (p: Patent) => inYear(p) && inKind(p);
         const reg = data.patents.filter((p) => p.status === "등록완료").length;
         const filed = data.patents.filter((p) => p.status === "출원완료").length;
-        const shown = data.patents.filter(inYear).length;
+        const shown = data.patents.filter(match).length;
+        const kindLabel = kind === "등록" ? "등록특허" : kind === "출원" ? "출원" : "전체";
 
         return (
-          <Section title={`💡 특허 — ${shown}건${year !== "전체" ? ` (${year}년)` : ` (등록 ${reg} · 출원 ${filed})`}`} sub="행의 특허증 '보기 ↗'로 등록증 미리보기. ✎로 수정(연계사업 포함), '특허 추가'로 등록.">
+          <Section title={`💡 특허 — ${shown}건${kind !== "전체" ? ` · ${kindLabel}` : ""}${year !== "전체" ? ` · ${year}년` : kind === "전체" ? ` (등록 ${reg} · 출원 ${filed})` : ""}`} sub="행의 특허증 '보기 ↗'로 등록증 미리보기. ✎로 수정(연계사업 포함), '특허 추가'로 등록.">
+            {/* 분류 필터 (등록/출원) */}
+            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-semibold text-slate-400">분류</span>
+              {(["전체", "등록", "출원"] as const).map((k) => (
+                <button key={k} onClick={() => setKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${kind === k ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                  {k === "전체" ? "전체" : k === "등록" ? "등록특허" : "출원"}
+                </button>
+              ))}
+            </div>
             {/* 연도 필터 (과제탭과 동일) */}
             <div className="mb-3 flex flex-wrap items-center gap-1.5">
               <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>
@@ -139,7 +152,7 @@ export default function PatentsPage() {
                 </button>
               ))}
               <button
-                onClick={() => printPatents(data.patents.filter(inYear), year === "전체" ? `전체 ${shown}건` : `${year}년 ${shown}건`)}
+                onClick={() => printPatents(data.patents.filter(match), `${kindLabel}${year === "전체" ? "" : ` · ${year}년`} · ${shown}건`)}
                 className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50">
                 🖨 화면출력(인쇄·PDF)
               </button>
@@ -162,7 +175,7 @@ export default function PatentsPage() {
             )}
             {error && <p className="mb-2 text-sm font-medium text-red-600">⚠ {error}</p>}
 
-            <EditableTable rows={data.patents} rowFilter={inYear} cols={cols} sheetName="특허" toSheetRow={toRow} blank={EMPTY} requiredKey="title" addLabel="특허 추가" entityLabel="특허" />
+            <EditableTable rows={data.patents} rowFilter={match} cols={cols} sheetName="특허" toSheetRow={toRow} blank={EMPTY} requiredKey="title" addLabel="특허 추가" entityLabel="특허" />
           </Section>
         );
       }}
