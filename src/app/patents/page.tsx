@@ -75,7 +75,7 @@ function printPatents(rows: Patent[], subtitle: string) {
 }
 
 export default function PatentsPage() {
-  const { count, cloud, uploading, error, loadFolder, getByPattern, refresh } = useAgreementFiles();
+  const { count, cloud, uploading, error, loadFolder, list, refresh } = useAgreementFiles();
   const { canEdit } = useAccess();
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("2025");
@@ -87,14 +87,24 @@ export default function PatentsPage() {
   }, [refresh]);
 
   const findCert = (p: Patent) => {
+    // PCT 특허는 PCT 파일에만, 일반(국내)은 비-PCT 파일에만 연결한다.
+    // (제목이 같은 국내출원↔PCT가 서로의 파일을 가져가는 문제 방지)
+    const isPctFile = (n: string) => /pct|국제/i.test(n);
+    const cands = list("patents").filter((d) => (p.isPCT ? isPctFile(d.name) : !isPctFile(d.name)));
+    const findIn = (pattern: string | null) => {
+      if (!pattern) return null;
+      const q = norm(pattern);
+      if (!q) return null;
+      return cands.find((d) => norm(d.name).includes(q)) ?? null;
+    };
     // 1) 등록번호 → 2) 특허명 전체 → 3) 앞 5글자(순서대로 더 느슨하게)
-    const byNum = p.regNumber ? getByPattern(p.regNumber, "patents") : null;
+    const byNum = p.regNumber ? findIn(p.regNumber) : null;
     if (byNum) return byNum;
     const full = norm(p.title);
-    const byFull = full.length >= 6 ? getByPattern(full, "patents") : null;
+    const byFull = full.length >= 6 ? findIn(full) : null;
     if (byFull) return byFull;
     const prefix = full.slice(0, 5);
-    return prefix.length >= 4 ? getByPattern(prefix, "patents") : null;
+    return prefix.length >= 4 ? findIn(prefix) : null;
   };
 
   const cols: Col<Patent>[] = [
