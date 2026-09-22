@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useDataCtx } from "@/lib/data-context";
 import { dateStr } from "@/components/EditableTable";
-import { daysUntil, fmtDate, type Data, type ScheduleEvent } from "@/lib/excel";
+import { daysUntil, fmtDate, type Data, type Project, type ScheduleEvent } from "@/lib/excel";
 import { Dday } from "@/components/ui";
 
 const WD = ["일", "월", "화", "수", "목", "금", "토"];
@@ -30,9 +31,24 @@ const HOLIDAYS: Record<string, string> = {
 
 type ModalState = { idx: number; date: string; title: string; note: string; done: boolean };
 
+/** 캘린더 표시용 통합 이벤트 (사용자 일정 + 과제 마감일 자동) */
+type CalEvent = { date: Date; title: string; note: string | null; done: boolean; kind: "user" | "project"; idx: number; code?: string };
+
+/** 과제 마감일 — 종료일 우선, 없으면 사업기간(period)의 마지막 날짜 파싱 */
+function projDeadline(p: Project): Date | null {
+  if (p.endDate instanceof Date && !isNaN(p.endDate.getTime())) return p.endDate;
+  const all = (p.period ?? "").match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/g);
+  if (all && all.length) {
+    const m = all[all.length - 1].match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/);
+    if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  }
+  return null;
+}
+
 /** 대시보드 전용 월간 캘린더 — 날짜 클릭으로 일정 입력, 공휴일 표시, D-day 확인. */
 export default function DashboardCalendar({ data }: { data: Data }) {
   const { saveSheet } = useDataCtx();
+  const router = useRouter();
   const now = new Date();
   const [cur, setCur] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [modal, setModal] = useState<ModalState | null>(null);
@@ -40,16 +56,29 @@ export default function DashboardCalendar({ data }: { data: Data }) {
   const [picker, setPicker] = useState(false);
 
   const events = data.events;
+  // 사용자 일정 + 과제 마감일(자동) 통합
+  const allEvents = useMemo<CalEvent[]>(() => {
+    const userEv: CalEvent[] = events
+      .map((e, idx): CalEvent | null => (e.date ? { date: e.date, title: e.title, note: e.note, done: e.done, kind: "user", idx } : null))
+      .filter((x): x is CalEvent => x !== null);
+    const projEv: CalEvent[] = data.projects
+      .map((p): CalEvent | null => {
+        const d = projDeadline(p);
+        return d ? { date: d, title: `${p.title} 마감`, note: p.agency ?? null, done: p.status === "완료", kind: "project", idx: -1, code: p.code } : null;
+      })
+      .filter((x): x is CalEvent => x !== null);
+    return [...userEv, ...projEv];
+  }, [events, data.projects]);
+
   const byDay = useMemo(() => {
-    const m = new Map<string, { ev: ScheduleEvent; idx: number }[]>();
-    events.forEach((ev, idx) => {
-      if (!ev.date) return;
+    const m = new Map<string, CalEvent[]>();
+    allEvents.forEach((ev) => {
       const k = keyOf(ev.date);
       if (!m.has(k)) m.set(k, []);
-      m.get(k)!.push({ ev, idx });
+      m.get(k)!.push(ev);
     });
     return m;
-  }, [events]);
+  }, [allEvents]);
 
   const first = new Date(Date.UTC(cur.y, cur.m, 1));
   const startWd = first.getUTCDay();
@@ -58,10 +87,10 @@ export default function DashboardCalendar({ data }: { data: Data }) {
   while (cells.length % 7) cells.push(null);
   const todayKey = keyOf(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())));
 
-  // 다가오는 일정: 미처리 + D-14 이내
+  // 다가오는 일정: 미처리 + D-14 이내 (사용자 일정 + 과제 마감)
   const upcoming = useMemo(
-    () => events.filter((e) => !e.done && e.date && daysUntil(e.date) >= 0 && daysUntil(e.date) <= 14).sort((a, b) => +(a.date ?? 0) - +(b.date ?? 0)),
-    [events],
+    () => allEvents.filter((e) => !e.done && daysUntil(e.date) >= 0 && daysUntil(e.date) <= 14).sort((a, b) => +a.date - +b.date),
+    [allEvents],
   );
 
   async function persist(list: ScheduleEvent[], closeModal = true) {
@@ -94,7 +123,7 @@ export default function DashboardCalendar({ data }: { data: Data }) {
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className="mt-0.5 h-4 w-1 shrink-0 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500" />
         <h2 className="text-base font-bold tracking-tight text-slate-800">📅 일정</h2>
-        <span className="text-xs text-slate-400">날짜를 클릭해 일정을 적으세요</span>
+        <span className="text-xs text-slate-400">날짜를 클릭해 일정 입력 · 🏁 과제 마감 자동표시</span>
         <div className="relative ml-auto flex items-center gap-1">
           <button onClick={() => setCur((c) => (c.m === 0 ? { y: c.y - 1, m: 11 } : { y: c.y, m: c.m - 1 }))} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="이전 달"><ChevronLeft className="h-4 w-4" /></button>
           <button onClick={() => setPicker((p) => !p)} className="min-w-[96px] rounded-lg px-2 py-1 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100">{cur.y}년 {cur.m + 1}월 ▾</button>
@@ -142,8 +171,13 @@ export default function DashboardCalendar({ data }: { data: Data }) {
                     {hol && <span className="truncate text-[10px] font-medium text-red-500">{hol}</span>}
                   </div>
                   <div className="mt-0.5 space-y-0.5">
-                    {list.map(({ ev, idx }) => (
-                      <button key={idx} onClick={(e) => { e.stopPropagation(); setModal({ idx, date: ev.date ? dateStr(ev.date)! : "", title: ev.title, note: ev.note ?? "", done: ev.done }); }}
+                    {list.map((ev, j) => ev.kind === "project" ? (
+                      <button key={`p${j}`} onClick={(e) => { e.stopPropagation(); router.push(`/projects?p=${encodeURIComponent(ev.code!)}`); }}
+                        className={`block w-full truncate rounded px-1 py-0.5 text-left text-[11px] font-medium ${ev.done ? "bg-slate-100 text-slate-400 line-through" : "bg-amber-100 text-amber-800 hover:bg-amber-200"}`} title={`과제 마감: ${ev.title}`}>
+                        🏁 {ev.title}
+                      </button>
+                    ) : (
+                      <button key={`u${ev.idx}`} onClick={(e) => { e.stopPropagation(); setModal({ idx: ev.idx, date: dateStr(ev.date)!, title: ev.title, note: ev.note ?? "", done: ev.done }); }}
                         className={`block w-full truncate rounded px-1 py-0.5 text-left text-[11px] font-medium ${ev.done ? "bg-slate-100 text-slate-400 line-through" : "bg-blue-100 text-blue-800 hover:bg-blue-200"}`} title={ev.title}>
                         {ev.done ? "✓ " : ""}{ev.title}
                       </button>
@@ -164,15 +198,19 @@ export default function DashboardCalendar({ data }: { data: Data }) {
             <ul className="max-h-[360px] divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-100">
               {upcoming.map((e, i) => (
                 <li key={i} className="flex items-start gap-2 px-2.5 py-2 hover:bg-slate-50">
-                  <button onClick={() => toggleDone(events.indexOf(e))} disabled={saving} title="처리 완료로 표시"
-                    className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-slate-300 text-[10px] text-transparent transition-colors hover:border-emerald-500 hover:text-emerald-500">✓</button>
-                  <button onClick={() => { const idx = events.indexOf(e); setModal({ idx, date: e.date ? dateStr(e.date)! : "", title: e.title, note: e.note ?? "", done: e.done }); }}
+                  {e.kind === "user" ? (
+                    <button onClick={() => toggleDone(e.idx)} disabled={saving} title="처리 완료로 표시"
+                      className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border border-slate-300 text-[10px] text-transparent transition-colors hover:border-emerald-500 hover:text-emerald-500">✓</button>
+                  ) : (
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-[11px]" title="과제 마감">🏁</span>
+                  )}
+                  <button onClick={() => e.kind === "project" ? router.push(`/projects?p=${encodeURIComponent(e.code!)}`) : setModal({ idx: e.idx, date: dateStr(e.date)!, title: e.title, note: e.note ?? "", done: e.done })}
                     className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
                     <div className="flex items-center gap-2">
-                      {e.date && <Dday days={daysUntil(e.date)} />}
+                      <Dday days={daysUntil(e.date)} />
                       <span className="whitespace-nowrap text-[11px] text-slate-400">{fmtDate(e.date)}</span>
                     </div>
-                    <span className="truncate text-sm text-slate-700">{e.title}</span>
+                    <span className="truncate text-sm text-slate-700">{e.kind === "project" ? `🏁 ${e.title}` : e.title}</span>
                     {e.note && <span className="truncate text-[11px] text-slate-400">{e.note}</span>}
                   </button>
                 </li>
