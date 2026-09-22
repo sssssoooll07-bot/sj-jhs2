@@ -122,7 +122,7 @@ export default function DashboardCalendar({ data }: { data: Data }) {
     <section className="card p-5 sm:p-6">
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className="mt-0.5 h-4 w-1 shrink-0 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500" />
-        <h2 className="text-base font-bold tracking-tight text-slate-800">📅 일정</h2>
+        <button onClick={() => { setCur({ y: now.getFullYear(), m: now.getMonth() }); setPicker(false); }} className="text-base font-bold tracking-tight text-slate-800 transition-colors hover:text-blue-600" title="오늘 날짜로 이동">📅 일정</button>
         <span className="text-xs text-slate-400">날짜를 클릭해 일정 입력 · 🏁 과제 마감 자동표시</span>
         <div className="relative ml-auto flex items-center gap-1">
           <button onClick={() => setCur((c) => (c.m === 0 ? { y: c.y - 1, m: 11 } : { y: c.y, m: c.m - 1 }))} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100" aria-label="이전 달"><ChevronLeft className="h-4 w-4" /></button>
