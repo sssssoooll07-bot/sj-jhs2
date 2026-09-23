@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-22T01:31:49.260Z",
+ "fetchedAt": "2026-09-23T01:21:31.502Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -11,17 +11,6 @@
   }
  ],
  "items": [
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "2026년도 제1차 한국무역보험공사 연계 수출지원프로그램 시행계획 안내",
-   "category": "수출지원프로그램",
-   "summary": null,
-   "applyStart": "2026-07-06",
-   "applyEnd": "2026-08-10",
-   "announcedAt": "2026-07-06",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02873&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
   {
    "source": "SMTECH",
    "agency": "SMTECH",
@@ -186,6 +175,17 @@
    "applyEnd": "2026-09-30",
    "announcedAt": "2026-09-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=8&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 중소벤처기업부 혁신제품 3차 규격추가 모집 안내문",
+   "category": "중소벤처기업부 혁신제품 지정사업",
+   "summary": null,
+   "applyStart": "2026-09-22",
+   "applyEnd": "2026-10-19",
+   "announcedAt": "2026-09-22",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02880&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "SMTECH",
