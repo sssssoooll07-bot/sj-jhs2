@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-25T01:19:38.720Z",
+ "fetchedAt": "2026-09-26T01:21:41.383Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -9,6 +9,9 @@
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
+ ],
+ "errors": [
+  "SMTECH: fetch failed"
  ],
  "items": [
   {
