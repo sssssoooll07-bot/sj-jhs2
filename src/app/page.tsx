@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { collectDeadlines, participationTotals, daysUntil, fmtKWon, fmtDate } from "@/lib/excel";
+import { collectDeadlines, participationTotals, budgetExecByProject, daysUntil, fmtKWon, fmtDate } from "@/lib/excel";
 import { Badge, Dday, Empty, Section } from "@/components/ui";
+
+const won = (v: number) => `${Math.round(v).toLocaleString("ko-KR")}원`;
 import { WithData } from "@/components/FileGate";
 import DashboardCalendar from "@/components/DashboardCalendar";
 
@@ -56,6 +58,8 @@ export default function Dashboard() {
         const totals = participationTotals(data);
         const over = totals.filter((t) => t.total > 100);
         const projDeadlines = collectDeadlines(data, 90);
+        const bexec = budgetExecByProject(data);
+        const atRiskBudget = bexec.filter((b) => b.atRisk);
 
         const cards = [
           { href: "/projects", label: "과제", value: `${data.projects.length}건`, sub: `진행중 ${active.length} · R&D ${rnd} / 비R&D ${biz}` },
@@ -68,6 +72,27 @@ export default function Dashboard() {
 
         return (
           <div className="space-y-5">
+            {/* ⚠️ 확인 필요 경고 배너 (참여율 초과 / 집행 저조) */}
+            {(over.length > 0 || atRiskBudget.length > 0) && (
+              <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
+                <p className="text-sm font-bold text-amber-800">⚠️ 확인이 필요합니다</p>
+                <ul className="mt-1 space-y-1 text-sm text-amber-800">
+                  {over.length > 0 && (
+                    <li>
+                      참여율 100% 초과 <b>{over.length}명</b> — {over.map((o) => `${o.name}(${o.total}%)`).join(", ")}{" "}
+                      <Link href="/compliance" className="font-medium underline hover:text-amber-900">참여율 확인 ↗</Link>
+                    </li>
+                  )}
+                  {atRiskBudget.length > 0 && (
+                    <li>
+                      집행 저조 과제 <b>{atRiskBudget.length}건</b> (종료 임박 · 집행율 70% 미만) — {atRiskBudget.map((a) => `${a.title}(${Math.round(a.rate)}%)`).join(", ")}{" "}
+                      <Link href="/budget" className="font-medium underline hover:text-amber-900">사업비 확인 ↗</Link>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+
             {/* 전체 탭 요약 카드 */}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {cards.map((c) => (
@@ -140,6 +165,34 @@ export default function Dashboard() {
                         <span className="min-w-0 flex-1 truncate text-xs text-slate-400">{t.detail}</span>
                       </li>
                     ))}
+                  </ul>
+                )}
+              </Section>
+
+              {/* 사업비 집행율 (진행중 과제) */}
+              <Section title="💸 사업비 집행율" sub="진행중 과제 · 공급가 기준 · 종료 임박+집행율 70%↓ 주의">
+                {bexec.length === 0 ? (
+                  <Empty message="진행중 과제의 사업비 예산이 없습니다." />
+                ) : (
+                  <ul className="divide-y divide-slate-100">
+                    {bexec.map((b) => {
+                      const tone = b.rate >= 80 ? "text-emerald-600" : b.rate >= 50 ? "text-amber-600" : "text-red-600";
+                      return (
+                        <li key={b.code} className={`py-2 ${b.atRisk ? "-mx-2 rounded-lg bg-red-50 px-2" : ""}`}>
+                          <Link href="/budget" className="block hover:bg-slate-50/60">
+                            <div className="flex items-center gap-2">
+                              <span className={`w-12 shrink-0 text-right text-sm font-bold ${tone}`}>{Math.round(b.rate)}%</span>
+                              <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-700">{b.atRisk && "🔴 "}{b.title}</span>
+                              {b.dday !== null && <Dday days={b.dday} />}
+                            </div>
+                            <div className="ml-14 mt-0.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                              <div className={`h-full rounded-full ${b.rate >= 80 ? "bg-emerald-500" : b.rate >= 50 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${Math.min(100, Math.round(b.rate))}%` }} />
+                            </div>
+                            <p className="ml-14 mt-0.5 text-[11px] text-slate-400">집행 {won(b.exec)} / 예산 {won(b.finalCash)}</p>
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </Section>

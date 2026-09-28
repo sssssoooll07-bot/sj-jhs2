@@ -330,3 +330,30 @@ export function participationTotals(data: Data): { name: string; total: number; 
     .map(([name, v]) => ({ name, total: v.total, detail: v.parts.join(" · ") || "—" }))
     .sort((a, b) => b.total - a.total);
 }
+
+/**
+ * 진행중 과제별 사업비 집행율 — 마감 임박 + 집행 저조 위험 확인용.
+ * 집행액은 공급가 기준, 분모는 현금 최종변경액(현물 제외). 예산이 있는 진행중 과제만.
+ */
+export type BudgetExec = { code: string; title: string; endDate: Date | null; dday: number | null; finalCash: number; exec: number; rate: number; atRisk: boolean };
+export function budgetExecByProject(data: Data): BudgetExec[] {
+  const isInKind = (c: string) => (c ?? "").includes("현물");
+  const now = new Date();
+  return data.projects
+    .filter((p) => p.status === "진행중")
+    .map((p): BudgetExec => {
+      const items = data.budgetItems.filter((b) => b.code === p.code);
+      const finalTotal = items.reduce((s, b) => s + (b.finalKWon ?? 0), 0);
+      const inKind = items.reduce((s, b) => s + (isInKind(b.category) ? (b.finalKWon ?? 0) : 0), 0);
+      const finalCash = inKind > 0 ? finalTotal - inKind : finalTotal;
+      const exec = data.budgetUsages.filter((u) => u.code === p.code).reduce((s, u) => s + (u.amountKWon ?? 0), 0);
+      const rate = finalCash > 0 ? (exec / finalCash) * 100 : 0;
+      const end = p.endDate ?? null;
+      const dday = end ? daysUntil(end, now) : null;
+      // 위험: 종료 90일 이내(또는 지남)인데 집행율 70% 미만
+      const atRisk = finalCash > 0 && dday !== null && dday <= 90 && rate < 70;
+      return { code: p.code, title: p.title, endDate: end, dday, finalCash, exec, rate, atRisk };
+    })
+    .filter((b) => b.finalCash > 0)
+    .sort((a, b) => (a.dday ?? 9999) - (b.dday ?? 9999));
+}
