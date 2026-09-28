@@ -1,17 +1,14 @@
 {
- "fetchedAt": "2026-09-28T01:29:20.335Z",
+ "fetchedAt": "2026-09-28T07:18:03.186Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
-   "url": "https://data.jntp.or.kr/jntp/content/business/announcement/list.jsp"
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202"
   },
   {
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
- ],
- "errors": [
-  "SMTECH: fetch failed"
  ],
  "items": [
   {
@@ -233,138 +230,6 @@
    "applyEnd": "2026-12-31",
    "announcedAt": "2026-09-17",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000062"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "광역협력권 후속사업(분야첨단신소재)에 대한 사업체 및 기술수요조사",
-   "category": "공공기관연계 지역산업육성 사업",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2018-09-20",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4063&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "광역협력권 후속사업 수요조사",
-   "category": "R&D지원사업",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2018-08-03",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4033&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "CES 2025 전남관 참가기업 모집 안내",
-   "category": "R&D역량강화",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2024-06-10",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4548&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2024년 자유무역지역 기업지원사업 닥터FTZ(전문 컨설턴트) 모집공고",
-   "category": "공공기관연계 지역산업육성 사업",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2024-05-29",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4547&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2024년 초광역권 기술닥터제 컨설팅 전문가 POOL 구축 모집공고",
-   "category": "R&D역량강화",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2024-02-14",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4546&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2023년도 전남 주력산업육성사업 지원기업 모집 통합공고(3차)",
-   "category": "거점기관운영지원사업",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2023-09-11",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4545&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2023년도 전남 주력산업육성사업 지원기업 모집 통합공고(2차)",
-   "category": "R&D역량강화",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2023-07-24",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4544&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2023년도 전남 주력산업육성사업 지원기업 모집 통합 공고(1차)",
-   "category": "R&D역량강화",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2023-06-16",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4543&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2022년 전남 지역주력산업 기업지원 비R&D 모집공고(4차)",
-   "category": "R&D역량강화",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2022-11-03",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4542&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2022년 전남 지역주력산업 기업지원 비R&D 모집공고(3차)",
-   "category": "기업지원사업",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2022-09-29",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4541&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2022년도 중소기업 밀집지역 위기대응 시스템 구축사업 공고",
-   "category": "기업지원사업",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2022-09-27",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4540&menuLevel=2&menuNo=46"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2022년 전남 지역주력산업 기업지원 비R&D 모집공고(2차)",
-   "category": "기업지원사업",
-   "summary": null,
-   "applyStart": null,
-   "applyEnd": null,
-   "announcedAt": "2022-08-01",
-   "url": "https://www.jntp.or.kr/base/board/read?boardManagementNo=13&boardNo=4539&menuLevel=2&menuNo=46"
   }
  ]
 }

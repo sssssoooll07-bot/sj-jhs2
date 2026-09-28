@@ -21,59 +21,30 @@ const clean = (s) =>
 
 /**
  * JNTP — 전남테크노파크 공고.
- *  (1) 지역사업공고: /base/apiAnnouncement/List (menuNo=45) — 접수기간·상태(접수중) 제공, 상세는 pms.jntp.or.kr
- *  (2) 정부사업공고: /base/board/list?boardManagementNo=13 (menuNo=46) — 게시일 기준
- * 한 소스가 실패해도 나머지는 반영한다(둘 다 0건일 때만 에러 → 이전 수집분 유지).
+ * 소스: /base/apiAnnouncement/List (menuNo=45) — 목록 표(번호/제목/접수기간/상태/조회수),
+ *       상세 링크는 pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=... 로 제공됨.
  */
 async function fetchJNTP() {
   const BASE = "https://www.jntp.or.kr";
-  const H = { "User-Agent": UA };
+  const res = await fetch(`${BASE}/base/apiAnnouncement/List?menuLevel=2&menuNo=45`, { headers: { "User-Agent": UA } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const html = await res.text();
   const items = [];
-  const errs = [];
-
-  // (1) 지역사업공고 — 접수기간/상태 있음
-  try {
-    const res = await fetch(`${BASE}/base/apiAnnouncement/List?menuLevel=2&menuNo=45`, { headers: H });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const html = await res.text();
-    for (const row of html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) ?? []) {
-      const tds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]));
-      if (tds.length < 4 || !/^\d+$/.test(tds[0])) continue; // 번호 있는 실제 행만
-      const title = tds[1];
-      if (!title) continue;
-      const dm = [...(tds[2] || "").matchAll(/(\d{4})-(\d{2})-(\d{2})/g)].map((m) => `${m[1]}-${m[2]}-${m[3]}`);
-      const href = (row.match(/href="([^"]+)"/)?.[1] || "").replace(/&amp;/g, "&");
-      items.push({
-        source: "JNTP", agency: "전남테크노파크", title, category: "지역사업", summary: null,
-        applyStart: dm[0] ?? null, applyEnd: dm[1] ?? null, announcedAt: dm[0] ?? null,
-        url: href || `${BASE}/base/apiAnnouncement/List?menuLevel=2&menuNo=45`,
-      });
-    }
-  } catch (e) { errs.push(`지역:${e.message}`); }
-
-  // (2) 정부사업공고 — 게시일 기준 (접수마감일은 목록에 없음)
-  try {
-    const res = await fetch(`${BASE}/base/board/list?boardManagementNo=13&menuLevel=2&menuNo=46`, { headers: H });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const html = await res.text();
-    const EXCLUDE = /(채용|합격|불합격|면접|발표|낙찰|입찰|정기총회|워크숍|설명회|간담회|공청회|폐기|매각)/;
-    for (const row of html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) ?? []) {
-      const tds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]));
-      if (tds.length < 5) continue;
-      const title = tds[2];
-      const boardNo = row.match(/boardNo=(\d+)/)?.[1];
-      if (!title || !boardNo || EXCLUDE.test(title)) continue;
-      const dm = tds[4].match(/(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})/);
-      items.push({
-        source: "JNTP", agency: "전남테크노파크", title, category: tds[1] || "정부사업", summary: null,
-        applyStart: null, applyEnd: null,
-        announcedAt: dm ? `${dm[1]}-${dm[2].padStart(2, "0")}-${dm[3].padStart(2, "0")}` : null,
-        url: `${BASE}/base/board/read?boardManagementNo=13&boardNo=${boardNo}&menuLevel=2&menuNo=46`,
-      });
-    }
-  } catch (e) { errs.push(`정부:${e.message}`); }
-
-  if (items.length === 0) throw new Error(`JNTP 파싱 0건 (${errs.join(" / ") || "구조 변경 확인"})`);
+  for (const row of html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) ?? []) {
+    const tds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]));
+    if (tds.length < 4 || !/^\d+$/.test(tds[0])) continue; // 번호 있는 실제 행만
+    const title = tds[1];
+    if (!title) continue;
+    const dm = [...(tds[2] || "").matchAll(/(\d{4})-(\d{2})-(\d{2})/g)].map((m) => `${m[1]}-${m[2]}-${m[3]}`);
+    // 상세 링크(pms.jntp.or.kr) 우선, 없으면 접수공고 목록 페이지
+    const href = (row.match(/href="([^"]+)"/)?.[1] || "").replace(/&amp;/g, "&");
+    items.push({
+      source: "JNTP", agency: "전남테크노파크", title, category: "지역사업", summary: null,
+      applyStart: dm[0] ?? null, applyEnd: dm[1] ?? null, announcedAt: dm[0] ?? null,
+      url: href || "https://pms.jntp.or.kr/ko/sub02/sub0202",
+    });
+  }
+  if (items.length === 0) throw new Error("JNTP apiAnnouncement/List 파싱 0건 — 구조 변경 확인");
   return items;
 }
 
@@ -152,7 +123,7 @@ async function main() {
       {
         fetchedAt: new Date().toISOString(),
         sources: [
-          { name: "전남테크노파크 (JNTP)", url: "https://data.jntp.or.kr/jntp/content/business/announcement/list.jsp" },
+          { name: "전남테크노파크 (JNTP)", url: "https://pms.jntp.or.kr/ko/sub02/sub0202" },
           { name: "SMTECH 사업공고", url: "https://www.smtech.go.kr/front/ifg/no/notice02_list.do" },
         ],
         errors: errors.length ? errors : undefined,
