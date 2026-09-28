@@ -59,7 +59,6 @@ export default function Dashboard() {
         const over = totals.filter((t) => t.total > 100);
         const projDeadlines = collectDeadlines(data, 90);
         const bexec = budgetExecByProject(data);
-        const atRiskBudget = bexec.filter((b) => b.atRisk);
 
         const cards = [
           { href: "/projects", label: "과제", value: `${data.projects.length}건`, sub: `진행중 ${active.length} · R&D ${rnd} / 비R&D ${biz}` },
@@ -72,27 +71,6 @@ export default function Dashboard() {
 
         return (
           <div className="space-y-5">
-            {/* ⚠️ 확인 필요 경고 배너 (참여율 초과 / 집행 저조) */}
-            {(over.length > 0 || atRiskBudget.length > 0) && (
-              <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
-                <p className="text-sm font-bold text-amber-800">⚠️ 확인이 필요합니다</p>
-                <ul className="mt-1 space-y-1 text-sm text-amber-800">
-                  {over.length > 0 && (
-                    <li>
-                      참여율 100% 초과 <b>{over.length}명</b> — {over.map((o) => `${o.name}(${o.total}%)`).join(", ")}{" "}
-                      <Link href="/compliance" className="font-medium underline hover:text-amber-900">참여율 확인 ↗</Link>
-                    </li>
-                  )}
-                  {atRiskBudget.length > 0 && (
-                    <li>
-                      집행 저조 과제 <b>{atRiskBudget.length}건</b> (종료 임박 · 집행율 70% 미만) — {atRiskBudget.map((a) => `${a.title}(${Math.round(a.rate)}%)`).join(", ")}{" "}
-                      <Link href="/budget" className="font-medium underline hover:text-amber-900">사업비 확인 ↗</Link>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-
             {/* 전체 탭 요약 카드 */}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {cards.map((c) => (
