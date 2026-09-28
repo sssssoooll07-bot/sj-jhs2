@@ -2,10 +2,20 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { collectDeadlines, participationTotals, budgetExecByProject, daysUntil, fmtKWon, fmtDate } from "@/lib/excel";
+import { participationTotals, budgetExecByProject, daysUntil, fmtKWon, fmtDate, type Project } from "@/lib/excel";
 import { Badge, Dday, Empty, Section } from "@/components/ui";
 
 const won = (v: number) => `${Math.round(v).toLocaleString("ko-KR")}원`;
+/** 과제 종료일(마감) — endDate 우선, 없으면 사업기간(period) 마지막 날짜 */
+const projEnd = (p: Project): Date | null => {
+  if (p.endDate instanceof Date && !isNaN(p.endDate.getTime())) return p.endDate;
+  const all = (p.period ?? "").match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/g);
+  if (all && all.length) {
+    const m = all[all.length - 1].match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/);
+    if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  }
+  return null;
+};
 import { WithData } from "@/components/FileGate";
 import DashboardCalendar from "@/components/DashboardCalendar";
 import GlobalSearch from "@/components/GlobalSearch";
@@ -58,8 +68,9 @@ export default function Dashboard() {
         const activeResearchers = data.researchers.filter((r) => r.active).length;
         const totals = participationTotals(data);
         const over = totals.filter((t) => t.total > 100);
-        const projDeadlines = collectDeadlines(data, 90);
         const bexec = budgetExecByProject(data);
+        // 진행중 과제 — 마감(종료일) D-day 순 정렬
+        const activeSorted = [...active].sort((a, b) => (projEnd(a)?.getTime() ?? Infinity) - (projEnd(b)?.getTime() ?? Infinity));
 
         const cards = [
           { href: "/projects", label: "과제", value: `${data.projects.length}건`, sub: `진행중 ${active.length} · R&D ${rnd} / 비R&D ${biz}` },
@@ -90,68 +101,36 @@ export default function Dashboard() {
             <DashboardCalendar data={data} />
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-              {/* 과제 마감 임박 (과제만) */}
-              <Section title="⏰ 과제 마감 임박 (90일 내)" sub="진행중 과제의 수행기간 종료 (D-day 순)">
-                {projDeadlines.length === 0 ? (
-                  <Empty message="수행기간 종료가 임박한 과제가 없습니다." />
-                ) : (
-                  <ul className="divide-y divide-slate-100">
-                    {projDeadlines.map((d, i) => (
-                      <li key={i}>
-                        <Link href={d.href} className="flex items-center gap-3 py-2 hover:bg-slate-50">
-                          <Dday days={d.dday} />
-                          <span className="min-w-0 flex-1 truncate text-sm">
-                            <Badge tone={d.source === "연구과제" ? "blue" : "violet"}>{d.source === "연구과제" ? "R&D" : "비R&D"}</Badge> <span className="ml-1">{d.title}</span>
-                          </span>
-                          <span className="whitespace-nowrap text-xs text-slate-400">종료 {fmtDate(d.due)}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Section>
-
-              {/* 진행중 과제 */}
-              <Section title={`🚀 진행중 과제 — ${active.length}건`}>
+              {/* 진행중 과제 (마감 D-day 포함) — 마감임박+진행중 통합 */}
+              <Section title={`🚀 진행중 과제 — ${active.length}건`} sub="수행기간 종료(마감) D-day 순 · 클릭 시 과제로 이동">
                 {active.length === 0 ? (
                   <Empty message="진행중 과제가 없습니다." />
                 ) : (
                   <ul className="divide-y divide-slate-100">
-                    {active.map((p) => (
-                      <li key={p.code} className="py-2">
-                        <Link href="/projects" className="block hover:bg-slate-50">
-                          <p className="text-sm font-medium">
-                            <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type === "연구과제" ? "R&D" : "비R&D"}</Badge>{" "}
-                            <span className="ml-1">{p.title}</span>
-                          </p>
-                          <p className="mt-0.5 text-xs text-slate-400">
-                            {p.code} · {p.agency} · {p.period ?? `${fmtDate(p.startDate)}~${fmtDate(p.endDate)}`} · <b className="text-slate-600">{fmtKWon(p.totalKWon)}</b>
-                          </p>
-                        </Link>
-                      </li>
-                    ))}
+                    {activeSorted.map((p) => {
+                      const end = projEnd(p);
+                      return (
+                        <li key={p.code} className="py-2">
+                          <Link href={`/projects?p=${encodeURIComponent(p.code)}`} className="block hover:bg-slate-50">
+                            <div className="flex items-center gap-2">
+                              {end ? <Dday days={daysUntil(end)} /> : <span className="text-xs text-slate-300">—</span>}
+                              <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                                <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type === "연구과제" ? "R&D" : "비R&D"}</Badge> <span className="ml-1">{p.title}</span>
+                              </span>
+                              {end && <span className="whitespace-nowrap text-xs text-slate-400">종료 {fmtDate(end)}</span>}
+                            </div>
+                            <p className="ml-12 mt-0.5 truncate text-xs text-slate-400">
+                              {p.code} · {p.agency} · <b className="text-slate-600">{fmtKWon(p.totalKWon)}</b>
+                            </p>
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </Section>
 
-              {/* 참여율 현황 */}
-              <Section title="👥 참여율 현황" sub="진행중 과제 기준 · 오늘 시점 합계 (100% 초과 주의)">
-                {totals.length === 0 ? (
-                  <Empty message="진행중 과제의 참여율 기록이 없습니다." />
-                ) : (
-                  <ul className="divide-y divide-slate-100">
-                    {totals.map((t) => (
-                      <li key={t.name} className="flex items-center gap-3 py-2">
-                        <Badge tone={t.total > 100 ? "red" : "green"}>{t.total}%</Badge>
-                        <span className="text-sm font-medium">{t.name}</span>
-                        <span className="min-w-0 flex-1 truncate text-xs text-slate-400">{t.detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Section>
-
-              {/* 사업비 집행율 (진행중 과제) */}
+              {/* 사업비 집행율 (진행중 과제 자리) */}
               <Section title="💸 사업비 집행율" sub="진행중 과제 · 공급가 기준 · 종료 임박+집행율 70%↓ 주의">
                 {bexec.length === 0 ? (
                   <Empty message="진행중 과제의 사업비 예산이 없습니다." />
@@ -175,6 +154,23 @@ export default function Dashboard() {
                         </li>
                       );
                     })}
+                  </ul>
+                )}
+              </Section>
+
+              {/* 참여율 현황 */}
+              <Section title="👥 참여율 현황" sub="진행중 과제 기준 · 오늘 시점 합계 (100% 초과 주의)">
+                {totals.length === 0 ? (
+                  <Empty message="진행중 과제의 참여율 기록이 없습니다." />
+                ) : (
+                  <ul className="divide-y divide-slate-100">
+                    {totals.map((t) => (
+                      <li key={t.name} className="flex items-center gap-3 py-2">
+                        <Badge tone={t.total > 100 ? "red" : "green"}>{t.total}%</Badge>
+                        <span className="text-sm font-medium">{t.name}</span>
+                        <span className="min-w-0 flex-1 truncate text-xs text-slate-400">{t.detail}</span>
+                      </li>
+                    ))}
                   </ul>
                 )}
               </Section>
