@@ -8,6 +8,7 @@ import { Badge, Dday, Empty, Section } from "@/components/ui";
 const won = (v: number) => `${Math.round(v).toLocaleString("ko-KR")}원`;
 import { WithData } from "@/components/FileGate";
 import DashboardCalendar from "@/components/DashboardCalendar";
+import GlobalSearch from "@/components/GlobalSearch";
 
 type FeedItem = {
   source: string; agency: string; title: string; category: string | null; summary: string | null;
@@ -71,6 +72,9 @@ export default function Dashboard() {
 
         return (
           <div className="space-y-5">
+            {/* 통합 검색 (대시보드 전용) */}
+            <GlobalSearch />
+
             {/* 전체 탭 요약 카드 */}
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {cards.map((c) => (

@@ -4,7 +4,6 @@ import { AccessProvider } from "@/lib/access-context";
 import { AgreementFilesProvider } from "@/lib/agreement-files";
 import Sidebar from "@/components/Sidebar";
 import SectionGuard from "@/components/SectionGuard";
-import GlobalSearch from "@/components/GlobalSearch";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,8 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AgreementFilesProvider>
               <Sidebar />
               <div className="pl-60">
-                <main className="mx-auto max-w-6xl px-6 py-8">
-                  <GlobalSearch />
+                <main className="mx-auto max-w-6xl space-y-5 px-6 py-8">
                   <SectionGuard>{children}</SectionGuard>
                 </main>
                 <footer className="mx-auto max-w-6xl px-6 pb-8 text-xs text-slate-400">
