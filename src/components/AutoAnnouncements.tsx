@@ -11,7 +11,7 @@ type Item = {
 type Feed = { fetchedAt: string; errors?: string[]; items: Item[] };
 
 const SOURCE_INFO = {
-  JNTP: { label: "전남테크노파크", icon: "🏢", tone: "blue" as const, site: "https://data.jntp.or.kr/jntp/content/business/announcement/list.jsp" },
+  JNTP: { label: "전남테크노파크", icon: "🏢", tone: "blue" as const, site: "https://pms.jntp.or.kr/ko/sub02/sub0202" },
   SMTECH: { label: "중기청 (SMTECH)", icon: "🏛", tone: "violet" as const, site: "https://www.smtech.go.kr/front/ifg/no/notice02_list.do" },
 };
 type SrcKey = keyof typeof SOURCE_INFO;
