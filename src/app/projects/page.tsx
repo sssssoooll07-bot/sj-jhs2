@@ -52,9 +52,12 @@ const toRow = (p: Project) => ({
   부가세입금: p.vatPaid ? "O" : "", 자부담입금: p.selfPaid ? "O" : "",
 });
 
+/** 파일 확장자(.pdf 기본) */
+const extOf = (name: string) => { const i = name.lastIndexOf("."); return i >= 0 ? name.slice(i) : ".pdf"; };
+
 /** 전용통장 1건 + 통장거래내역 (상세용) */
 function AccountBox({ p }: { p: Project }) {
-  const { getByPattern, loadFolder, uploading } = useAgreementFiles();
+  const { getByPattern, uploadNamed, uploading } = useAgreementFiles();
   const canEdit = useCanEditHere();
   const bankRef = useRef<HTMLInputElement>(null);
   const stmt = getByPattern(p.code, "bankbook");
@@ -73,16 +76,14 @@ function AccountBox({ p }: { p: Project }) {
         <span className="ml-auto text-[11px] text-slate-400">입금 여부는 과제 목록에서 ✎로 체크</span>
       </div>
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-        <p className="text-xs text-emerald-800">통장거래내역: {stmt ? <DocViewButton doc={stmt} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다."}</p>
+        <p className="text-xs text-emerald-800">통장거래내역: {stmt ? <DocViewButton doc={stmt} /> : "파일을 선택하면 이 과제에 연결됩니다."}</p>
         {canEdit && (
           <>
             <button onClick={() => bankRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
               {uploading ? "업로드 중…" : "거래내역 업로드"}
             </button>
-            <input ref={bankRef} type="file"
-              // @ts-expect-error webkitdirectory는 표준 타입에 없음
-              webkitdirectory="" directory="" multiple className="hidden"
-              onChange={(e) => e.target.files && loadFolder(e.target.files, "bankbook")} />
+            <input ref={bankRef} type="file" accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls" className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadNamed(f, "bankbook", `${p.code} 통장거래내역${extOf(f.name)}`); e.target.value = ""; }} />
           </>
         )}
       </div>
@@ -92,22 +93,20 @@ function AccountBox({ p }: { p: Project }) {
 
 /** 사업계획서 1건 (상세용) */
 function PlanBox({ p }: { p: Project }) {
-  const { getByPattern, loadFolder, uploading } = useAgreementFiles();
+  const { getByPattern, uploadNamed, uploading } = useAgreementFiles();
   const canEdit = useCanEditHere();
   const planRef = useRef<HTMLInputElement>(null);
   const doc = getByPattern(p.code, "businessplan");
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-      <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">사업계획서:</span> {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF 권장)."}</p>
+      <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">사업계획서:</span> {doc ? <DocViewButton doc={doc} /> : "파일을 선택하면 이 과제에 연결됩니다(PDF 권장)."}</p>
       {canEdit && (
         <>
           <button onClick={() => planRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-slate-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-slate-700 disabled:opacity-50">
             {uploading ? "업로드 중…" : "사업계획서 업로드"}
           </button>
-          <input ref={planRef} type="file"
-            // @ts-expect-error webkitdirectory는 표준 타입에 없음
-            webkitdirectory="" directory="" multiple className="hidden"
-            onChange={(e) => e.target.files && loadFolder(e.target.files, "businessplan")} />
+          <input ref={planRef} type="file" accept=".pdf,.png,.jpg,.jpeg,.hwp,.hwpx,.doc,.docx" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadNamed(f, "businessplan", `${p.code} 사업계획서${extOf(f.name)}`); e.target.value = ""; }} />
         </>
       )}
     </div>
@@ -116,20 +115,20 @@ function PlanBox({ p }: { p: Project }) {
 
 /** 연구노트 최종본 PDF 1건 (R&D 과제 상세용) */
 function NoteBox({ p }: { p: Project }) {
-  const { getByPattern, loadFolder, uploading } = useAgreementFiles();
+  const { getByPattern, uploadNamed, uploading } = useAgreementFiles();
   const canEdit = useCanEditHere();
   const noteRef = useRef<HTMLInputElement>(null);
   const doc = getByPattern(p.code, "researchnote");
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-      <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">연구노트(최종본):</span> {doc ? <DocViewButton doc={doc} /> : "파일명에 과제코드를 넣어 업로드하면 여기 연결됩니다(PDF)."}</p>
+      <p className="text-xs text-slate-600"><span className="font-medium text-slate-700">연구노트(최종본):</span> {doc ? <DocViewButton doc={doc} /> : "파일을 선택하면 이 과제에 연결됩니다(PDF)."}</p>
       {canEdit && (
         <>
           <button onClick={() => noteRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-indigo-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
             {uploading ? "업로드 중…" : "연구노트 업로드"}
           </button>
-          <input ref={noteRef} type="file" accept=".pdf" multiple className="hidden"
-            onChange={(e) => e.target.files && loadFolder(e.target.files, "researchnote")} />
+          <input ref={noteRef} type="file" accept=".pdf,.png,.jpg,.jpeg" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadNamed(f, "researchnote", `${p.code} 연구노트${extOf(f.name)}`); e.target.value = ""; }} />
         </>
       )}
     </div>
