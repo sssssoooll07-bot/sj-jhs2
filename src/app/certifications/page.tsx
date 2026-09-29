@@ -7,6 +7,7 @@ import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
 import { useCanEditHere } from "@/lib/access-context";
 import DocViewButton from "@/components/DocViewButton";
+import AttachButton from "@/components/AttachButton";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 
 const CAT_TONE: Record<string, "blue" | "amber" | "violet"> = { 인증: "blue", "면허·등록": "amber", "표창·수상": "violet" };
@@ -41,7 +42,12 @@ function CertInner({ data }: { data: Data }) {
       view: (c) => {
         const doc = getByPattern(c.name, "cert");
         const label = <span className="font-medium">{c.name}</span>;
-        return doc ? <DocViewButton doc={doc} label={label} /> : label;
+        return (
+          <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {doc ? <DocViewButton doc={doc} label={label} /> : label}
+            {canEdit && <AttachButton category="cert" saveName={c.name} title="인증서/증서 첨부" />}
+          </span>
+        );
       },
     },
     { key: "category", label: "구분", type: "select", options: ["인증", "면허·등록", "표창·수상"], view: (c) => <Badge tone={CAT_TONE[c.category] ?? "slate"}>{c.category}</Badge> },

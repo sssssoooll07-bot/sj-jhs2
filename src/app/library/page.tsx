@@ -7,6 +7,7 @@ import { useCanEditHere } from "@/lib/access-context";
 import { Badge, Empty, Section, Dday } from "@/components/ui";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
+import AttachButton from "@/components/AttachButton";
 import { daysUntil, type LibraryDoc } from "@/lib/excel";
 
 /**
@@ -48,7 +49,12 @@ export default function LibraryPage() {
       view: (d) => {
         const doc = getByPattern(d.name, "refdoc");
         const label = <span className="font-medium">{d.name}</span>;
-        return doc ? <DocViewButton doc={doc} label={label} /> : label;
+        return (
+          <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {doc ? <DocViewButton doc={doc} label={label} /> : label}
+            {canEdit && <AttachButton category="refdoc" saveName={d.name} title="서류 파일 첨부" accept=".pdf,.png,.jpg,.jpeg,.hwp,.hwpx,.doc,.docx,.xlsx,.xls" />}
+          </span>
+        );
       },
     },
     { key: "validUntil", label: "만료일", type: "date", th: "만료일", nowrap: true, view: (d) => (d.validUntil ? <Dday days={daysUntil(d.validUntil)} /> : "—") },
