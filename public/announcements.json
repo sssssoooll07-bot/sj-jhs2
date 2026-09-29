@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-28T07:18:03.186Z",
+ "fetchedAt": "2026-09-29T00:09:54.065Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -34,6 +34,28 @@
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02871&buclCd=S9161&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "「2026년 지역수요맞춤형 연구개발사업(지역핵심과학기술 지원)」 수행기관 2차 모집공고",
+   "category": "R&D",
+   "summary": null,
+   "applyStart": "2026-08-10",
+   "applyEnd": "2026-08-21",
+   "announcedAt": "2026-08-07",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000027"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "해남군 지방소멸대응 뿌리·조선산업 활성화 지원사업 4차 모집공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-05",
+   "applyEnd": "2026-08-21",
+   "announcedAt": "2026-08-05",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000025"
+  },
+  {
    "source": "SMTECH",
    "agency": "SMTECH",
    "title": "2026년 제5차 중소기업 R&D 전담은행 투자지원 추천기업(강원충청권) 모집 공고",
@@ -45,6 +67,39 @@
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02876&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 전남 벤처•스타트업 사업화 지원 모집 공고(2차)",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-12",
+   "applyEnd": "2026-08-25",
+   "announcedAt": "2026-08-11",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000030"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 전남 탄소중립 제조혁신 고도화 2단계 사업 추가모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-18",
+   "applyEnd": "2026-08-28",
+   "announcedAt": "2026-08-14",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000031"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 전남 에너지산업 융복합단지 활성화 기업지원사업 통합 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-10",
+   "applyEnd": "2026-08-28",
+   "announcedAt": "2026-08-10",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000029"
+  },
+  {
    "source": "SMTECH",
    "agency": "SMTECH",
    "title": "2026년 중소기업 연구인력지원사업(파견) 8월 공고",
@@ -54,6 +109,50 @@
    "applyEnd": "2026-08-31",
    "announcedAt": "2026-09-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=7&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "우주항공기업 기술자립 연계형 지역성장 지원사업(비R&D분야) 모집공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-20",
+   "applyEnd": "2026-09-02",
+   "announcedAt": "2026-08-24",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000038"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "우주항공기업 기술자립 연계형 지역성장 지원사업 수행기관 모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-20",
+   "applyEnd": "2026-09-02",
+   "announcedAt": "2026-08-18",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000034"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "우주항공기업 기술자립 연계형 지역성장 지원사업(R&D분야) 모집 공고",
+   "category": "R&D",
+   "summary": null,
+   "applyStart": "2026-08-20",
+   "applyEnd": "2026-09-02",
+   "announcedAt": "2026-08-18",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000032"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "「철강·금속 제조기업 DX·AX 전환 혁신 기업지원 사업」 DX·AX 전환 전략 수립 수행기관(기업) 모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-28",
+   "applyEnd": "2026-09-03",
+   "announcedAt": "2026-08-28",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000045"
   },
   {
    "source": "SMTECH",
@@ -69,19 +168,96 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "전남농공단지 기업맞춤형 특화지원사업 모집공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-26",
+   "applyEnd": "2026-09-04",
+   "announcedAt": "2026-08-25",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000039"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "보성군 새싹 키움터 사업 3차 모집공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-28",
+   "applyEnd": "2026-09-04",
+   "announcedAt": "2026-08-20",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000036"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "철강·금속 제조기업 DX·AX 전환 혁신 기업지원 사업(도입단계)",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-26",
+   "applyEnd": "2026-09-08",
+   "announcedAt": "2026-08-26",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000042"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "「2026년 지역수요맞춤형 연구개발사업(지역핵심과학기술 지원)」 수행기관 3차 모집공고",
+   "category": "R&D",
+   "summary": null,
+   "applyStart": "2026-08-26",
+   "applyEnd": "2026-09-08",
+   "announcedAt": "2026-08-26",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000041"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2025년도 뿌리산업 선도기업 육성사업 신규지원 공고(5차)",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-09-03",
+   "applyEnd": "2026-09-09",
+   "announcedAt": "2026-09-03",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000051"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "보성군 새싹 키움터 사업 3차 모집공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-28",
+   "applyEnd": "2026-09-11",
+   "announcedAt": "2026-09-04",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000052"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "여수-울산 석유화학산단 기업혁신주체 네트워킹 운영 기업지원사업 수행기관 공고",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-04",
    "applyEnd": "2026-09-14",
-   "announcedAt": "2026-09-04",
+   "announcedAt": "2026-09-08",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000055"
   },
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "첨단로봇·AI 활용 중소기업 제조혁신 기업지원 2차 모집 공고_실증지원",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-09-01",
+   "applyEnd": "2026-09-15",
+   "announcedAt": "2026-08-31",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000046"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "2026년 전남 탄소중립 제조혁신 고도화 2단계 사업 추가모집 공고",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-09",
    "applyEnd": "2026-09-18",
@@ -92,7 +268,7 @@
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "2026년도 무탄소 전력활용 수소산업육성 기업지원사업(3차)",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-07",
    "applyEnd": "2026-09-18",
@@ -103,18 +279,18 @@
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "여수-울산 석유화학산단 기업혁신주체 네트워킹 운영 기업지원사업 수행기관 공고",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-04",
    "applyEnd": "2026-09-21",
-   "announcedAt": "2026-09-04",
+   "announcedAt": "2026-09-14",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000060"
   },
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "2026년 정부출연연 연계 전남 패밀리기업 추가모집",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-07",
    "applyEnd": "2026-09-22",
@@ -125,11 +301,11 @@
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "「2026년도 화순군 시군구연고산업육성사업」화순군 바이오산업 활성화 지원사업 참여기업 모집 4차 공고",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-15",
    "applyEnd": "2026-09-23",
-   "announcedAt": "2026-09-15",
+   "announcedAt": "2026-09-14",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000058"
   },
   {
@@ -147,23 +323,34 @@
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "2026년 서남권 지역혁신클러스터육성(비R&D) BIXPO 2026 전시 공동홍보관 참가 기업 모집 공고",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-10",
    "applyEnd": "2026-09-29",
-   "announcedAt": "2026-09-10",
+   "announcedAt": "2026-09-09",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000056"
   },
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
    "title": "2026년 전남 중소기업 연구조직 설립 및 R&D 기획지원 사업 3차 공고",
-   "category": "지역사업",
+   "category": "R&D",
    "summary": null,
    "applyStart": "2026-09-18",
    "applyEnd": "2026-09-30",
-   "announcedAt": "2026-09-18",
+   "announcedAt": "2026-09-17",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000063"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 여수시 지역산업위기대응 맞춤형 지원사업 4차 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-31",
+   "applyEnd": "2026-09-30",
+   "announcedAt": "2026-08-28",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000044"
   },
   {
    "source": "SMTECH",
@@ -177,6 +364,28 @@
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=8&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 광양 지역산업 위기대응 맞춤형 지원사업 4차 통합공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-09-01",
+   "applyEnd": "2026-10-01",
+   "announcedAt": "2026-09-01",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000048"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "해남군 제조환경 개선 청년친화형 일자리 증대사업(2차) 변경 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-09-01",
+   "applyEnd": "2026-10-08",
+   "announcedAt": "2026-09-01",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000047"
+  },
+  {
    "source": "SMTECH",
    "agency": "SMTECH",
    "title": "2026년도 중소벤처기업부 혁신제품 3차 규격추가 모집 안내문",
@@ -186,6 +395,17 @@
    "applyEnd": "2026-10-19",
    "announcedAt": "2026-09-22",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02880&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 뿌리산업 선도기업 육성사업 신규지원 변경 공고(3차)",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-09-02",
+   "applyEnd": "2026-10-23",
+   "announcedAt": "2026-09-02",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000050"
   },
   {
    "source": "SMTECH",
@@ -212,24 +432,57 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "2026년 생분해성 플라스틱 표준개발 및 평가 기반구축 기업지원사업 3차",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-28",
+   "applyEnd": "2026-10-31",
+   "announcedAt": "2026-08-27",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000043"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "2026년 [소상공인 IP출원(상표출원) 지원사업] 소상공인 수혜자 모집 공고",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-02-27",
    "applyEnd": "2026-11-30",
-   "announcedAt": "2026-02-27",
+   "announcedAt": "2026-09-14",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000059"
   },
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "AI대전환 오픈플랫폼 AI컴퓨팅 자원 사용자 모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-08-19",
+   "applyEnd": "2026-11-30",
+   "announcedAt": "2026-08-19",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000035"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "2026년 밀집지역 소재 중소기업 한국은행 C2자금 지원대상 확인서 발급 신청 접수",
-   "category": "지역사업",
+   "category": "비R&D",
    "summary": null,
    "applyStart": "2026-09-17",
    "applyEnd": "2026-12-31",
    "announcedAt": "2026-09-17",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000062"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "전남 지역혁신클러스터 에너지신산업 OpenLAB 회원사 모집",
+   "category": "R&D",
+   "summary": null,
+   "applyStart": "2026-02-02",
+   "applyEnd": "2026-12-31",
+   "announcedAt": "2026-08-10",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000028"
   }
  ]
 }

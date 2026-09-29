@@ -20,31 +20,47 @@ const clean = (s) =>
     .trim();
 
 /**
- * JNTP — 전남테크노파크 공고.
- * 소스: /base/apiAnnouncement/List (menuNo=45) — 목록 표(번호/제목/접수기간/상태/조회수),
- *       상세 링크는 pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=... 로 제공됨.
+ * JNTP — 전남테크노파크 공고. 소스: pms.jntp.or.kr/ko/sub02/sub0202 (사업공고 목록, 페이지네이션).
+ * 항목: .table_box_wrap — pageViewGo('A20xx-xxxxxx'), 제목, 접수기간, 등록일, 배지(R&D·접수중).
+ * 상세: ?mode=view&bisProjAnnceIdx=<공고번호>.
  */
 async function fetchJNTP() {
-  const BASE = "https://www.jntp.or.kr";
-  const res = await fetch(`${BASE}/base/apiAnnouncement/List?menuLevel=2&menuNo=45`, { headers: { "User-Agent": UA } });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const html = await res.text();
+  const LIST = "https://pms.jntp.or.kr/ko/sub02/sub0202";
+  const H = { "User-Agent": UA };
+  const seen = new Set();
   const items = [];
-  for (const row of html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) ?? []) {
-    const tds = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]));
-    if (tds.length < 4 || !/^\d+$/.test(tds[0])) continue; // 번호 있는 실제 행만
-    const title = tds[1];
-    if (!title) continue;
-    const dm = [...(tds[2] || "").matchAll(/(\d{4})-(\d{2})-(\d{2})/g)].map((m) => `${m[1]}-${m[2]}-${m[3]}`);
-    // 상세 링크(pms.jntp.or.kr) 우선, 없으면 접수공고 목록 페이지
-    const href = (row.match(/href="([^"]+)"/)?.[1] || "").replace(/&amp;/g, "&");
-    items.push({
-      source: "JNTP", agency: "전남테크노파크", title, category: "지역사업", summary: null,
-      applyStart: dm[0] ?? null, applyEnd: dm[1] ?? null, announcedAt: dm[0] ?? null,
-      url: href || "https://pms.jntp.or.kr/ko/sub02/sub0202",
-    });
+
+  const parse = (html) => {
+    for (const b of html.split('class="table_box_wrap"').slice(1)) {
+      const idx = b.match(/pageViewGo\(['"](A\d{4}-\d{6})['"]\)/)?.[1] || b.match(/공고번호<\/span>\s*<span class="value">\s*([A-Z0-9-]+)/)?.[1];
+      const title = clean((b.match(/<span class="title">([\s\S]*?)<\/span>/) || [])[1] || "");
+      if (!idx || !title || seen.has(idx)) continue;
+      seen.add(idx);
+      const period = (b.match(/접수기간<\/span>\s*<span class="value">\s*([^<]+)</) || [])[1] || "";
+      const dm = [...period.matchAll(/(\d{4})-(\d{2})-(\d{2})/g)].map((m) => `${m[1]}-${m[2]}-${m[3]}`);
+      const reg = (b.match(/등록일<\/span>\s*<span class="value">\s*(\d{4}-\d{2}-\d{2})/) || [])[1] || null;
+      const badges = [...b.matchAll(/<span class="badge-board[^"]*">\s*([^<]+?)\s*<\/span>/g)].map((m) => clean(m[1]));
+      const category = badges.find((x) => !/(접수중|접수마감|마감|예정|종료|^D[-+])/.test(x)) || "공고";
+      items.push({
+        source: "JNTP", agency: "전남테크노파크", title, category, summary: null,
+        applyStart: dm[0] ?? null, applyEnd: dm[1] ?? null, announcedAt: reg ?? dm[0] ?? null,
+        url: `${LIST}?mode=view&bisProjAnnceIdx=${idx}`,
+      });
+    }
+  };
+
+  const first = await fetch(`${LIST}?nowPage=1`, { headers: H });
+  if (!first.ok) throw new Error(`HTTP ${first.status}`);
+  const firstHtml = await first.text();
+  const pageTotal = Math.min(parseInt((firstHtml.match(/id="page-total">\s*(\d+)/) || [])[1] || "1", 10) || 1, 10);
+  parse(firstHtml);
+  for (let p = 2; p <= pageTotal; p++) {
+    try {
+      const r = await fetch(`${LIST}?nowPage=${p}`, { headers: H });
+      if (r.ok) parse(await r.text());
+    } catch { /* 해당 페이지 스킵 */ }
   }
-  if (items.length === 0) throw new Error("JNTP apiAnnouncement/List 파싱 0건 — 구조 변경 확인");
+  if (items.length === 0) throw new Error("JNTP(pms) 파싱 0건 — 구조 변경 확인");
   return items;
 }
 
