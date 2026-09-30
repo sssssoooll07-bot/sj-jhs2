@@ -37,7 +37,7 @@ const COLS: Col<Project>[] = [
   { key: "bank", label: "전용통장 은행", hide: true },
   { key: "account", label: "전용통장 계좌번호", hide: true },
   { key: "accountHolder", label: "예금주", hide: true },
-  { key: "cardNo", label: "전용카드 번호", hide: true },
+  { key: "cardNo", label: "전용카드 번호 (2개면 쉼표로 구분)", hide: true, placeholder: "예: 1234567812345678, 8765432187654321" },
   { key: "selfPaid", label: "자부담(민간부담금) 입금완료", type: "toggle", th: "자부담입금", align: "center", nowrap: true, view: (p) => <OX on={p.selfPaid} /> },
   { key: "vatPaid", label: "부가세 입금완료", type: "toggle", th: "부가세입금", align: "center", nowrap: true, view: (p) => <OX on={p.vatPaid} /> },
 ];
@@ -74,7 +74,14 @@ function AccountBox({ p }: { p: Project }) {
         <Info label="은행" value={p.bank} />
         <Info label="계좌번호" value={p.account} mono />
         <Info label="예금주" value={p.accountHolder} />
-        <Info label="전용카드 번호" value={fmtCard(p.cardNo)} mono />
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+          <p className="text-[11px] font-medium text-slate-400">전용카드 번호</p>
+          {(() => {
+            const cards = (p.cardNo ?? "").split(/[,/\n;]+/).map((s) => s.trim()).filter(Boolean);
+            if (cards.length === 0) return <p className="mt-0.5 text-sm text-slate-800">—</p>;
+            return cards.map((c, i) => <p key={i} className="mt-0.5 font-mono text-sm text-slate-800">{fmtCard(c)}</p>);
+          })()}
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">부가세 입금
