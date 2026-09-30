@@ -55,6 +55,12 @@ const toRow = (p: Project) => ({
 
 /** 파일 확장자(.pdf 기본) */
 const extOf = (name: string) => { const i = name.lastIndexOf("."); return i >= 0 ? name.slice(i) : ".pdf"; };
+/** 카드번호 4자리씩 끊어 표시 (숫자면 그룹핑, 아니면 원본) */
+const fmtCard = (s: string | null): string | null => {
+  if (!s) return null;
+  const d = s.replace(/[\s-]/g, "");
+  return /^\d+$/.test(d) ? d.replace(/(.{4})/g, "$1 ").trim() : s;
+};
 
 /** 전용통장 1건 + 통장거래내역 (상세용) */
 function AccountBox({ p }: { p: Project }) {
@@ -68,7 +74,7 @@ function AccountBox({ p }: { p: Project }) {
         <Info label="은행" value={p.bank} />
         <Info label="계좌번호" value={p.account} mono />
         <Info label="예금주" value={p.accountHolder} />
-        <Info label="전용카드 번호" value={p.cardNo} mono />
+        <Info label="전용카드 번호" value={fmtCard(p.cardNo)} mono />
       </div>
       <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">부가세 입금
