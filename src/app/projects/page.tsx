@@ -18,7 +18,7 @@ const yearOf = (code: string) => code.match(/(\d{4})/)?.[1] ?? "기타";
 const EMPTY: Project = {
   code: "", title: "", type: "연구과제", agency: null, period: null, startDate: null, endDate: null,
   totalKWon: null, status: "진행중", role: "주관", company: "신정개발", progress: null, note: null,
-  bank: null, account: null, accountHolder: null, vatPaid: false, selfPaid: false, techType: null, phaseSumKWon: 0, phaseCheck: "—",
+  bank: null, account: null, accountHolder: null, cardNo: null, vatPaid: false, selfPaid: false, techType: null, phaseSumKWon: 0, phaseCheck: "—",
 };
 const COLS: Col<Project>[] = [
   { key: "type", label: "구분 (연구과제=R&D / 지원사업=비R&D)", type: "select", options: ["연구과제", "지원사업"], th: "구분", view: (p) => <Badge tone={p.type === "연구과제" ? "blue" : "violet"}>{p.type === "연구과제" ? "R&D" : "비R&D"}</Badge> },
@@ -37,6 +37,7 @@ const COLS: Col<Project>[] = [
   { key: "bank", label: "전용통장 은행", hide: true },
   { key: "account", label: "전용통장 계좌번호", hide: true },
   { key: "accountHolder", label: "예금주", hide: true },
+  { key: "cardNo", label: "전용카드 번호", hide: true },
   { key: "selfPaid", label: "자부담(민간부담금) 입금완료", type: "toggle", th: "자부담입금", align: "center", nowrap: true, view: (p) => <OX on={p.selfPaid} /> },
   { key: "vatPaid", label: "부가세 입금완료", type: "toggle", th: "부가세입금", align: "center", nowrap: true, view: (p) => <OX on={p.vatPaid} /> },
 ];
@@ -48,7 +49,7 @@ const toRow = (p: Project) => ({
   과제코드: p.code, 과제명: p.title, 구분: p.type, "지원부처/기관": p.agency, 총사업기간: p.period,
   시작일: dateStr(p.startDate), 종료일: dateStr(p.endDate), "총사업금액(천원)": p.totalKWon,
   진행상태: p.status, 역할: p.role, 수행사: p.company, 진행사항: p.progress, 비고: p.note,
-  은행명: p.bank, 계좌번호: p.account, 예금주: p.accountHolder,
+  은행명: p.bank, 계좌번호: p.account, 예금주: p.accountHolder, 카드번호: p.cardNo,
   부가세입금: p.vatPaid ? "O" : "", 자부담입금: p.selfPaid ? "O" : "",
 });
 
@@ -63,10 +64,11 @@ function AccountBox({ p }: { p: Project }) {
   const stmt = getByPattern(p.code, "bankbook");
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Info label="은행" value={p.bank} />
         <Info label="계좌번호" value={p.account} mono />
         <Info label="예금주" value={p.accountHolder} />
+        <Info label="전용카드 번호" value={p.cardNo} mono />
       </div>
       <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">부가세 입금
