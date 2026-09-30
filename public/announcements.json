@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-29T02:32:00.309Z",
+ "fetchedAt": "2026-09-30T01:55:18.406Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -322,17 +322,6 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
-   "title": "2026년 서남권 지역혁신클러스터육성(비R&D) BIXPO 2026 전시 공동홍보관 참가 기업 모집 공고",
-   "category": "비R&D",
-   "summary": null,
-   "applyStart": "2026-09-10",
-   "applyEnd": "2026-09-29",
-   "announcedAt": "2026-09-09",
-   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000056"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
    "title": "2026년 전남 중소기업 연구조직 설립 및 R&D 기획지원 사업 3차 공고",
    "category": "R&D",
    "summary": null,
@@ -340,6 +329,17 @@
    "applyEnd": "2026-09-30",
    "announcedAt": "2026-09-17",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000063"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 서남권 지역혁신클러스터육성(비R&D) BIXPO 2026 전시 공동홍보관 참가 기업 모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-09-10",
+   "applyEnd": "2026-09-30",
+   "announcedAt": "2026-09-09",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000056"
   },
   {
    "source": "JNTP",
@@ -410,17 +410,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
-   "summary": null,
-   "applyStart": "2026-09-21",
-   "applyEnd": "2026-10-28",
-   "announcedAt": "2026-09-21",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02879&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년도 제4차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
    "category": "중소벤처기업부 혁신제품 지정 연장사업",
    "summary": null,
@@ -428,6 +417,17 @@
    "applyEnd": "2026-10-28",
    "announcedAt": "2026-09-21",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02878&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-09-21",
+   "applyEnd": "2026-10-28",
+   "announcedAt": "2026-09-21",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02879&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
