@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-09-30T01:55:18.406Z",
+ "fetchedAt": "2026-10-01T01:56:23.567Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -11,28 +11,6 @@
   }
  ],
  "items": [
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "2026년도 중소기업 R&D 우수성과 50선 모집 공고(한계재도전)",
-   "category": "중소기업 R&D 우수성과 사례발굴",
-   "summary": null,
-   "applyStart": "2026-06-30",
-   "applyEnd": "2026-08-13",
-   "announcedAt": "2026-06-30",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02871&buclCd=S9161&dtlAncmSn=2&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "2026년도 중소기업 R&D 우수성과 50선 모집 공고",
-   "category": "중소기업 R&D 우수성과 사례발굴",
-   "summary": null,
-   "applyStart": "2026-06-30",
-   "applyEnd": "2026-08-14",
-   "announcedAt": "2026-06-30",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02871&buclCd=S9161&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
@@ -107,7 +85,7 @@
    "summary": null,
    "applyStart": "2026-08-01",
    "applyEnd": "2026-08-31",
-   "announcedAt": "2026-09-01",
+   "announcedAt": "2026-10-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=7&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
@@ -360,7 +338,7 @@
    "summary": null,
    "applyStart": "2026-09-01",
    "applyEnd": "2026-09-30",
-   "announcedAt": "2026-09-01",
+   "announcedAt": "2026-10-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=8&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
@@ -384,6 +362,17 @@
    "applyEnd": "2026-10-08",
    "announcedAt": "2026-09-01",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000047"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "「2026년 목포대 지역성장 인재양성사업」 전남형 스마트야드(J-Smart Yard) 특화과정 강사 모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-09-30",
+   "applyEnd": "2026-10-13",
+   "announcedAt": "2026-09-30",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000065"
   },
   {
    "source": "SMTECH",
@@ -410,6 +399,17 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
+   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
+   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "summary": null,
+   "applyStart": "2026-09-21",
+   "applyEnd": "2026-10-28",
+   "announcedAt": "2026-09-21",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02879&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
    "title": "2026년도 제4차 중소벤처기업부 혁신제품 지정기간 연장(1차) 공고",
    "category": "중소벤처기업부 혁신제품 지정 연장사업",
    "summary": null,
@@ -421,13 +421,13 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년도 제3차 중소벤처기업부 혁신제품 지정기간 연장(2차) 공고",
-   "category": "중소벤처기업부 혁신제품 지정 연장사업",
+   "title": "2026년도 제2차 한국무역보험공사 연계 수출지원프로그램 시행계획 안내",
+   "category": "수출지원프로그램",
    "summary": null,
-   "applyStart": "2026-09-21",
-   "applyEnd": "2026-10-28",
-   "announcedAt": "2026-09-21",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02879&buclCd=S9112&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+   "applyStart": "2026-10-01",
+   "applyEnd": "2026-10-29",
+   "announcedAt": "2026-10-01",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02881&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -439,6 +439,17 @@
    "applyEnd": "2026-10-31",
    "announcedAt": "2026-08-27",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000043"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년 중소기업 연구인력지원사업(파견) 10월 공고",
+   "category": "공공연연구인력파견지원(참여기업접수용)",
+   "summary": null,
+   "applyStart": "2026-10-01",
+   "applyEnd": "2026-10-31",
+   "announcedAt": "2026-10-01",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=10&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
