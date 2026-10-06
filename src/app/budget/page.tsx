@@ -30,11 +30,12 @@ function BudgetInner({ data }: { data: Data }) {
   const [sel, setSel] = useState(0);
   const [selCat, setSelCat] = useState<string | null>(null);
   const [showRestore, setShowRestore] = useState(false);
+  const [showAllUsage, setShowAllUsage] = useState(false);
   const idx = Math.min(sel, Math.max(active.length - 1, 0));
   const p = active[idx];
 
   useEffect(() => { void refresh(); }, [refresh]);
-  useEffect(() => { setSelCat(null); setShowRestore(false); }, [idx]);
+  useEffect(() => { setSelCat(null); setShowRestore(false); setShowAllUsage(false); }, [idx]);
 
   const template = useMemo(() => list("budget").find((d) => /양식|서식|템플릿/.test(d.name)), [list]);
   const ledgerTmpl = useMemo(() => (p ? list("budget").find((d) => d.name.includes("지출부") && d.name.includes(p.code)) : undefined), [list, p]);
@@ -154,6 +155,13 @@ function BudgetInner({ data }: { data: Data }) {
   ];
   const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, 거래처: u.payee, "총액(원)": u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0)), "금액(원)": u.amountKWon, "부가세(원)": u.vatKWon, 비고: u.note });
 
+  // 전체보기용 컬럼 — 비목(세목) 열 추가 (비목별 선택 없이 전체를 일자순으로)
+  const ALL_USAGE_COLS: Col<BudgetUsage>[] = [
+    USAGE_COLS[0],
+    { key: "category", label: "비목", type: "select", options: items.map((b) => b.category).filter(Boolean) as string[], th: "비목", nowrap: true, view: (u) => <span className="font-medium text-slate-600">{u.category}</span> },
+    ...USAGE_COLS.slice(1),
+  ];
+
   // 부가세 복원 내역 입력 컬럼 (복원일·적요·복원액)
   const RESTORE_COLS: Col<BudgetUsage>[] = [
     { key: "usedAt", label: "복원일", type: "date", nowrap: true },
@@ -215,11 +223,29 @@ function BudgetInner({ data }: { data: Data }) {
                   <p className="text-[11px] text-slate-400">※ 현물(비집행) {won(tot.inKind)}원은 현금 집행 대상이 아니므로 집행율 계산(현금 집행대상 {won(tot.cashFinal)}원)에서 제외됩니다.</p>
                 )}
 
-                {/* 선택 비목 사용내역 */}
+                {/* 사용내역 — 비목별 또는 전체(일자순) */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  {selCat ? (
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-slate-700">
+                      📋 {showAllUsage ? `전체 사용내역 — 집행(공급가) ${won(tot.exec)}원` : selCat ? `<${selCat}> 사용내역 — 실지출 ${won(usedTotalWon(selCat))}원 · 집행(공급가) ${won(usedWon(selCat))}원` : "사용내역"}
+                    </p>
+                    <button onClick={() => setShowAllUsage((v) => !v)} className="ml-auto rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50">
+                      {showAllUsage ? "비목별 보기" : "전체보기 (일자순)"}
+                    </button>
+                  </div>
+                  {showAllUsage ? (
                     <>
-                      <p className="mb-2 text-sm font-semibold text-slate-700">📋 &lt;{selCat}&gt; 사용내역 — 실지출 {won(usedTotalWon(selCat))}원 · 집행(공급가) {won(usedWon(selCat))}원</p>
+                      <EditableTable
+                        rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category !== RESTORE_CAT} cols={ALL_USAGE_COLS}
+                        sort={(a, b) => +(a.usedAt ?? 0) - +(b.usedAt ?? 0)}
+                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: "", usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
+                        requiredKey="category" addLabel="사용내역 추가" entityLabel="사용내역"
+                        emptyMessage="사용내역이 없습니다. '사용내역 추가'로 기록하세요(비목 선택)."
+                      />
+                      <p className="mt-2 text-[11px] text-slate-400">※ 비목 구분 없이 집행일 순으로 모두 표시됩니다. 추가 시 비목을 선택하세요. 부가세는 집행액에서 제외되고 공급가만 반영됩니다.</p>
+                    </>
+                  ) : selCat ? (
+                    <>
                       <EditableTable
                         rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === selCat} cols={USAGE_COLS}
                         sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
@@ -229,7 +255,7 @@ function BudgetInner({ data }: { data: Data }) {
                       <p className="mt-2 text-[11px] text-slate-400">※ 부가세는 집행액(비목)에서 제외되고 공급가만 반영됩니다.</p>
                     </>
                   ) : (
-                    <p className="text-xs text-slate-400">위 표에서 <b className="text-slate-600">비목을 클릭</b>하면 해당 비목의 사용내역을 입력할 수 있습니다.</p>
+                    <p className="text-xs text-slate-400">위 표에서 <b className="text-slate-600">비목을 클릭</b>하거나 오른쪽 <b className="text-slate-600">전체보기</b>를 누르세요.</p>
                   )}
                 </div>
 
