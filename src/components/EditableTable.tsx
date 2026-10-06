@@ -41,7 +41,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false, sort, toolbarLeft,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false, sort, toolbarLeft, collapsed = false,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -66,6 +66,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   sort?: (a: T, b: T) => number;
   /** 추가 버튼 왼쪽에 함께 놓을 요소(전체보기 탭 등) — 보기 전용에서도 표시 */
   toolbarLeft?: ReactNode;
+  /** true면 표 본문을 접고 툴바(추가 버튼·toolbarLeft)만 표시 */
+  collapsed?: boolean;
 }) {
   const { saveSheet, error } = useDataCtx();
   const canEdit = useCanEditHere(); // 소유자 또는 이 섹션 수정권한이 있는 뷰어
@@ -97,7 +99,7 @@ export function EditableTable<T extends Record<string, unknown>>({
   return (
     <div>
       {(!ro || toolbarLeft) && (
-        <div className="mb-4 flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${collapsed ? "" : "mb-4"}`}>
           {toolbarLeft}
           {!ro && (
             <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700">
@@ -107,7 +109,7 @@ export function EditableTable<T extends Record<string, unknown>>({
           {error && <span className="text-sm font-medium text-red-600">⚠ {error}</span>}
         </div>
       )}
-      {visible.length === 0 ? (
+      {collapsed ? null : visible.length === 0 ? (
         <Empty message={rows.length === 0 ? (emptyMessage ?? `등록된 ${entityLabel}이(가) 없습니다. '${addLabel}'으로 등록하세요.`) : "선택한 조건에 해당하는 항목이 없습니다."} />
       ) : (
         <div className="overflow-x-auto">

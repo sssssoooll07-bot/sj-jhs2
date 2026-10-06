@@ -29,11 +29,12 @@ function BudgetInner({ data }: { data: Data }) {
   const active = data.projects.filter((p) => p.status === "진행중");
   const [sel, setSel] = useState(0);
   const [showRestore, setShowRestore] = useState(false);
+  const [showUsage, setShowUsage] = useState(false);
   const idx = Math.min(sel, Math.max(active.length - 1, 0));
   const p = active[idx];
 
   useEffect(() => { void refresh(); }, [refresh]);
-  useEffect(() => { setShowRestore(false); }, [idx]);
+  useEffect(() => { setShowRestore(false); setShowUsage(false); }, [idx]);
 
   const template = useMemo(() => list("budget").find((d) => /양식|서식|템플릿/.test(d.name)), [list]);
   const ledgerTmpl = useMemo(() => (p ? list("budget").find((d) => d.name.includes("지출부") && d.name.includes(p.code)) : undefined), [list, p]);
@@ -229,9 +230,14 @@ function BudgetInner({ data }: { data: Data }) {
                     sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: "", usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
                     requiredKey="category" addLabel="사용내역 추가" entityLabel="사용내역"
                     emptyMessage="사용내역이 없습니다. '사용내역 추가'로 기록하세요(비목 선택)."
-                    toolbarLeft={<span className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500">전체보기 (일자순)</span>}
+                    collapsed={!showUsage}
+                    toolbarLeft={
+                      <button onClick={() => setShowUsage((v) => !v)} className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50">
+                        {showUsage ? "접기 ▲" : "전체보기 (일자순) ▼"}
+                      </button>
+                    }
                   />
-                  <p className="mt-2 text-[11px] text-slate-400">※ 비목 구분 없이 집행일 순으로 모두 표시됩니다. 추가 시 비목을 선택하세요. 부가세는 집행액에서 제외되고 공급가만 반영됩니다.</p>
+                  {showUsage && <p className="mt-2 text-[11px] text-slate-400">※ 비목 구분 없이 집행일 순으로 모두 표시됩니다. 추가 시 비목을 선택하세요. 부가세는 집행액에서 제외되고 공급가만 반영됩니다.</p>}
                 </div>
 
                 {/* 부가세 복원 */}
