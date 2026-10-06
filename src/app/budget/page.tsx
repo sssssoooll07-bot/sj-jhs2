@@ -97,6 +97,12 @@ function BudgetInner({ data }: { data: Data }) {
   );
   const execBase = tot.inKind > 0 ? tot.cashFinal : tot.final; // 집행율 분모(현물 제외)
 
+  // 부가세 복원: 사용내역 부가세 합(복원대상) - 복원내역 합(복원완료)
+  const RESTORE_CAT = "부가세복원";
+  const vatToRestore = p ? data.budgetUsages.filter((u) => u.code === p.code && u.category !== RESTORE_CAT).reduce((s, u) => s + (u.vatKWon ?? 0), 0) : 0;
+  const vatRestored = p ? data.budgetUsages.filter((u) => u.code === p.code && u.category === RESTORE_CAT).reduce((s, u) => s + (u.amountKWon ?? 0), 0) : 0;
+  const vatOutstanding = vatToRestore - vatRestored;
+
   const BUDGET_COLS: Col<BudgetItem>[] = [
     { key: "category", label: "비목(세목)", span: true, view: (b) => <span className="font-medium">{b.category}</span> },
     { key: "planKWon", label: "최초계획금액(원)", type: "money", align: "center", th: "최초계획", nowrap: true, view: (b) => won(b.planKWon) },
@@ -145,6 +151,14 @@ function BudgetInner({ data }: { data: Data }) {
     },
   ];
   const usageRow = (u: BudgetUsage) => ({ 과제코드: u.code, 비목: u.category, 집행일: dateStr(u.usedAt), 적요: u.desc, 거래처: u.payee, "총액(원)": u.grossKWon ?? ((u.amountKWon ?? 0) + (u.vatKWon ?? 0)), "금액(원)": u.amountKWon, "부가세(원)": u.vatKWon, 비고: u.note });
+
+  // 부가세 복원 내역 입력 컬럼 (복원일·적요·복원액)
+  const RESTORE_COLS: Col<BudgetUsage>[] = [
+    { key: "usedAt", label: "복원일", type: "date", nowrap: true },
+    { key: "desc", label: "적요(복원 내역)", span: true },
+    { key: "amountKWon", label: "복원액(원)", type: "money", align: "center", th: "복원액", nowrap: true, placeholder: "복원액 입력", view: (u) => won(u.amountKWon) },
+    { key: "note", label: "비고", span: true, hide: true },
+  ];
 
   return (
     <div className="space-y-5">
@@ -215,6 +229,25 @@ function BudgetInner({ data }: { data: Data }) {
                   ) : (
                     <p className="text-xs text-slate-400">위 표에서 <b className="text-slate-600">비목을 클릭</b>하면 해당 비목의 사용내역을 입력할 수 있습니다.</p>
                   )}
+                </div>
+
+                {/* 부가세 복원 */}
+                <div className={`rounded-xl border p-4 ${vatOutstanding > 0 ? "border-red-200 bg-red-50/50" : "border-slate-200 bg-slate-50"}`}>
+                  <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <span className="text-sm font-semibold text-slate-700">💳 부가세 복원</span>
+                    <span className="text-xs text-slate-500">복원대상(부가세 합) <b className="text-slate-700">{won(vatToRestore)}원</b> · 복원완료 <b className="text-slate-700">{won(vatRestored)}원</b></span>
+                    <span className="ml-auto text-sm font-bold">
+                      미복원{" "}
+                      {vatOutstanding > 0 ? <span className="text-red-600">{won(vatOutstanding)}원</span> : <span className="text-emerald-600">0원 ✓</span>}
+                    </span>
+                  </div>
+                  <EditableTable
+                    rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === RESTORE_CAT} cols={RESTORE_COLS}
+                    sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: RESTORE_CAT, usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
+                    requiredKey="code" addLabel="복원 내역 추가" entityLabel="복원 내역"
+                    emptyMessage="복원 내역이 없습니다. 부가세를 사업비 계좌로 복원하면 '복원 내역 추가'로 기록하세요."
+                  />
+                  <p className="mt-2 text-[11px] text-slate-400">※ 사용내역의 부가세 합계만큼 사업비 계좌로 복원해야 하며, 복원 내역을 입력하면 미복원 금액이 0원이 됩니다.</p>
                 </div>
               </div>
             )}
