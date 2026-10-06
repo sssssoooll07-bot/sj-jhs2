@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Empty } from "@/components/ui";
 import { fmtDate } from "@/lib/excel";
@@ -41,7 +41,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false, sort,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false, sort, toolbarLeft,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -64,6 +64,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   editColumn?: boolean;
   /** 표시 정렬(원본 인덱스는 유지되어 수정/저장에 영향 없음) */
   sort?: (a: T, b: T) => number;
+  /** 추가 버튼 왼쪽에 함께 놓을 요소(전체보기 탭 등) — 보기 전용에서도 표시 */
+  toolbarLeft?: ReactNode;
 }) {
   const { saveSheet, error } = useDataCtx();
   const canEdit = useCanEditHere(); // 소유자 또는 이 섹션 수정권한이 있는 뷰어
@@ -94,11 +96,14 @@ export function EditableTable<T extends Record<string, unknown>>({
 
   return (
     <div>
-      {!ro && (
+      {(!ro || toolbarLeft) && (
         <div className="mb-4 flex items-center gap-2">
-          <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700">
-            <Plus className="h-3.5 w-3.5" /> {addLabel}
-          </button>
+          {toolbarLeft}
+          {!ro && (
+            <button onClick={() => setModal({ r: { ...blank }, isNew: true, index: -1 })} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700">
+              <Plus className="h-3.5 w-3.5" /> {addLabel}
+            </button>
+          )}
           {error && <span className="text-sm font-medium text-red-600">⚠ {error}</span>}
         </div>
       )}

@@ -222,7 +222,6 @@ function BudgetInner({ data }: { data: Data }) {
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold text-slate-700">📋 사용내역 — 집행(공급가) {won(tot.exec)}원</p>
-                    <span className="ml-auto rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500">전체보기 (일자순)</span>
                   </div>
                   <EditableTable
                     rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category !== RESTORE_CAT} cols={ALL_USAGE_COLS}
@@ -230,6 +229,7 @@ function BudgetInner({ data }: { data: Data }) {
                     sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: "", usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
                     requiredKey="category" addLabel="사용내역 추가" entityLabel="사용내역"
                     emptyMessage="사용내역이 없습니다. '사용내역 추가'로 기록하세요(비목 선택)."
+                    toolbarLeft={<span className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500">전체보기 (일자순)</span>}
                   />
                   <p className="mt-2 text-[11px] text-slate-400">※ 비목 구분 없이 집행일 순으로 모두 표시됩니다. 추가 시 비목을 선택하세요. 부가세는 집행액에서 제외되고 공급가만 반영됩니다.</p>
                 </div>
