@@ -41,7 +41,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false, sort,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -62,6 +62,8 @@ export function EditableTable<T extends Record<string, unknown>>({
   onRowClick?: (r: T) => void;
   /** onRowClick 없이도 ✎ 수정 열을 표시하고, 행 배경 클릭은 아무 동작도 하지 않게 한다 */
   editColumn?: boolean;
+  /** 표시 정렬(원본 인덱스는 유지되어 수정/저장에 영향 없음) */
+  sort?: (a: T, b: T) => number;
 }) {
   const { saveSheet, error } = useDataCtx();
   const canEdit = useCanEditHere(); // 소유자 또는 이 섹션 수정권한이 있는 뷰어
@@ -86,6 +88,7 @@ export function EditableTable<T extends Record<string, unknown>>({
   const tableCols = cols.filter((c) => !c.hide);
   const formCols = cols.filter((c) => c.editable !== false);
   const visible = rows.map((r, i) => ({ r, i })).filter(({ r }) => !rowFilter || rowFilter(r));
+  if (sort) visible.sort((a, b) => sort(a.r, b.r)); // 표시만 정렬(인덱스 i 유지)
   const showEditCol = (!!onRowClick || editColumn) && !addOnly && !ro; // ✎ 수정 열 표시 여부
   const rowClickEdits = !onRowClick && !editColumn && !addOnly && !ro; // 행 배경 클릭으로 수정 열림 여부
 

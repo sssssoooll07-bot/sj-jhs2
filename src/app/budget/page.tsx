@@ -29,11 +29,12 @@ function BudgetInner({ data }: { data: Data }) {
   const active = data.projects.filter((p) => p.status === "진행중");
   const [sel, setSel] = useState(0);
   const [selCat, setSelCat] = useState<string | null>(null);
+  const [showRestore, setShowRestore] = useState(false);
   const idx = Math.min(sel, Math.max(active.length - 1, 0));
   const p = active[idx];
 
   useEffect(() => { void refresh(); }, [refresh]);
-  useEffect(() => { setSelCat(null); }, [idx]);
+  useEffect(() => { setSelCat(null); setShowRestore(false); }, [idx]);
 
   const template = useMemo(() => list("budget").find((d) => /양식|서식|템플릿/.test(d.name)), [list]);
   const ledgerTmpl = useMemo(() => (p ? list("budget").find((d) => d.name.includes("지출부") && d.name.includes(p.code)) : undefined), [list, p]);
@@ -102,6 +103,7 @@ function BudgetInner({ data }: { data: Data }) {
   const vatToRestore = p ? data.budgetUsages.filter((u) => u.code === p.code && u.category !== RESTORE_CAT).reduce((s, u) => s + (u.vatKWon ?? 0), 0) : 0;
   const vatRestored = p ? data.budgetUsages.filter((u) => u.code === p.code && u.category === RESTORE_CAT).reduce((s, u) => s + (u.amountKWon ?? 0), 0) : 0;
   const vatOutstanding = vatToRestore - vatRestored;
+  const restoreCount = p ? data.budgetUsages.filter((u) => u.code === p.code && u.category === RESTORE_CAT).length : 0;
 
   const BUDGET_COLS: Col<BudgetItem>[] = [
     { key: "category", label: "비목(세목)", span: true, view: (b) => <span className="font-medium">{b.category}</span> },
@@ -232,22 +234,30 @@ function BudgetInner({ data }: { data: Data }) {
                 </div>
 
                 {/* 부가세 복원 */}
-                <div className={`rounded-xl border p-4 ${vatOutstanding > 0 ? "border-red-200 bg-red-50/50" : "border-slate-200 bg-slate-50"}`}>
-                  <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+                <div className={`rounded-xl border px-4 py-3 ${vatOutstanding > 0 ? "border-red-200 bg-red-50/50" : "border-slate-200 bg-slate-50"}`}>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                     <span className="text-sm font-semibold text-slate-700">💳 부가세 복원</span>
-                    <span className="text-xs text-slate-500">복원대상(부가세 합) <b className="text-slate-700">{won(vatToRestore)}원</b> · 복원완료 <b className="text-slate-700">{won(vatRestored)}원</b></span>
+                    <span className="text-xs text-slate-500">복원대상 <b className="text-slate-700">{won(vatToRestore)}원</b> · 복원완료 <b className="text-slate-700">{won(vatRestored)}원</b></span>
+                    <button onClick={() => setShowRestore((v) => !v)} className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50">
+                      {showRestore ? "접기 ▲" : `복원 내역 전체보기 (${restoreCount}건) ▼`}
+                    </button>
                     <span className="ml-auto text-sm font-bold">
                       미복원{" "}
                       {vatOutstanding > 0 ? <span className="text-red-600">{won(vatOutstanding)}원</span> : <span className="text-emerald-600">0원 ✓</span>}
                     </span>
                   </div>
-                  <EditableTable
-                    rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === RESTORE_CAT} cols={RESTORE_COLS}
-                    sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: RESTORE_CAT, usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
-                    requiredKey="code" addLabel="복원 내역 추가" entityLabel="복원 내역"
-                    emptyMessage="복원 내역이 없습니다. 부가세를 사업비 계좌로 복원하면 '복원 내역 추가'로 기록하세요."
-                  />
-                  <p className="mt-2 text-[11px] text-slate-400">※ 사용내역의 부가세 합계만큼 사업비 계좌로 복원해야 하며, 복원 내역을 입력하면 미복원 금액이 0원이 됩니다.</p>
+                  {showRestore && (
+                    <div className="mt-3">
+                      <EditableTable
+                        rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === RESTORE_CAT} cols={RESTORE_COLS}
+                        sort={(a, b) => +(a.usedAt ?? 0) - +(b.usedAt ?? 0)}
+                        sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: RESTORE_CAT, usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
+                        requiredKey="code" addLabel="복원 내역 추가" entityLabel="복원 내역"
+                        emptyMessage="복원 내역이 없습니다. 부가세를 사업비 계좌로 복원하면 '복원 내역 추가'로 기록하세요."
+                      />
+                      <p className="mt-2 text-[11px] text-slate-400">※ 사용내역의 부가세 합계만큼 사업비 계좌로 복원해야 하며, 복원 내역을 입력하면 미복원 금액이 0원이 됩니다. (복원일 순 정렬)</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
