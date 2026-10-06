@@ -35,7 +35,14 @@ function BudgetInner({ data }: { data: Data }) {
   const p = active[idx];
 
   useEffect(() => { void refresh(); }, [refresh]);
-  useEffect(() => { setSelCat(null); setShowRestore(false); setShowAllUsage(false); }, [idx]);
+  // 사업을 열면 기본은 '비목별 보기' — 첫 번째 비목을 자동 선택
+  useEffect(() => {
+    const code = active[idx]?.code;
+    setSelCat(data.budgetItems.find((b) => b.code === code)?.category ?? null);
+    setShowRestore(false);
+    setShowAllUsage(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx]);
 
   const template = useMemo(() => list("budget").find((d) => /양식|서식|템플릿/.test(d.name)), [list]);
   const ledgerTmpl = useMemo(() => (p ? list("budget").find((d) => d.name.includes("지출부") && d.name.includes(p.code)) : undefined), [list, p]);
