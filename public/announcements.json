@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-10-06T02:49:18.077Z",
+ "fetchedAt": "2026-10-07T02:11:29.475Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -395,6 +395,17 @@
    "applyEnd": "2026-10-19",
    "announcedAt": "2026-09-22",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02880&buclCd=S9111&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 나주형 청년 에너지 창업 사관학교(직·주·락·비) 사업 1차 수행기업 모집",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-10-19",
+   "applyEnd": "2026-10-23",
+   "announcedAt": "2026-10-06",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000070"
   },
   {
    "source": "JNTP",
