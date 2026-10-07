@@ -239,6 +239,12 @@ function BudgetInner({ data }: { data: Data }) {
                         className={`rounded-md border px-2 py-0.5 text-[11px] font-medium transition-colors ${showUsage ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"}`}>
                         전체보기 (일자순)
                       </button>
+                      {(showUsage || selCat) && (
+                        <button onClick={() => { setShowUsage(false); setSelCat(null); }}
+                          className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-500 hover:bg-slate-50">
+                          접기 ▲
+                        </button>
+                      )}
                     </div>
                   </div>
 
