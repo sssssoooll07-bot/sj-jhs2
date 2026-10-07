@@ -29,12 +29,13 @@ function BudgetInner({ data }: { data: Data }) {
   const active = data.projects.filter((p) => p.status === "진행중");
   const [sel, setSel] = useState(0);
   const [showRestore, setShowRestore] = useState(false);
-  const [showUsage, setShowUsage] = useState(false);
+  const [showUsage, setShowUsage] = useState(false); // true면 전체보기(일자순)
+  const [selCat, setSelCat] = useState<string | null>(null); // 선택한 비목(비목별 입력)
   const idx = Math.min(sel, Math.max(active.length - 1, 0));
   const p = active[idx];
 
   useEffect(() => { void refresh(); }, [refresh]);
-  useEffect(() => { setShowRestore(false); setShowUsage(false); }, [idx]);
+  useEffect(() => { setShowRestore(false); setShowUsage(false); setSelCat(null); }, [idx]);
 
   const template = useMemo(() => list("budget").find((d) => /양식|서식|템플릿/.test(d.name)), [list]);
   const ledgerTmpl = useMemo(() => (p ? list("budget").find((d) => d.name.includes("지출부") && d.name.includes(p.code)) : undefined), [list, p]);
@@ -203,6 +204,7 @@ function BudgetInner({ data }: { data: Data }) {
 
                 <EditableTable
                   rows={data.budgetItems} rowFilter={(b) => b.code === p.code} cols={BUDGET_COLS} editColumn
+                  onRowClick={(b) => { if (b.category && !isInKind(b.category)) { setSelCat(b.category); setShowUsage(false); } }}
                   sheetName="사업비" toSheetRow={budgetRow} blank={{ code: p.code, category: "", planKWon: null, finalKWon: null, execKWon: null, note: null }}
                   requiredKey="category" addLabel="비목 추가" entityLabel="비목"
                   emptyMessage="등록된 비목이 없습니다. '비목 추가'로 세목을 등록하세요."
@@ -219,25 +221,48 @@ function BudgetInner({ data }: { data: Data }) {
                   <p className="text-[11px] text-slate-400">※ 현물(비집행) {won(tot.inKind)}원은 현금 집행 대상이 아니므로 집행율 계산(현금 집행대상 {won(tot.cashFinal)}원)에서 제외됩니다.</p>
                 )}
 
-                {/* 사용내역 — 전체(일자순) */}
+                {/* 사용내역 — 비목별 입력 + 일자별 전체보기 */}
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold text-slate-700">📋 사용내역 — 집행(공급가) {won(tot.exec)}원</p>
-                  </div>
-                  <EditableTable
-                    rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category !== RESTORE_CAT} cols={ALL_USAGE_COLS}
-                    sort={(a, b) => +(a.usedAt ?? 0) - +(b.usedAt ?? 0)}
-                    sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: "", usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
-                    requiredKey="category" addLabel="사용내역 추가" entityLabel="사용내역"
-                    emptyMessage="사용내역이 없습니다. '사용내역 추가'로 기록하세요(비목 선택)."
-                    collapsed={!showUsage}
-                    toolbarLeft={
-                      <button onClick={() => setShowUsage((v) => !v)} className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50">
-                        {showUsage ? "접기 ▲" : "전체보기 (일자순) ▼"}
+                    <div className="ml-auto flex flex-wrap items-center gap-1">
+                      {items.filter((b) => b.category && !isInKind(b.category)).map((b) => {
+                        const on = !showUsage && selCat === b.category;
+                        return (
+                          <button key={b.category} onClick={() => { setSelCat(b.category); setShowUsage(false); }}
+                            className={`rounded-md border px-2 py-0.5 text-[11px] font-medium transition-colors ${on ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                            {b.category}
+                          </button>
+                        );
+                      })}
+                      <button onClick={() => { setShowUsage(true); setSelCat(null); }}
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-medium transition-colors ${showUsage ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                        전체보기 (일자순)
                       </button>
-                    }
-                  />
-                  {showUsage && <p className="mt-2 text-[11px] text-slate-400">※ 비목 구분 없이 집행일 순으로 모두 표시됩니다. 추가 시 비목을 선택하세요. 부가세는 집행액에서 제외되고 공급가만 반영됩니다.</p>}
+                    </div>
+                  </div>
+
+                  {showUsage ? (
+                    <EditableTable
+                      rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category !== RESTORE_CAT} cols={ALL_USAGE_COLS}
+                      sort={(a, b) => +(a.usedAt ?? 0) - +(b.usedAt ?? 0)}
+                      sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: "", usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
+                      requiredKey="category" addLabel="사용내역 추가" entityLabel="사용내역"
+                      emptyMessage="사용내역이 없습니다. 위 비목 탭을 선택해 입력하세요."
+                    />
+                  ) : selCat ? (
+                    <EditableTable
+                      rows={data.budgetUsages} rowFilter={(u) => u.code === p.code && u.category === selCat} cols={USAGE_COLS}
+                      sort={(a, b) => +(a.usedAt ?? 0) - +(b.usedAt ?? 0)}
+                      sheetName="사업비사용내역" toSheetRow={usageRow} blank={{ code: p.code, category: selCat, usedAt: todayUTC, desc: null, payee: null, amountKWon: null, vatKWon: null, grossKWon: null, note: null }}
+                      requiredKey="category" addLabel={`${selCat} 사용내역 추가`} entityLabel="사용내역"
+                      emptyMessage={`'${selCat}' 사용내역이 없습니다. '${selCat} 사용내역 추가'로 기록하세요.`}
+                    />
+                  ) : (
+                    <p className="py-5 text-center text-sm text-slate-400">위 표에서 비목을 클릭하거나 위 탭에서 선택하면 해당 비목의 사용내역을 입력할 수 있습니다. · [전체보기 (일자순)]로 전체를 날짜순으로 확인하세요.</p>
+                  )}
+
+                  <p className="mt-2 text-[11px] text-slate-400">※ 비목별로 입력한 내역이 [전체보기 (일자순)]에서 집행일 순으로 정리됩니다. 부가세는 집행액에서 제외되고 공급가만 반영됩니다.</p>
                 </div>
 
                 {/* 부가세 복원 */}
