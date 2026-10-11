@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-10-10T02:12:35.515Z",
+ "fetchedAt": "2026-10-11T01:44:53.459Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -362,6 +362,17 @@
    "applyEnd": "2026-10-13",
    "announcedAt": "2026-09-30",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000065"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "첨단로봇·AI 활용 중소기업 제조혁신 기업지원 3차 모집 공고_실증지원",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-10-13",
+   "applyEnd": "2026-10-15",
+   "announcedAt": "2026-10-10",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000073"
   },
   {
    "source": "JNTP",
