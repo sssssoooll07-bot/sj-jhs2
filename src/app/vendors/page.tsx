@@ -51,15 +51,16 @@ const vatOf = (it: POItem) => Math.round(supplyOf(it) * 0.1);
 
 function todayStr() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 const dateKor = (d: string) => (d ? `${d.slice(0, 4)}년 ${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일` : "");
-function defaultNo() { const d = new Date(); return `제${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}-01호`; }
+// 발주번호는 발주일과 동일한 당일 기준(제YYYYMM-DD호)
+function noFromDate(d: string) { return d ? `제${d.slice(0, 4)}${d.slice(5, 7)}-${d.slice(8, 10)}호` : ""; }
 
 function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () => void }) {
   const [company, setCompany] = useState(vendor.name);
   const [ceo, setCeo] = useState(vendor.ceo ?? "");
   const [tel, setTel] = useState(vendor.tel ?? "");
   const [fax, setFax] = useState("");
-  const [no, setNo] = useState(defaultNo());
   const [date, setDate] = useState(todayStr());
+  const [no, setNo] = useState(noFromDate(todayStr()));
   const [items, setItems] = useState<POItem[]>([blankItem()]);
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -125,6 +126,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       ws.getCell("G5").value = ceo;
       ws.getCell("C6").value = tel;
       ws.getCell("G6").value = fax;
+      ws.getCell("G8").value = "061-691-5537"; // 발주자(㈜신정개발) 팩스
       items.slice(0, 20).forEach((it, i) => {
         const r = 13 + i, sup = supplyOf(it), vat = vatOf(it);
         ws.getCell(`B${r}`).value = it.name || "";
@@ -180,7 +182,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
         <tr><th rowspan="2" class="side">공급자</th><th>업체명</th><td>${esc(company)}</td><th>대표자</th><td>${esc(ceo)}</td></tr>
         <tr><th>전화</th><td>${esc(tel)}</td><th>팩스</th><td>${esc(fax)}</td></tr>
         <tr><th rowspan="2" class="side">발주자</th><th>업체명</th><td>㈜신정개발</td><th>담당자</th><td>정한솔</td></tr>
-        <tr><th>전화</th><td>061-682-5537</td><th>팩스</th><td>061-683-5567</td></tr>
+        <tr><th>전화</th><td>061-682-5537</td><th>팩스</th><td>061-691-5537</td></tr>
       </table>
       <p class="sec">■ 발주내역</p>
       <table class="items">
@@ -250,7 +252,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
 
             <div className="mb-3 grid grid-cols-2 gap-2 text-sm">
               <label className="flex items-center gap-2"><span className="w-16 shrink-0 text-xs font-semibold text-slate-500">발주번호</span><input value={no} onChange={(e) => setNo(e.target.value)} className={`${field} flex-1`} /></label>
-              <label className="flex items-center gap-2"><span className="w-16 shrink-0 text-xs font-semibold text-slate-500">발주일</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={`${field} flex-1`} /></label>
+              <label className="flex items-center gap-2"><span className="w-16 shrink-0 text-xs font-semibold text-slate-500">발주일</span><input type="date" value={date} onChange={(e) => { setDate(e.target.value); setNo(noFromDate(e.target.value)); }} className={`${field} flex-1`} /></label>
             </div>
 
             <div className="mb-3 grid gap-3 sm:grid-cols-2">
@@ -268,7 +270,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
                 <div className="space-y-1 text-sm text-slate-700">
                   <p>업체명: <b>㈜신정개발</b></p>
                   <p>담당자: 정한솔</p>
-                  <p>전화: 061-682-5537 · 팩스: 061-683-5567</p>
+                  <p>전화: 061-682-5537 · 팩스: 061-691-5537</p>
                 </div>
               </div>
             </div>
