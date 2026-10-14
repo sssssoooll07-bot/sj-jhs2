@@ -49,8 +49,8 @@ export type Agreement = {
 };
 
 export type Vendor = { name: string; bizNo: string | null; ceo: string | null; tel: string | null; note: string | null };
-/** 공용 통장·카드 — 사업이 바뀌어도 동일하게 쓰는 결제수단(과제와 무관하게 공통 보관) */
-export type PaymentMethod = { kind: string; issuer: string | null; number: string | null; holder: string | null; note: string | null };
+/** 공용 통장·카드 — 사업이 바뀌어도 동일하게 쓰는 통장 1건 + 그 통장에 연결된 카드(여러 개면 쉼표) */
+export type PaymentMethod = { bank: string | null; account: string | null; holder: string | null; card: string | null; note: string | null };
 export type ScheduleEvent = { date: Date | null; title: string; note: string | null; done: boolean };
 export type BudgetItem = { code: string; category: string; planKWon: number | null; finalKWon: number | null; execKWon: number | null; note: string | null };
 export type BudgetUsage = { code: string; category: string; usedAt: Date | null; desc: string | null; payee: string | null; amountKWon: number | null; vatKWon: number | null; grossKWon: number | null; note: string | null };
@@ -240,8 +240,8 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
     .map((r) => ({ date: dt(r["일자"]), title: s(r["내용"])!, note: s(r["비고"]), done: yn(r["완료"]) }));
 
   const paymentMethods: PaymentMethod[] = rows("공용결제수단")
-    .filter((r) => s(r["번호"]))
-    .map((r) => ({ kind: s(r["구분"]) ?? "통장", issuer: s(r["은행/카드사"]), number: s(r["번호"]), holder: s(r["예금주/명의"]), note: s(r["비고"]) }));
+    .filter((r) => s(r["계좌번호"]))
+    .map((r) => ({ bank: s(r["은행"]) ?? s(r["은행명"]), account: s(r["계좌번호"]), holder: s(r["예금주"]), card: s(r["카드번호"]), note: s(r["비고"]) }));
 
   return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, participants, employees, vendors, paymentMethods, events, loadedAt: new Date().toISOString() };
 }

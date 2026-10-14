@@ -62,16 +62,21 @@ const fmtCard = (s: string | null): string | null => {
   return /^\d+$/.test(d) ? d.replace(/(.{4})/g, "$1 ").trim() : s;
 };
 
-/* ── 공용 통장·카드 [공용결제수단] — 사업이 바뀌어도 동일하게 쓰는 결제수단 ── */
-const PM_EMPTY: PaymentMethod = { kind: "통장", issuer: null, number: null, holder: null, note: null };
+/* ── 공용 통장·카드 [공용결제수단] — 통장 1건 + 그 통장에 연결된 카드(통장번호↔카드번호 매칭) ── */
+const PM_EMPTY: PaymentMethod = { bank: null, account: null, holder: "(주)신정개발", card: null, note: null };
+/** 쉼표 등으로 구분된 카드 여러 개 → 4자리씩 끊어 줄바꿈 표시 */
+const cardLines = (card: string | null) => (card ?? "").split(/[,/\n;]+/).map((s) => s.trim()).filter(Boolean);
 const PM_COLS: Col<PaymentMethod>[] = [
-  { key: "kind", label: "구분 (통장/카드)", type: "select", options: ["통장", "카드"], th: "구분", nowrap: true, view: (m) => <Badge tone={m.kind === "카드" ? "violet" : "blue"}>{m.kind}</Badge> },
-  { key: "issuer", label: "은행 / 카드사", th: "은행·카드사", nowrap: true },
-  { key: "number", label: "번호 (계좌번호 / 카드번호)", span: true, view: (m) => (m.number ? <span className="font-mono text-sm">{m.kind === "카드" ? fmtCard(m.number) : m.number}</span> : "—") },
-  { key: "holder", label: "예금주 / 명의", th: "예금주·명의", nowrap: true },
+  { key: "bank", label: "은행", th: "은행", nowrap: true, view: (m) => (m.bank ? <Badge tone="blue">{m.bank}</Badge> : "—") },
+  { key: "account", label: "통장(계좌)번호", span: true, placeholder: "예: 1005-180-034560", view: (m) => (m.account ? <span className="font-mono text-sm">{m.account}</span> : "—") },
+  { key: "holder", label: "예금주", th: "예금주", nowrap: true },
+  {
+    key: "card", label: "이 통장에 연결된 카드번호 (2개면 쉼표로 구분)", span: true, placeholder: "예: 5532240016343418, 5532240014276543",
+    view: (m) => { const cs = cardLines(m.card); return cs.length ? <>{cs.map((c, i) => <span key={i} className="block font-mono text-sm">{fmtCard(c)}</span>)}</> : <span className="text-slate-400">—</span>; },
+  },
   { key: "note", label: "비고 (용도 등)", span: true },
 ];
-const pmRow = (m: PaymentMethod) => ({ 구분: m.kind, "은행/카드사": m.issuer, 번호: m.number, "예금주/명의": m.holder, 비고: m.note });
+const pmRow = (m: PaymentMethod) => ({ 은행: m.bank, 계좌번호: m.account, 예금주: m.holder, 카드번호: m.card, 비고: m.note });
 
 /** 전용통장 1건 + 통장거래내역 (상세용) */
 function AccountBox({ p, methods }: { p: Project; methods: PaymentMethod[] }) {
@@ -84,17 +89,21 @@ function AccountBox({ p, methods }: { p: Project; methods: PaymentMethod[] }) {
     <div className="space-y-2">
       {methods.length > 0 && (
         <div className="rounded-lg border border-indigo-200 bg-indigo-50/60 px-3 py-2">
-          <p className="mb-1 text-[11px] font-semibold text-indigo-700">💳 공용 통장·카드 (모든 사업 공용)</p>
-          <div className="space-y-0.5">
-            {methods.map((m, i) => (
-              <p key={i} className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
-                <Badge tone={m.kind === "카드" ? "violet" : "blue"}>{m.kind}</Badge>
-                {m.issuer && <span>{m.issuer}</span>}
-                <span className="font-mono">{m.kind === "카드" ? fmtCard(m.number) : m.number}</span>
-                {m.holder && <span className="text-slate-500">({m.holder})</span>}
-                {m.note && <span className="text-xs text-slate-400">· {m.note}</span>}
-              </p>
-            ))}
+          <p className="mb-1 text-[11px] font-semibold text-indigo-700">💳 공용 통장·카드 (모든 사업 공용 · 통장↔카드 매칭)</p>
+          <div className="space-y-1.5">
+            {methods.map((m, i) => {
+              const cs = cardLines(m.card);
+              return (
+                <div key={i} className="text-sm text-slate-700">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    {m.bank && <Badge tone="blue">{m.bank}</Badge>}
+                    <span className="font-mono">{m.account}</span>
+                    {m.holder && <span className="text-xs text-slate-500">({m.holder})</span>}
+                  </span>
+                  {cs.length > 0 && <span className="ml-0.5 text-xs text-slate-500">↳ 카드 {cs.map((c) => fmtCard(c)).join("  ·  ")}</span>}
+                </div>
+              );
+            })}
           </div>
           <p className="mt-1 text-[11px] text-indigo-400">※ 수정은 과제 목록 하단 &apos;공용 통장·카드&apos;에서</p>
         </div>
@@ -325,7 +334,7 @@ function ProjectsInner() {
             </Section>
 
             <Section title="💳 공용 통장·카드" sub="사업이 바뀌어도 동일하게 쓰는 통장·카드를 과제와 별도로 공통 보관합니다. (각 과제 '전용통장' 탭에서도 표시)">
-              <EditableTable rows={data.paymentMethods} cols={PM_COLS} sheetName="공용결제수단" toSheetRow={pmRow} blank={PM_EMPTY} requiredKey="number" addLabel="통장·카드 추가" entityLabel="통장·카드" emptyMessage="등록된 공용 통장·카드가 없습니다. '통장·카드 추가'로 등록하세요." />
+              <EditableTable rows={data.paymentMethods} cols={PM_COLS} sheetName="공용결제수단" toSheetRow={pmRow} blank={PM_EMPTY} requiredKey="account" addLabel="통장·카드 추가" entityLabel="통장·카드" emptyMessage="등록된 공용 통장·카드가 없습니다. '통장·카드 추가'로 등록하세요." />
             </Section>
           </div>
         );
