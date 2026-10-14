@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { fmtKWon, fmtDate, type Data, type Project, type Agreement } from "@/lib/excel";
+import { fmtKWon, fmtDate, type Data, type Project, type Agreement, type PaymentMethod } from "@/lib/excel";
 import { Badge, Section, StatusBadge } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { useAgreementFiles } from "@/lib/agreement-files";
@@ -62,14 +62,44 @@ const fmtCard = (s: string | null): string | null => {
   return /^\d+$/.test(d) ? d.replace(/(.{4})/g, "$1 ").trim() : s;
 };
 
+/* ── 공용 통장·카드 [공용결제수단] — 사업이 바뀌어도 동일하게 쓰는 결제수단 ── */
+const PM_EMPTY: PaymentMethod = { kind: "통장", issuer: null, number: null, holder: null, note: null };
+const PM_COLS: Col<PaymentMethod>[] = [
+  { key: "kind", label: "구분 (통장/카드)", type: "select", options: ["통장", "카드"], th: "구분", nowrap: true, view: (m) => <Badge tone={m.kind === "카드" ? "violet" : "blue"}>{m.kind}</Badge> },
+  { key: "issuer", label: "은행 / 카드사", th: "은행·카드사", nowrap: true },
+  { key: "number", label: "번호 (계좌번호 / 카드번호)", span: true, view: (m) => (m.number ? <span className="font-mono text-sm">{m.kind === "카드" ? fmtCard(m.number) : m.number}</span> : "—") },
+  { key: "holder", label: "예금주 / 명의", th: "예금주·명의", nowrap: true },
+  { key: "note", label: "비고 (용도 등)", span: true },
+];
+const pmRow = (m: PaymentMethod) => ({ 구분: m.kind, "은행/카드사": m.issuer, 번호: m.number, "예금주/명의": m.holder, 비고: m.note });
+
 /** 전용통장 1건 + 통장거래내역 (상세용) */
-function AccountBox({ p }: { p: Project }) {
+function AccountBox({ p, methods }: { p: Project; methods: PaymentMethod[] }) {
   const { getByPattern, uploadNamed, uploading } = useAgreementFiles();
   const canEdit = useCanEditHere();
   const bankRef = useRef<HTMLInputElement>(null);
   const stmt = getByPattern(p.code, "bankbook");
+  const hasOwn = p.bank || p.account || p.accountHolder || p.cardNo;
   return (
     <div className="space-y-2">
+      {methods.length > 0 && (
+        <div className="rounded-lg border border-indigo-200 bg-indigo-50/60 px-3 py-2">
+          <p className="mb-1 text-[11px] font-semibold text-indigo-700">💳 공용 통장·카드 (모든 사업 공용)</p>
+          <div className="space-y-0.5">
+            {methods.map((m, i) => (
+              <p key={i} className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
+                <Badge tone={m.kind === "카드" ? "violet" : "blue"}>{m.kind}</Badge>
+                {m.issuer && <span>{m.issuer}</span>}
+                <span className="font-mono">{m.kind === "카드" ? fmtCard(m.number) : m.number}</span>
+                {m.holder && <span className="text-slate-500">({m.holder})</span>}
+                {m.note && <span className="text-xs text-slate-400">· {m.note}</span>}
+              </p>
+            ))}
+          </div>
+          <p className="mt-1 text-[11px] text-indigo-400">※ 수정은 과제 목록 하단 &apos;공용 통장·카드&apos;에서</p>
+        </div>
+      )}
+      {hasOwn && (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Info label="은행" value={p.bank} />
         <Info label="계좌번호" value={p.account} mono />
@@ -83,6 +113,7 @@ function AccountBox({ p }: { p: Project }) {
           })()}
         </div>
       </div>
+      )}
       <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-slate-600">부가세 입금
           {p.vatPaid ? <Badge tone="green">완료 ✓</Badge> : <Badge tone="amber">미입금</Badge>}</span>
@@ -227,7 +258,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
           ))}
         </div>
         <div className="mt-4">
-          {tab === "account" && <AccountBox p={p} />}
+          {tab === "account" && <AccountBox p={p} methods={data.paymentMethods} />}
           {tab === "plan" && <PlanBox p={p} />}
           {tab === "note" && <NoteBox p={p} />}
           {tab === "agreement" && <AgreementBox p={p} list={data.agreements} />}
@@ -291,6 +322,10 @@ function ProjectsInner() {
 
             <Section title={`⚗ 과제 — ${cnt}건${year !== "전체" ? ` · ${year}년` : ""}${roleF !== "전체" ? ` · ${roleF}` : ""}${techF !== "전체" ? ` · ${techF}` : ""}`} sub="R&D=연구과제, 비R&D=지원사업. 행을 클릭하면 상세로 이동, ✎는 기본정보 수정, '과제 추가'로 등록.">
               <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inRole(p.role) && inTech(p)} onRowClick={(p) => router.push(`/projects?p=${encodeURIComponent(p.code)}`)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
+            </Section>
+
+            <Section title="💳 공용 통장·카드" sub="사업이 바뀌어도 동일하게 쓰는 통장·카드를 과제와 별도로 공통 보관합니다. (각 과제 '전용통장' 탭에서도 표시)">
+              <EditableTable rows={data.paymentMethods} cols={PM_COLS} sheetName="공용결제수단" toSheetRow={pmRow} blank={PM_EMPTY} requiredKey="number" addLabel="통장·카드 추가" entityLabel="통장·카드" emptyMessage="등록된 공용 통장·카드가 없습니다. '통장·카드 추가'로 등록하세요." />
             </Section>
           </div>
         );
