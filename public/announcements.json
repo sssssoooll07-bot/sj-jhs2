@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-10-14T01:43:13.907Z",
+ "fetchedAt": "2026-10-15T01:19:51.587Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -527,6 +527,17 @@
    "applyEnd": "2026-10-31",
    "announcedAt": "2026-10-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=10&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년 제7차 중소기업 R&D 전담은행 투자지원 추천기업(기술사업화 패키지 및 TIPA ValueUP) 모집 공고",
+   "category": "전담은행 투자설명회(IR)",
+   "summary": null,
+   "applyStart": "2026-10-14",
+   "applyEnd": "2026-11-05",
+   "announcedAt": "2026-10-14",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02883&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
