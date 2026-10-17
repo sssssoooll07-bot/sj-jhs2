@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-10-16T01:05:19.709Z",
+ "fetchedAt": "2026-10-17T01:11:33.268Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -450,6 +450,17 @@
    "applyEnd": "2026-10-23",
    "announcedAt": "2026-09-02",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000050"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년도 전남 드론기업 역량강화 지원사업 공고(R&D)",
+   "category": "R&D",
+   "summary": null,
+   "applyStart": "2026-10-19",
+   "applyEnd": "2026-10-28",
+   "announcedAt": "2026-10-16",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000077"
   },
   {
    "source": "SMTECH",
