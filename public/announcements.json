@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-10-20T01:39:43.413Z",
+ "fetchedAt": "2026-10-21T01:25:13.863Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -9,9 +9,6 @@
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
- ],
- "errors": [
-  "SMTECH: fetch failed"
  ],
  "items": [
   {
@@ -68,17 +65,6 @@
    "applyEnd": "2026-08-28",
    "announcedAt": "2026-08-10",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000029"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
-   "title": "2026년 중소기업 연구인력지원사업(파견) 8월 공고",
-   "category": "공공연연구인력파견지원(참여기업접수용)",
-   "summary": null,
-   "applyStart": "2026-08-01",
-   "applyEnd": "2026-08-31",
-   "announcedAt": "2026-10-01",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=7&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -457,6 +443,17 @@
   {
    "source": "JNTP",
    "agency": "전남테크노파크",
+   "title": "2026년도 여수시 맞춤형 단계별 기업지원프로그램 2차 모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-10-21",
+   "applyEnd": "2026-10-27",
+   "announcedAt": "2026-10-21",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000078"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
    "title": "2026년도 전남 드론기업 역량강화 지원사업 공고(R&D)",
    "category": "R&D",
    "summary": null,
@@ -541,6 +538,17 @@
    "applyEnd": "2026-10-31",
    "announcedAt": "2026-10-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=10&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년 중소기업기술개발지원사업 모의평가 프로그램 접수 공고",
+   "category": "중소기업R&D 모의평가 프로그램",
+   "summary": null,
+   "applyStart": "2026-10-29",
+   "applyEnd": "2026-11-05",
+   "announcedAt": "2026-10-19",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02882&buclCd=S9I01&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "SMTECH",
