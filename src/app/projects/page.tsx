@@ -10,6 +10,7 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import { useCanEditHere } from "@/lib/access-context";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
+import { ProjectBudget } from "@/components/ProjectBudget";
 
 /** 과제코드에서 연도 추출 (P2025-02 → "2025"). 없으면 "기타". */
 const yearOf = (code: string) => code.match(/(\d{4})/)?.[1] ?? "기타";
@@ -224,7 +225,7 @@ function Info({ label, value, mono }: { label: string; value: string | null; mon
 /** 과제 상세 — 상단 요약 + 전용통장/사업계획서/협약서 탭 */
 function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: () => void }) {
   const { refresh } = useAgreementFiles();
-  const [tab, setTab] = useState<"account" | "plan" | "agreement" | "note">("agreement");
+  const [tab, setTab] = useState<"account" | "budget" | "plan" | "agreement" | "note">("agreement");
   // 과제 상세 진입 시 협약서·사업계획서·통장·연구노트 목록을 새로 읽는다(업로드 직후 재로그인 없이 반영)
   useEffect(() => { void refresh(); }, [refresh]);
 
@@ -234,6 +235,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
     ["plan", "📑 사업계획서"],
     ...(isRnd ? ([["note", "🔬 연구노트"]] as [typeof tab, string][]) : []),
     ["account", "💳 전용통장"],
+    ["budget", "💵 사업비"],
   ];
 
   return (
@@ -268,6 +270,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
         </div>
         <div className="mt-4">
           {tab === "account" && <AccountBox p={p} methods={data.paymentMethods} />}
+          {tab === "budget" && <ProjectBudget data={data} p={p} />}
           {tab === "plan" && <PlanBox p={p} />}
           {tab === "note" && <NoteBox p={p} />}
           {tab === "agreement" && <AgreementBox p={p} list={data.agreements} />}
