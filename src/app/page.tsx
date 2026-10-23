@@ -59,7 +59,9 @@ export default function Dashboard() {
   return (
     <WithData>
       {(data) => {
-        const active = data.projects.filter((p) => p.status === "진행중");
+        // 종료일(마감)이 지난 과제는 진행중이어도 대시보드에서 제외
+        const ended = (p: Project) => { const e = projEnd(p); return e != null && daysUntil(e) < 0; };
+        const active = data.projects.filter((p) => p.status === "진행중" && !ended(p));
         const rnd = data.projects.filter((p) => p.type === "연구과제").length;
         const biz = data.projects.filter((p) => p.type === "지원사업").length;
         const registered = data.patents.filter((p) => p.status === "등록완료").length;
@@ -68,7 +70,8 @@ export default function Dashboard() {
         const activeResearchers = data.researchers.filter((r) => r.active).length;
         const totals = participationTotals(data);
         const over = totals.filter((t) => t.total > 100);
-        const bexec = budgetExecByProject(data);
+        const activeCodes = new Set(active.map((p) => p.code));
+        const bexec = budgetExecByProject(data).filter((b) => activeCodes.has(b.code));
         // 진행중 과제 — 마감(종료일) D-day 순 정렬
         const activeSorted = [...active].sort((a, b) => (projEnd(a)?.getTime() ?? Infinity) - (projEnd(b)?.getTime() ?? Infinity));
 
