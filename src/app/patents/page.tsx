@@ -9,8 +9,8 @@ import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
 import { fmtDate, type Patent } from "@/lib/excel";
 
-// 지식재산 유형 — 특허 / 프로그램(저작권) / 상표·디자인 (나중에 실용신안 등 추가 가능)
-const IP_TYPES = ["특허", "프로그램(저작권)", "상표·디자인"] as const;
+// 지식재산 유형 — 특허 / 프로그램(저작권) (나중에 상표·디자인 등 추가 가능)
+const IP_TYPES = ["특허", "프로그램(저작권)"] as const;
 const ipTone = (c: string) => (c.startsWith("프로그램") ? "violet" : c.startsWith("상표") ? "amber" : "blue") as "violet" | "amber" | "blue";
 
 const EMPTY: Patent = {
@@ -110,7 +110,7 @@ export default function PatentsPage() {
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("2025");
   const [kind, setKind] = useState<"전체" | "등록" | "출원">("전체"); // 분류: 등록 / 출원
-  const [ipType, setIpType] = useState<"전체" | string>("전체"); // 유형: 특허 / 프로그램(저작권) / 상표·디자인
+  const [ipType, setIpType] = useState<string>("특허"); // 유형: 특허 / 프로그램(저작권)
 
   // 특허 탭 진입 시 특허증 목록을 새로 읽는다(업로드 직후에도 재로그인 없이 반영)
   useEffect(() => {
@@ -174,7 +174,7 @@ export default function PatentsPage() {
         const years = ["전체", ...Array.from(new Set(data.patents.map(patentYear))).sort().reverse()];
         const inYear = (p: Patent) => year === "전체" || patentYear(p) === year;
         const inKind = (p: Patent) => kind === "전체" || (kind === "등록" ? p.status === "등록완료" : p.status === "출원완료");
-        const inType = (p: Patent) => ipType === "전체" || p.category === ipType;
+        const inType = (p: Patent) => p.category === ipType;
         const match = (p: Patent) => inYear(p) && inKind(p) && inType(p);
         const reg = data.patents.filter((p) => p.status === "등록완료").length;
         const filed = data.patents.filter((p) => p.status === "출원완료").length;
@@ -188,9 +188,9 @@ export default function PatentsPage() {
             {/* 유형 필터 (특허/프로그램/상표·디자인) */}
             <div className="mb-2 flex flex-wrap items-center gap-1.5">
               <span className="mr-1 text-xs font-semibold text-slate-400">유형</span>
-              {(["전체", ...IP_TYPES] as string[]).map((t) => (
+              {(IP_TYPES as readonly string[]).map((t) => (
                 <button key={t} onClick={() => setIpType(t)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${ipType === t ? "bg-violet-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
-                  {t === "전체" ? "전체" : `${t}${typeCount(t) ? ` (${typeCount(t)})` : ""}`}
+                  {`${t}${typeCount(t) ? ` (${typeCount(t)})` : ""}`}
                 </button>
               ))}
             </div>
