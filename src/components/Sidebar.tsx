@@ -19,7 +19,7 @@ const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/vendors", label: "거래처", Icon: Building2 },
   { href: "/researchers", label: "연구원", Icon: Users },
   { href: "/certifications", label: "인증·면허", Icon: BadgeCheck },
-  { href: "/patents", label: "특허", Icon: Lightbulb },
+  { href: "/patents", label: "지식재산", Icon: Lightbulb },
   { href: "/library", label: "자료실", Icon: FolderOpen },
 ];
 

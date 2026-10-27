@@ -9,14 +9,19 @@ import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
 import DocViewButton from "@/components/DocViewButton";
 import { fmtDate, type Patent } from "@/lib/excel";
 
+// 지식재산 유형 — 특허 / 프로그램(저작권) / 상표·디자인 (나중에 실용신안 등 추가 가능)
+const IP_TYPES = ["특허", "프로그램(저작권)", "상표·디자인"] as const;
+const ipTone = (c: string) => (c.startsWith("프로그램") ? "violet" : c.startsWith("상표") ? "amber" : "blue") as "violet" | "amber" | "blue";
+
 const EMPTY: Patent = {
+  category: "특허",
   status: "출원완료", title: "", regNumber: null, appNumber: null, filedAt: null, registeredAt: null,
   owner: "㈜신정개발", inventors: null, claims: null, citations: null, isPCT: false,
   examStatus: null, note: null, projectCode: null,
 };
 // 연계과제코드는 저장에서 제외(열 삭제)
 const toRow = (p: Patent) => ({
-  상태: p.status, 특허명칭: p.title, 등록번호: p.regNumber, 출원번호: p.appNumber,
+  유형: p.category, 상태: p.status, 특허명칭: p.title, 등록번호: p.regNumber, 출원번호: p.appNumber,
   출원일: dateStr(p.filedAt), 등록일: dateStr(p.registeredAt), 특허권자: p.owner, 발명자: p.inventors,
   청구항수: p.claims, 피인용: p.citations, PCT: p.isPCT ? "Y" : "N",
   "진행상태(출원건)": p.examStatus, "연계사업(비고)": p.note,
@@ -37,6 +42,7 @@ function printPatents(rows: Patent[], subtitle: string) {
   const dt = (d: Date | null) => { const s = fmtDate(d); return s === "—" ? "" : s; };
   const body = rows.map((p, i) => `<tr>
       <td class="c">${i + 1}</td>
+      <td class="c">${esc(p.category)}</td>
       <td class="c">${esc(p.status)}${p.isPCT ? "<br>(PCT)" : ""}</td>
       <td class="l">${esc(p.title)}</td>
       <td class="c">${esc(p.regNumber ?? "")}</td>
@@ -58,9 +64,9 @@ function printPatents(rows: Patent[], subtitle: string) {
     th{background:#eef2f8;text-align:center;white-space:nowrap}
     td.c{text-align:center;white-space:nowrap} td.l{text-align:left} td.ln{text-align:left;white-space:nowrap}
     .foot{margin-top:14px;text-align:right;font-size:12px;font-weight:bold}`;
-  const html = `<h1>특허 현황</h1><p class="sub">㈜신정개발 · ${esc(subtitle)} · 출력일 ${dateK}</p>
+  const html = `<h1>지식재산 현황</h1><p class="sub">㈜신정개발 · ${esc(subtitle)} · 출력일 ${dateK}</p>
     <table><thead><tr>
-      <th>No</th><th>상태</th><th>특허 명칭</th><th>등록번호</th><th>출원번호</th><th>출원일</th><th>등록일</th><th>특허권자</th><th>발명자</th><th>비고</th>
+      <th>No</th><th>유형</th><th>상태</th><th>명칭</th><th>등록번호</th><th>출원번호</th><th>출원일</th><th>등록일</th><th>권리자</th><th>발명자·저작자</th><th>비고</th>
     </tr></thead><tbody>${body}</tbody></table>
     <p class="foot">㈜ 신 정 개 발</p>`;
   const ifr = document.createElement("iframe");
@@ -68,7 +74,7 @@ function printPatents(rows: Patent[], subtitle: string) {
   document.body.appendChild(ifr);
   const doc = ifr.contentWindow!.document;
   doc.open();
-  doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>특허현황</title><style>${css}</style></head><body>${html}</body></html>`);
+  doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>지식재산현황</title><style>${css}</style></head><body>${html}</body></html>`);
   doc.close();
   ifr.contentWindow!.focus();
   setTimeout(() => { ifr.contentWindow!.print(); setTimeout(() => document.body.removeChild(ifr), 1000); }, 300);
@@ -103,7 +109,8 @@ export default function PatentsPage() {
   const canEdit = useCanEditHere();
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("2025");
-  const [kind, setKind] = useState<"전체" | "등록" | "출원">("전체"); // 분류: 등록특허 / 출원건
+  const [kind, setKind] = useState<"전체" | "등록" | "출원">("전체"); // 분류: 등록 / 출원
+  const [ipType, setIpType] = useState<"전체" | string>("전체"); // 유형: 특허 / 프로그램(저작권) / 상표·디자인
 
   // 특허 탭 진입 시 특허증 목록을 새로 읽는다(업로드 직후에도 재로그인 없이 반영)
   useEffect(() => {
@@ -132,6 +139,7 @@ export default function PatentsPage() {
   };
 
   const cols: Col<Patent>[] = [
+    { key: "category", label: "유형", type: "select", options: [...IP_TYPES], th: "유형", nowrap: true, view: (p) => <Badge tone={ipTone(p.category)}>{p.category}</Badge> },
     { key: "status", label: "상태", type: "select", options: ["등록완료", "출원완료"], view: (p) => <StatusBadge status={p.status} /> },
     {
       key: "title", label: "특허 명칭", span: true,
@@ -166,17 +174,29 @@ export default function PatentsPage() {
         const years = ["전체", ...Array.from(new Set(data.patents.map(patentYear))).sort().reverse()];
         const inYear = (p: Patent) => year === "전체" || patentYear(p) === year;
         const inKind = (p: Patent) => kind === "전체" || (kind === "등록" ? p.status === "등록완료" : p.status === "출원완료");
-        const match = (p: Patent) => inYear(p) && inKind(p);
+        const inType = (p: Patent) => ipType === "전체" || p.category === ipType;
+        const match = (p: Patent) => inYear(p) && inKind(p) && inType(p);
         const reg = data.patents.filter((p) => p.status === "등록완료").length;
         const filed = data.patents.filter((p) => p.status === "출원완료").length;
         const shown = data.patents.filter(match).length;
         const kindLabel = kind === "등록" ? "등록완료" : kind === "출원" ? "출원완료" : "전체";
+        // 유형별 건수(탭 배지용)
+        const typeCount = (t: string) => data.patents.filter((p) => p.category === t).length;
 
         return (
-          <Section title={`💡 특허 — ${shown}건${kind !== "전체" ? ` · ${kindLabel}` : ""}${year !== "전체" ? ` · ${year}년` : kind === "전체" ? ` (등록 ${reg} · 출원 ${filed})` : ""}`} sub="행의 특허증 '보기 ↗'로 등록증 미리보기. ✎로 수정(연계사업 포함), '특허 추가'로 등록.">
+          <Section title={`💡 지식재산 — ${shown}건${ipType !== "전체" ? ` · ${ipType}` : ""}${kind !== "전체" ? ` · ${kindLabel}` : ""}${year !== "전체" ? ` · ${year}년` : ipType === "전체" && kind === "전체" ? ` (등록 ${reg} · 출원 ${filed})` : ""}`} sub="특허·프로그램(저작권)·상표·디자인을 유형으로 구분해 관리. 명칭의 '보기 ↗'로 등록증 미리보기, ✎로 수정, '지식재산 추가'로 등록.">
+            {/* 유형 필터 (특허/프로그램/상표·디자인) */}
+            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-semibold text-slate-400">유형</span>
+              {(["전체", ...IP_TYPES] as string[]).map((t) => (
+                <button key={t} onClick={() => setIpType(t)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${ipType === t ? "bg-violet-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                  {t === "전체" ? "전체" : `${t}${typeCount(t) ? ` (${typeCount(t)})` : ""}`}
+                </button>
+              ))}
+            </div>
             {/* 분류 필터 (등록/출원) */}
             <div className="mb-2 flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-semibold text-slate-400">분류</span>
+              <span className="mr-1 text-xs font-semibold text-slate-400">상태</span>
               {(["전체", "등록", "출원"] as const).map((k) => (
                 <button key={k} onClick={() => setKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${kind === k ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
                   {k === "전체" ? "전체" : k === "등록" ? "등록완료" : "출원완료"}
@@ -203,9 +223,9 @@ export default function PatentsPage() {
 
             {canEdit && (
               <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-                <p className="text-xs text-emerald-800">🏅 특허증은 파일명에 <b>등록번호</b>(예: 10-2693397) 또는 특허명이 들어가면 자동 연결됩니다{cloud ? ` · ${count}건 로드됨` : ""}. 로그인 사용자만 열람.</p>
+                <p className="text-xs text-emerald-800">🏅 등록증(특허증·저작권 등록증 등)은 파일명에 <b>등록번호</b>(예: 10-2693397) 또는 명칭이 들어가면 자동 연결됩니다{cloud ? ` · ${count}건 로드됨` : ""}. 로그인 사용자만 열람.</p>
                 <button onClick={() => certRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-                  {uploading ? "업로드 중…" : "특허증 파일 업로드"}
+                  {uploading ? "업로드 중…" : "등록증 파일 업로드"}
                 </button>
                 <input ref={certRef} type="file" accept=".pdf,.png,.jpg,.jpeg" multiple className="hidden"
                   onChange={(e) => e.target.files && loadFolder(e.target.files, "patents")} />
@@ -213,7 +233,7 @@ export default function PatentsPage() {
             )}
             {error && <p className="mb-2 text-sm font-medium text-red-600">⚠ {error}</p>}
 
-            <EditableTable rows={data.patents} rowFilter={match} editColumn cols={cols} sheetName="특허" toSheetRow={toRow} blank={EMPTY} requiredKey="title" addLabel="특허 추가" entityLabel="특허" />
+            <EditableTable rows={data.patents} rowFilter={match} editColumn cols={cols} sheetName="특허" toSheetRow={toRow} blank={{ ...EMPTY, category: ipType === "전체" ? "특허" : ipType }} requiredKey="title" addLabel="지식재산 추가" entityLabel="지식재산" />
           </Section>
         );
       }}

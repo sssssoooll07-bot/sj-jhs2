@@ -18,6 +18,7 @@ export type Phase = { code: string; label: string | null; period: string | null;
 export type Consortium = { code: string; name: string; role: string | null; govKWon: number | null; cashKWon: number | null; inKindKWon: number | null };
 export type Disbursement = { code: string; paidAt: Date | null; payer: string | null; amountKWon: number | null };
 export type Patent = {
+  category: string; // 유형: 특허 / 프로그램(저작권) / 상표·디자인
   status: string; title: string; regNumber: string | null; appNumber: string | null;
   filedAt: Date | null; registeredAt: Date | null; owner: string | null; inventors: string | null;
   claims: number | null; citations: number | null; isPCT: boolean; examStatus: string | null;
@@ -143,6 +144,7 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
   const patents: Patent[] = rows("특허")
     .filter((r) => s(r["특허명칭"]))
     .map((r) => ({
+      category: s(r["유형"]) ?? "특허",
       status: s(r["상태"]) ?? "", title: s(r["특허명칭"]) ?? "", regNumber: s(r["등록번호"]), appNumber: s(r["출원번호"]),
       filedAt: dt(r["출원일"]), registeredAt: dt(r["등록일"]), owner: s(r["특허권자"]), inventors: s(r["발명자"]),
       claims: n(r["청구항수"]), citations: n(r["피인용"]), isPCT: yn(r["PCT"]),

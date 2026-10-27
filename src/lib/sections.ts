@@ -15,7 +15,7 @@ export const SECTIONS: { key: SectionKey; href: string; label: string }[] = [
   { key: "vendors", href: "/vendors", label: "거래처" },
   { key: "researchers", href: "/researchers", label: "연구원" },
   { key: "certifications", href: "/certifications", label: "인증·면허" },
-  { key: "patents", href: "/patents", label: "특허" },
+  { key: "patents", href: "/patents", label: "지식재산" },
   { key: "library", href: "/library", label: "자료실" },
 ];
 

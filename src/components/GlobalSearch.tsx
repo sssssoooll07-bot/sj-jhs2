@@ -25,7 +25,7 @@ export default function GlobalSearch() {
     const can = (k: SectionKey) => allowed(k);
     const out: Hit[] = [];
     if (can("projects")) for (const p of data.projects) if (has(p.title, p.code, p.agency)) out.push({ type: "과제", label: p.title, sub: p.code, href: `/projects?p=${encodeURIComponent(p.code)}` });
-    if (can("patents")) for (const p of data.patents) if (has(p.title, p.regNumber, p.appNumber)) out.push({ type: "특허", label: p.title, sub: p.regNumber ?? p.appNumber, href: "/patents" });
+    if (can("patents")) for (const p of data.patents) if (has(p.title, p.regNumber, p.appNumber)) out.push({ type: p.category || "지식재산", label: p.title, sub: p.regNumber ?? p.appNumber, href: "/patents" });
     if (can("vendors")) for (const v of data.vendors) if (has(v.name, v.ceo, v.bizNo)) out.push({ type: "거래처", label: v.name, sub: v.ceo, href: "/vendors" });
     if (can("certifications")) for (const c of data.certifications) if (has(c.name, c.issuer)) out.push({ type: "인증", label: c.name, sub: c.category, href: "/certifications" });
     if (can("researchers")) for (const r of data.researchers) if (has(r.name, r.major, r.university)) out.push({ type: "연구원", label: r.name, sub: r.position, href: "/researchers" });

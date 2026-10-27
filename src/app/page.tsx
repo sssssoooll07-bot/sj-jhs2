@@ -67,7 +67,7 @@ export default function Dashboard() {
 
         const cards = [
           { href: "/projects", label: "과제", value: `${data.projects.length}건`, sub: `진행중 ${active.length} · R&D ${rnd} / 비R&D ${biz}` },
-          { href: "/patents", label: "특허", value: `${data.patents.length}건`, sub: `등록 ${registered} · 출원 ${filed}` },
+          { href: "/patents", label: "지식재산", value: `${data.patents.length}건`, sub: `등록 ${registered} · 출원 ${filed}` },
           { href: "/certifications", label: "인증·면허", value: `${data.certifications.length}건`, sub: `갱신대상 ${renewable}건` },
           { href: "/funding", label: "지원사업 공고", value: feed === null ? "…" : `접수중 ${accepting.length}건`, sub: "매일 08:00 자동 수집" },
           { href: "/compliance", label: "참여율", value: `${data.participations.length}건`, sub: `참여율 초과 ${over.length}명` },
