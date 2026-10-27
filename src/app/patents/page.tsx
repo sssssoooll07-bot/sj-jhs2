@@ -110,7 +110,7 @@ export default function PatentsPage() {
   const certRef = useRef<HTMLInputElement>(null);
   const [year, setYear] = useState("2025");
   const [kind, setKind] = useState<"전체" | "등록" | "출원">("전체"); // 분류: 등록 / 출원
-  const [ipType, setIpType] = useState<string>("특허"); // 유형: 특허 / 프로그램(저작권)
+  const [ipType, setIpType] = useState<string | null>(null); // 유형 선택 전엔 유형 탭만 표시
 
   // 특허 탭 진입 시 특허증 목록을 새로 읽는다(업로드 직후에도 재로그인 없이 반영)
   useEffect(() => {
@@ -171,69 +171,82 @@ export default function PatentsPage() {
   return (
     <WithData>
       {(data) => {
-        const years = ["전체", ...Array.from(new Set(data.patents.map(patentYear))).sort().reverse()];
+        const years = ["전체", ...Array.from(new Set(data.patents.filter((p) => !ipType || p.category === ipType).map(patentYear))).sort().reverse()];
         const inYear = (p: Patent) => year === "전체" || patentYear(p) === year;
-        const inKind = (p: Patent) => kind === "전체" || (kind === "등록" ? p.status === "등록완료" : p.status === "출원완료");
+        // 상태(등록/출원) 필터는 '특허' 유형에서만 적용
+        const inKind = (p: Patent) => ipType !== "특허" || kind === "전체" || (kind === "등록" ? p.status === "등록완료" : p.status === "출원완료");
         const inType = (p: Patent) => p.category === ipType;
-        const match = (p: Patent) => inYear(p) && inKind(p) && inType(p);
-        const reg = data.patents.filter((p) => p.status === "등록완료").length;
-        const filed = data.patents.filter((p) => p.status === "출원완료").length;
+        const match = (p: Patent) => !!ipType && inYear(p) && inKind(p) && inType(p);
         const shown = data.patents.filter(match).length;
         const kindLabel = kind === "등록" ? "등록완료" : kind === "출원" ? "출원완료" : "전체";
         // 유형별 건수(탭 배지용)
         const typeCount = (t: string) => data.patents.filter((p) => p.category === t).length;
 
         return (
-          <Section title={`💡 지식재산 — ${shown}건${ipType !== "전체" ? ` · ${ipType}` : ""}${kind !== "전체" ? ` · ${kindLabel}` : ""}${year !== "전체" ? ` · ${year}년` : ipType === "전체" && kind === "전체" ? ` (등록 ${reg} · 출원 ${filed})` : ""}`} sub="특허·프로그램(저작권)·상표·디자인을 유형으로 구분해 관리. 명칭의 '보기 ↗'로 등록증 미리보기, ✎로 수정, '지식재산 추가'로 등록.">
-            {/* 유형 필터 (특허/프로그램/상표·디자인) */}
+          <Section title={ipType ? `💡 지식재산 — ${ipType} ${shown}건${ipType === "특허" && kind !== "전체" ? ` · ${kindLabel}` : ""}${year !== "전체" ? ` · ${year}년` : ""}` : "💡 지식재산"} sub="유형을 먼저 선택하세요. 특허는 상태·연도로, 프로그램(저작권)은 연도로 조회합니다. 명칭의 '보기 ↗'로 등록증 미리보기, ✎로 수정, '지식재산 추가'로 등록.">
+            {/* 유형 필터 — 선택 전엔 이것만 보인다 */}
             <div className="mb-2 flex flex-wrap items-center gap-1.5">
               <span className="mr-1 text-xs font-semibold text-slate-400">유형</span>
               {(IP_TYPES as readonly string[]).map((t) => (
-                <button key={t} onClick={() => setIpType(t)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${ipType === t ? "bg-violet-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                <button key={t} onClick={() => { setIpType(t); setKind("전체"); setYear("전체"); }} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${ipType === t ? "bg-violet-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
                   {`${t}${typeCount(t) ? ` (${typeCount(t)})` : ""}`}
                 </button>
               ))}
             </div>
-            {/* 분류 필터 (등록/출원) */}
-            <div className="mb-2 flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-semibold text-slate-400">상태</span>
-              {(["전체", "등록", "출원"] as const).map((k) => (
-                <button key={k} onClick={() => setKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${kind === k ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
-                  {k === "전체" ? "전체" : k === "등록" ? "등록완료" : "출원완료"}
-                </button>
-              ))}
-            </div>
-            {/* 연도 필터 (과제탭과 동일) */}
-            <div className="mb-3 flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>
-              {years.map((y) => (
-                <button key={y} onClick={() => setYear(y)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${year === y ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
-                  {y === "전체" ? "전체" : `${y}년`}
-                </button>
-              ))}
-              <button
-                onClick={() => printPatents(data.patents.filter(match), `${kindLabel}${year === "전체" ? "" : ` · ${year}년`} · ${shown}건`)}
-                className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50">
-                🖨 화면출력(인쇄·PDF)
-              </button>
-              <a href="https://www.kipris.or.kr/khome/search/searchResult.do?tab=patent" target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50">
-                🔍 KIPRIS 특허검색 ↗
-              </a>
-            </div>
 
-            {canEdit && (
-              <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-                <p className="text-xs text-emerald-800">🏅 등록증(특허증·저작권 등록증 등)은 파일명에 <b>등록번호</b>(예: 10-2693397) 또는 명칭이 들어가면 자동 연결됩니다{cloud ? ` · ${count}건 로드됨` : ""}. 로그인 사용자만 열람.</p>
-                <button onClick={() => certRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-                  {uploading ? "업로드 중…" : "등록증 파일 업로드"}
-                </button>
-                <input ref={certRef} type="file" accept=".pdf,.png,.jpg,.jpeg" multiple className="hidden"
-                  onChange={(e) => e.target.files && loadFolder(e.target.files, "patents")} />
+            {/* 상태(등록/출원) — 특허 유형에서만 */}
+            {ipType === "특허" && (
+              <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs font-semibold text-slate-400">상태</span>
+                {(["전체", "등록", "출원"] as const).map((k) => (
+                  <button key={k} onClick={() => setKind(k)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${kind === k ? "bg-teal-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                    {k === "전체" ? "전체" : k === "등록" ? "등록완료" : "출원완료"}
+                  </button>
+                ))}
               </div>
             )}
-            {error && <p className="mb-2 text-sm font-medium text-red-600">⚠ {error}</p>}
 
-            <EditableTable rows={data.patents} rowFilter={match} editColumn cols={cols} sheetName="특허" toSheetRow={toRow} blank={{ ...EMPTY, category: ipType === "전체" ? "특허" : ipType }} requiredKey="title" addLabel="지식재산 추가" entityLabel="지식재산" />
+            {/* 연도 — 유형 선택 후 표시 */}
+            {ipType && (
+              <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs font-semibold text-slate-400">연도</span>
+                {years.map((y) => (
+                  <button key={y} onClick={() => setYear(y)} className={`rounded-lg px-3 py-1 text-xs font-medium transition-colors ${year === y ? "bg-blue-600 text-white shadow-sm" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                    {y === "전체" ? "전체" : `${y}년`}
+                  </button>
+                ))}
+                <button
+                  onClick={() => printPatents(data.patents.filter(match), `${ipType}${ipType === "특허" ? ` · ${kindLabel}` : ""}${year === "전체" ? "" : ` · ${year}년`} · ${shown}건`)}
+                  className="ml-auto rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50">
+                  🖨 화면출력(인쇄·PDF)
+                </button>
+                {ipType === "특허" && (
+                  <a href="https://www.kipris.or.kr/khome/search/searchResult.do?tab=patent" target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50">
+                    🔍 KIPRIS 특허검색 ↗
+                  </a>
+                )}
+              </div>
+            )}
+
+            {!ipType ? (
+              <p className="py-8 text-center text-sm text-slate-400">위에서 <b className="text-slate-600">유형</b>을 선택하세요. (특허 / 프로그램(저작권))</p>
+            ) : (
+              <>
+                {canEdit && (
+                  <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                    <p className="text-xs text-emerald-800">🏅 등록증(특허증·저작권 등록증 등)은 파일명에 <b>등록번호</b>(예: 10-2693397) 또는 명칭이 들어가면 자동 연결됩니다{cloud ? ` · ${count}건 로드됨` : ""}. 로그인 사용자만 열람.</p>
+                    <button onClick={() => certRef.current?.click()} disabled={uploading} className="ml-auto rounded-md bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                      {uploading ? "업로드 중…" : "등록증 파일 업로드"}
+                    </button>
+                    <input ref={certRef} type="file" accept=".pdf,.png,.jpg,.jpeg" multiple className="hidden"
+                      onChange={(e) => e.target.files && loadFolder(e.target.files, "patents")} />
+                  </div>
+                )}
+                {error && <p className="mb-2 text-sm font-medium text-red-600">⚠ {error}</p>}
+
+                <EditableTable rows={data.patents} rowFilter={match} editColumn cols={cols} sheetName="특허" toSheetRow={toRow} blank={{ ...EMPTY, category: ipType }} requiredKey="title" addLabel="지식재산 추가" entityLabel="지식재산" />
+              </>
+            )}
           </Section>
         );
       }}
