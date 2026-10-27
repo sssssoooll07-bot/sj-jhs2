@@ -253,6 +253,23 @@ export function daysUntil(due: Date, now: Date = new Date()): number {
   return Math.round((d - t) / DAY);
 }
 
+/** 과제 종료일 — endDate 우선, 없으면 총사업기간 문자열의 마지막 날짜를 파싱 */
+export function projEnd(p: Project): Date | null {
+  if (p.endDate instanceof Date && !isNaN(p.endDate.getTime())) return p.endDate;
+  const all = (p.period ?? "").match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/g);
+  if (all && all.length) {
+    const m = all[all.length - 1].match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/);
+    if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  }
+  return null;
+}
+
+/** 종료일(마감)이 지났는지 — 종료 당일(D-0)까지는 false, 하루라도 지나면 true */
+export function projEnded(p: Project, now: Date = new Date()): boolean {
+  const e = projEnd(p);
+  return e != null && daysUntil(e, now) < 0;
+}
+
 export function fmtKWon(v: number | null | undefined): string {
   if (v === null || v === undefined) return "—";
   return `${Math.round(v).toLocaleString("ko-KR")}천원`;

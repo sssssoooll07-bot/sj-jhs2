@@ -7,7 +7,7 @@ import { useAgreementFiles } from "@/lib/agreement-files";
 import DocViewButton from "@/components/DocViewButton";
 import { ProjectBudget } from "@/components/ProjectBudget";
 import { dateStr } from "@/components/EditableTable";
-import { type Data } from "@/lib/excel";
+import { projEnded, type Data } from "@/lib/excel";
 
 // 사업별 지출부 양식의 집행내역 셀 매핑 (다운로드 시 채울 위치)
 const LEDGER_MAP: Record<string, { start: number; date: string; amt: string; desc: string; payee: string; vat: string; cols: Record<string, string> }> = {
@@ -16,7 +16,8 @@ const LEDGER_MAP: Record<string, { start: number; date: string; amt: string; des
 
 function BudgetInner({ data }: { data: Data }) {
   const { list, refresh, getViewUrl } = useAgreementFiles();
-  const active = data.projects.filter((p) => p.status === "진행중");
+  // 종료일(마감)이 지난 과제는 사업비 현황에서 제외 — 과제 상세의 '사업비' 탭에서 확인
+  const active = data.projects.filter((p) => p.status === "진행중" && !projEnded(p));
   const [sel, setSel] = useState(0);
   const idx = Math.min(sel, Math.max(active.length - 1, 0));
   const p = active[idx];

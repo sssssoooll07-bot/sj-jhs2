@@ -2,20 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { participationTotals, budgetExecByProject, daysUntil, fmtKWon, fmtDate, type Project } from "@/lib/excel";
+import { participationTotals, budgetExecByProject, daysUntil, fmtKWon, fmtDate, projEnd, projEnded } from "@/lib/excel";
 import { Badge, Dday, Empty, Section } from "@/components/ui";
 
 const won = (v: number) => `${Math.round(v).toLocaleString("ko-KR")}원`;
 /** 과제 종료일(마감) — endDate 우선, 없으면 사업기간(period) 마지막 날짜 */
-const projEnd = (p: Project): Date | null => {
-  if (p.endDate instanceof Date && !isNaN(p.endDate.getTime())) return p.endDate;
-  const all = (p.period ?? "").match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/g);
-  if (all && all.length) {
-    const m = all[all.length - 1].match(/(\d{4})[.\-/]\s*(\d{1,2})[.\-/]\s*(\d{1,2})/);
-    if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
-  }
-  return null;
-};
 import { WithData } from "@/components/FileGate";
 import DashboardCalendar from "@/components/DashboardCalendar";
 import GlobalSearch from "@/components/GlobalSearch";
@@ -60,8 +51,7 @@ export default function Dashboard() {
     <WithData>
       {(data) => {
         // 종료일(마감)이 지난 과제는 진행중이어도 대시보드에서 제외
-        const ended = (p: Project) => { const e = projEnd(p); return e != null && daysUntil(e) < 0; };
-        const active = data.projects.filter((p) => p.status === "진행중" && !ended(p));
+        const active = data.projects.filter((p) => p.status === "진행중" && !projEnded(p));
         const rnd = data.projects.filter((p) => p.type === "연구과제").length;
         const biz = data.projects.filter((p) => p.type === "지원사업").length;
         const registered = data.patents.filter((p) => p.status === "등록완료").length;
