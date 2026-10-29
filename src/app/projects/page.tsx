@@ -79,6 +79,25 @@ const PM_COLS: Col<PaymentMethod>[] = [
 ];
 const pmRow = (m: PaymentMethod) => ({ 은행: m.bank, 계좌번호: m.account, 예금주: m.holder, 카드번호: m.card, 비고: m.note });
 
+/** 접기/펼치기 섹션 (기본 접힘) */
+function CollapsibleSection({ title, sub, defaultOpen = false, children }: { title: string; sub?: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="card p-5 sm:p-6">
+      <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-start gap-2.5 text-left">
+        <span className="mt-1 h-4 w-1 shrink-0 rounded-full bg-gradient-to-b from-blue-500 to-indigo-500" />
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-bold tracking-tight text-slate-800">
+            {title} <span className="ml-1 text-xs font-normal text-blue-600">{open ? "접기 ▲" : "펼치기 ▼"}</span>
+          </h2>
+          {sub && <p className="mt-0.5 text-xs leading-relaxed text-slate-400">{sub}</p>}
+        </div>
+      </button>
+      {open && <div className="mt-4">{children}</div>}
+    </section>
+  );
+}
+
 /** 전용통장 1건 + 통장거래내역 (상세용) */
 function AccountBox({ p }: { p: Project }) {
   const { getByPattern, uploadNamed, uploading } = useAgreementFiles();
@@ -315,9 +334,9 @@ function ProjectsInner() {
               <EditableTable rows={data.projects} rowFilter={(p) => inYear(p.code) && inRole(p.role) && inTech(p)} onRowClick={(p) => router.push(`/projects?p=${encodeURIComponent(p.code)}`)} cols={COLS} sheetName="과제" toSheetRow={toRow} blank={EMPTY} requiredKey="code" addLabel="과제 추가" entityLabel="과제" />
             </Section>
 
-            <Section title="💳 공용 통장·카드" sub="사업이 바뀌어도 동일하게 쓰는 통장·카드를 과제와 별도로 공통 보관합니다. (각 과제 '전용통장' 탭에서도 표시)">
+            <CollapsibleSection title="💳 공용 통장·카드" sub="사업이 바뀌어도 동일하게 쓰는 통장·카드를 과제와 별도로 공통 보관합니다. (각 과제 '전용통장' 탭에서도 표시) · 제목을 눌러 펼치기/접기">
               <EditableTable rows={data.paymentMethods} cols={PM_COLS} sheetName="공용결제수단" toSheetRow={pmRow} blank={PM_EMPTY} requiredKey="account" addLabel="통장·카드 추가" entityLabel="통장·카드" emptyMessage="등록된 공용 통장·카드가 없습니다. '통장·카드 추가'로 등록하세요." />
-            </Section>
+            </CollapsibleSection>
           </div>
         );
       }}
