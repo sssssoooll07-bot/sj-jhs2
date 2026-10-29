@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-10-28T02:05:03.271Z",
+ "fetchedAt": "2026-10-29T02:15:28.567Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -9,6 +9,9 @@
    "name": "SMTECH 사업공고",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do"
   }
+ ],
+ "errors": [
+  "SMTECH: fetch failed"
  ],
  "items": [
   {
@@ -538,6 +541,17 @@
    "applyEnd": "2026-10-31",
    "announcedAt": "2026-10-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02847&buclCd=S6041&dtlAncmSn=10&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "전라남도 산업기술정책기획사업 제3차 주관기관 모집 공고",
+   "category": "R&D",
+   "summary": null,
+   "applyStart": "2026-10-28",
+   "applyEnd": "2026-11-03",
+   "announcedAt": "2026-10-28",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000082"
   },
   {
    "source": "SMTECH",
