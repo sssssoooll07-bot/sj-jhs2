@@ -80,7 +80,7 @@ const PM_COLS: Col<PaymentMethod>[] = [
 const pmRow = (m: PaymentMethod) => ({ 은행: m.bank, 계좌번호: m.account, 예금주: m.holder, 카드번호: m.card, 비고: m.note });
 
 /** 전용통장 1건 + 통장거래내역 (상세용) */
-function AccountBox({ p, methods }: { p: Project; methods: PaymentMethod[] }) {
+function AccountBox({ p }: { p: Project }) {
   const { getByPattern, uploadNamed, uploading } = useAgreementFiles();
   const canEdit = useCanEditHere();
   const bankRef = useRef<HTMLInputElement>(null);
@@ -88,27 +88,6 @@ function AccountBox({ p, methods }: { p: Project; methods: PaymentMethod[] }) {
   const hasOwn = p.bank || p.account || p.accountHolder || p.cardNo;
   return (
     <div className="space-y-2">
-      {methods.length > 0 && (
-        <div className="rounded-lg border border-indigo-200 bg-indigo-50/60 px-3 py-2">
-          <p className="mb-1 text-[11px] font-semibold text-indigo-700">💳 공용 통장·카드 (모든 사업 공용 · 통장↔카드 매칭)</p>
-          <div className="space-y-1.5">
-            {methods.map((m, i) => {
-              const cs = cardLines(m.card);
-              return (
-                <div key={i} className="text-sm text-slate-700">
-                  <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                    {m.bank && <Badge tone="blue">{m.bank}</Badge>}
-                    <span className="font-mono">{m.account}</span>
-                    {m.holder && <span className="text-xs text-slate-500">({m.holder})</span>}
-                  </span>
-                  {cs.length > 0 && <span className="ml-0.5 text-xs text-slate-500">↳ 카드 {cs.map((c) => fmtCard(c)).join("  ·  ")}</span>}
-                </div>
-              );
-            })}
-          </div>
-          <p className="mt-1 text-[11px] text-indigo-400">※ 수정은 과제 목록 하단 &apos;공용 통장·카드&apos;에서</p>
-        </div>
-      )}
       {hasOwn && (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Info label="은행" value={p.bank} />
@@ -269,7 +248,7 @@ function ProjectDetail({ data, p, onBack }: { data: Data; p: Project; onBack: ()
           ))}
         </div>
         <div className="mt-4">
-          {tab === "account" && <AccountBox p={p} methods={data.paymentMethods} />}
+          {tab === "account" && <AccountBox p={p} />}
           {tab === "budget" && <ProjectBudget data={data} p={p} />}
           {tab === "plan" && <PlanBox p={p} />}
           {tab === "note" && <NoteBox p={p} />}
