@@ -216,15 +216,19 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
     .date{text-align:center;font-size:14px;margin:6px 0} .sign{text-align:center;font-size:16px;font-weight:bold;letter-spacing:2px;margin:4px 0}
     @page{size:A4;margin:14mm}`;
   function printPDF() {
+    // PDF 저장 기본 파일명 = 상위 문서의 document.title (Chrome). 발주서명으로 바꿨다가 복원.
+    const fileTitle = `발주서_${vendor.name}`;
     const ifr = document.createElement("iframe");
     ifr.style.position = "fixed"; ifr.style.right = "0"; ifr.style.bottom = "0"; ifr.style.width = "0"; ifr.style.height = "0"; ifr.style.border = "0";
     document.body.appendChild(ifr);
     const doc = ifr.contentWindow!.document;
     doc.open();
-    doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>발주서</title><style>${DOC_CSS}</style></head><body>${bodyHtml()}</body></html>`);
+    doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(fileTitle)}</title><style>${DOC_CSS}</style></head><body>${bodyHtml()}</body></html>`);
     doc.close();
     ifr.contentWindow!.focus();
-    setTimeout(() => { ifr.contentWindow!.print(); setTimeout(() => document.body.removeChild(ifr), 1000); }, 300);
+    const prevTitle = document.title;
+    document.title = fileTitle;
+    setTimeout(() => { ifr.contentWindow!.print(); setTimeout(() => { document.body.removeChild(ifr); document.title = prevTitle; }, 1500); }, 300);
   }
 
   const field = "rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-blue-400 focus:outline-none";
