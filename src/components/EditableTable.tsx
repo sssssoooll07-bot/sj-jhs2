@@ -20,6 +20,7 @@ export type Col<T> = {
   nowrap?: boolean; // 보기 테이블에서 줄바꿈 방지(한 줄 표시)
   th?: string;
   placeholder?: string;
+  datalist?: string[]; // 자유 입력 + 추천 목록(제안) — 텍스트 입력에 <datalist>로 제공
   derive?: (val: unknown, r: T) => Partial<T>; // 이 필드 변경 시 다른 필드 자동 계산(예: 총액→공급가/부가세)
 };
 
@@ -202,6 +203,11 @@ function EditModal<T extends Record<string, unknown>>({
                   value={r[c.key] == null || r[c.key] === "" ? "" : Number(r[c.key]).toLocaleString("ko-KR")}
                   onChange={(e) => { const d = e.target.value.replace(/[^\d]/g, ""); set(c.key, d === "" ? null : Number(d)); }}
                   placeholder={c.placeholder} />
+              ) : c.datalist && c.datalist.length > 0 ? (
+                <>
+                  <input className="field" list={`dl-${c.key}`} value={(r[c.key] as string | null) ?? ""} onChange={(e) => set(c.key, e.target.value || null)} placeholder={c.placeholder} autoFocus={c.key === requiredKey} />
+                  <datalist id={`dl-${c.key}`}>{c.datalist.map((o) => <option key={o} value={o} />)}</datalist>
+                </>
               ) : (
                 <input className="field" value={(r[c.key] as string | null) ?? ""} onChange={(e) => set(c.key, e.target.value || null)} placeholder={c.placeholder} autoFocus={c.key === requiredKey} />
               )}

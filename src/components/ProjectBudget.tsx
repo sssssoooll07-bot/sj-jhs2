@@ -95,7 +95,7 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
   const noVat = (cat?: string | null) => (cat ?? "").includes("여비");
   const USAGE_COLS: Col<BudgetUsage>[] = [
     { key: "usedAt", label: "집행일", type: "date", nowrap: true },
-    { key: "desc", label: "적요(사용내역)", span: true },
+    { key: "desc", label: "적요(사용내역)", span: true, datalist: (selCat ? details.filter((d) => d.category === selCat) : details).map((d) => d.item).filter(Boolean) as string[] },
     { key: "payee", label: "거래처(지급처)", th: "거래처", nowrap: true, view: (u) => u.payee ?? "—" },
     {
       key: "amountKWon", label: "공급가액(원) — 입력하면 부가세·총액 자동", type: "money", align: "center", th: "공급가", nowrap: true, placeholder: "공급가 입력",
@@ -170,14 +170,15 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
         <p className="text-[11px] text-slate-400">※ 현물(비집행) {won(tot.inKind)}원은 현금 집행 대상이 아니므로 집행율 계산(현금 집행대상 {won(tot.cashFinal)}원)에서 제외됩니다.</p>
       )}
 
-      {/* 비목 세부내역(산출근거) — 세부내역이 등록된 비목에만 표시 */}
-      {detailCats.map((cat) => {
-        const rows = details.filter((d) => d.category === cat);
-        const sum = rows.reduce((a, d) => a + (d.amountKWon ?? 0), 0);
+      {/* 비목 세부내역(산출근거) — 해당 비목을 선택(클릭)했을 때만 표시 */}
+      {selCat && detailCats.includes(selCat) && (() => {
+        const cat = selCat;
+        const dRows = details.filter((d) => d.category === cat);
+        const sum = dRows.reduce((a, d) => a + (d.amountKWon ?? 0), 0);
         const item = items.find((b) => b.category === cat);
         const mismatch = item?.finalKWon != null && item.finalKWon !== sum;
         return (
-          <div key={cat} className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">
             <p className="mb-3 text-sm font-semibold text-indigo-800">
               📐 세부내역 (산출근거) — {cat} · 합계 {won(sum)}원
               {mismatch && <span className="ml-2 text-xs font-normal text-red-600">(비목 최종변경 {won(item!.finalKWon)}원과 다름)</span>}
@@ -190,7 +191,7 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
             />
           </div>
         );
-      })}
+      })()}
 
       {/* 사용내역 — 비목별 입력 + 일자별 전체보기 */}
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
