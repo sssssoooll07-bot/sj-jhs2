@@ -55,8 +55,8 @@ export type PaymentMethod = { bank: string | null; account: string | null; holde
 export type ScheduleEvent = { date: Date | null; title: string; note: string | null; done: boolean };
 export type BudgetItem = { code: string; category: string; planKWon: number | null; finalKWon: number | null; execKWon: number | null; note: string | null };
 export type BudgetUsage = { code: string; category: string; usedAt: Date | null; desc: string | null; payee: string | null; amountKWon: number | null; vatKWon: number | null; grossKWon: number | null; note: string | null };
-/** 비목 세부내역(산출근거) — 내역·단가·수량·금액 (원 단위) */
-export type BudgetDetail = { code: string; category: string; item: string; unitKWon: number | null; qty: number | null; amountKWon: number | null; note: string | null };
+/** 비목 세부내역(산출근거) — 내역·단가·수량·금액 (원 단위). execKWon은 표시용(집행), 시트에 저장 안 함 */
+export type BudgetDetail = { code: string; category: string; item: string; unitKWon: number | null; qty: number | null; amountKWon: number | null; note: string | null; execKWon?: number | null };
 export type Data = {
   projects: Project[]; phases: Phase[]; consortium: Consortium[]; disbursements: Disbursement[];
   patents: Patent[]; researchers: Researcher[]; certifications: Certification[];

@@ -75,7 +75,16 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
   ];
   const budgetRow = (b: BudgetItem) => ({ 과제코드: b.code, 비목: b.category, 최초계획금액: b.planKWon, 최종변경금액: b.finalKWon, 집행금액: b.execKWon, 비고: b.note });
 
-  // 비목 세부내역(산출근거) — 내역·단가·수량·금액
+  // 비목 세부내역(산출근거) — 내역·단가·수량·금액 + 집행/잔액
+  // 세부항목별 집행 = 그 비목 사용내역 중 적요가 세부항목명과 일치(공백 무시)하는 공급가 합
+  const norm = (x: string | null | undefined) => (x ?? "").replace(/\s/g, "");
+  const detailExec = (d: BudgetDetail) => {
+    const key = norm(d.item);
+    if (!key) return 0;
+    return data.budgetUsages
+      .filter((u) => u.code === d.code && u.category === d.category && norm(u.desc).includes(key))
+      .reduce((s, u) => s + (u.amountKWon ?? 0), 0);
+  };
   const BUDGET_DETAIL_COLS: Col<BudgetDetail>[] = [
     { key: "item", label: "내역", span: true, view: (d) => <span className="font-medium">{d.item}</span> },
     {
@@ -87,7 +96,15 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
       derive: (v, r) => (v == null ? {} : { amountKWon: (Number(r.unitKWon) || 0) * (Number(v) || 0) }),
     },
     { key: "amountKWon", label: "금액(원) — 단가·수량 입력 시 자동", type: "money", align: "center", th: "금액", nowrap: true, placeholder: "금액", view: (d) => won(d.amountKWon) },
-    { key: "note", label: "비고", span: true },
+    { key: "execKWon", label: "집행", th: "집행", align: "center", nowrap: true, editable: false, view: (d) => won(detailExec(d)) },
+    {
+      key: "note", label: "비고", th: "잔액(집행율)", align: "center", nowrap: true, editable: false,
+      view: (d) => {
+        const a = d.amountKWon ?? 0, e = detailExec(d);
+        const rate = a ? (e / a) * 100 : 0;
+        return <span className="text-xs">{won(a - e)}{a ? <span className={rate > 100 ? "ml-1 font-semibold text-red-600" : "ml-1 text-slate-400"}>({rate.toFixed(0)}%)</span> : null}</span>;
+      },
+    },
   ];
   const detailRow = (d: BudgetDetail) => ({ 과제코드: d.code, 비목: d.category, 내역: d.item, 단가: d.unitKWon, 수량: d.qty, 금액: d.amountKWon, 비고: d.note });
 
@@ -175,12 +192,13 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
         const cat = selCat;
         const dRows = details.filter((d) => d.category === cat);
         const sum = dRows.reduce((a, d) => a + (d.amountKWon ?? 0), 0);
+        const execSum = dRows.reduce((a, d) => a + detailExec(d), 0);
         const item = items.find((b) => b.category === cat);
         const mismatch = item?.finalKWon != null && item.finalKWon !== sum;
         return (
           <div className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">
             <p className="mb-3 text-sm font-semibold text-indigo-800">
-              📐 세부내역 (산출근거) — {cat} · 합계 {won(sum)}원
+              📐 세부내역 (산출근거) — {cat} · 합계 {won(sum)}원 <span className="font-normal text-slate-500">· 집행 {won(execSum)}원 · 잔액 {won(sum - execSum)}원</span>
               {mismatch && <span className="ml-2 text-xs font-normal text-red-600">(비목 최종변경 {won(item!.finalKWon)}원과 다름)</span>}
             </p>
             <EditableTable
