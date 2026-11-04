@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-11-03T03:52:43.043Z",
+ "fetchedAt": "2026-11-04T02:57:31.054Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -542,17 +542,6 @@
   {
    "source": "SMTECH",
    "agency": "SMTECH",
-   "title": "2026년 제7차 중소기업 R&D 전담은행 투자지원 추천기업(기술사업화 패키지 및 TIPA ValueUP) 모집 공고",
-   "category": "전담은행 투자설명회(IR)",
-   "summary": null,
-   "applyStart": "2026-10-14",
-   "applyEnd": "2026-11-05",
-   "announcedAt": "2026-10-14",
-   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02883&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "SMTECH",
-   "agency": "SMTECH",
    "title": "2026년 중소기업기술개발지원사업 모의평가 프로그램 접수 공고",
    "category": "중소기업R&D 모의평가 프로그램",
    "summary": null,
@@ -560,6 +549,17 @@
    "applyEnd": "2026-11-05",
    "announcedAt": "2026-10-19",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02882&buclCd=S9I01&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "SMTECH",
+   "agency": "SMTECH",
+   "title": "2026년 제7차 중소기업 R&D 전담은행 투자지원 추천기업(기술사업화 패키지 및 TIPA ValueUP) 모집 공고",
+   "category": "전담은행 투자설명회(IR)",
+   "summary": null,
+   "applyStart": "2026-10-14",
+   "applyEnd": "2026-11-05",
+   "announcedAt": "2026-10-14",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02883&buclCd=S9171&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
   },
   {
    "source": "JNTP",
@@ -582,6 +582,17 @@
    "applyEnd": "2026-11-10",
    "announcedAt": "2026-10-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02881&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 전남 탄소중립 제조혁신 고도화 2단계 사업 추가모집 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-11-03",
+   "applyEnd": "2026-11-13",
+   "announcedAt": "2026-11-03",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000084"
   },
   {
    "source": "JNTP",
