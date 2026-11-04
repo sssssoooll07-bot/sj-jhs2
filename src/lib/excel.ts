@@ -55,6 +55,8 @@ export type PaymentMethod = { bank: string | null; account: string | null; holde
 export type ScheduleEvent = { date: Date | null; title: string; note: string | null; done: boolean };
 export type BudgetItem = { code: string; category: string; planKWon: number | null; finalKWon: number | null; execKWon: number | null; note: string | null };
 export type BudgetUsage = { code: string; category: string; usedAt: Date | null; desc: string | null; payee: string | null; amountKWon: number | null; vatKWon: number | null; grossKWon: number | null; note: string | null };
+/** 비목 세부내역(산출근거) — 내역·단가·수량·금액 (원 단위) */
+export type BudgetDetail = { code: string; category: string; item: string; unitKWon: number | null; qty: number | null; amountKWon: number | null; note: string | null };
 export type Data = {
   projects: Project[]; phases: Phase[]; consortium: Consortium[]; disbursements: Disbursement[];
   patents: Patent[]; researchers: Researcher[]; certifications: Certification[];
@@ -63,6 +65,7 @@ export type Data = {
   agreements: Agreement[];
   budgetItems: BudgetItem[];
   budgetUsages: BudgetUsage[];
+  budgetDetails: BudgetDetail[];
   participants: Participant[];
   employees: Employee[];
   vendors: Vendor[];
@@ -222,6 +225,14 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
       usedAt: dt(r["집행일"]), desc: s(r["적요"]), payee: s(r["거래처"]), amountKWon: n(r["금액(원)"]), vatKWon: n(r["부가세(원)"]), grossKWon: n(r["총액(원)"]), note: s(r["비고"]),
     }));
 
+  // [사업비세부내역] 시트 — 비목(세목)별 산출근거(내역·단가·수량·금액) (원 단위)
+  const budgetDetails: BudgetDetail[] = rows("사업비세부내역")
+    .filter((r) => s(r["과제코드"]) && s(r["비목"]) && s(r["내역"]))
+    .map((r) => ({
+      code: s(r["과제코드"])!, category: s(r["비목"])!, item: s(r["내역"])!,
+      unitKWon: n(r["단가"]), qty: n(r["수량"]), amountKWon: n(r["금액"]), note: s(r["비고"]),
+    }));
+
   const participants: Participant[] = rows("참여인력")
     .filter((r) => s(r["과제코드"]) && s(r["성명"]))
     .map((r) => ({
@@ -245,7 +256,7 @@ export function parseWorkbook(bytes: ArrayBuffer | Uint8Array): Data {
     .filter((r) => s(r["계좌번호"]))
     .map((r) => ({ bank: s(r["은행"]) ?? s(r["은행명"]), account: s(r["계좌번호"]), holder: s(r["예금주"]), card: s(r["카드번호"]), note: s(r["비고"]) }));
 
-  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, participants, employees, vendors, paymentMethods, events, loadedAt: new Date().toISOString() };
+  return { projects, phases, consortium, disbursements, patents, researchers, certifications, funding, compliance, participations, library, agreements, budgetItems, budgetUsages, budgetDetails, participants, employees, vendors, paymentMethods, events, loadedAt: new Date().toISOString() };
 }
 
 const DAY = 86_400_000;

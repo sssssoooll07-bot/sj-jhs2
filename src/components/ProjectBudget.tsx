@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
-import { fmtKWon, fmtDate, type Data, type Project, type BudgetItem, type BudgetUsage } from "@/lib/excel";
+import { fmtKWon, fmtDate, type Data, type Project, type BudgetItem, type BudgetUsage, type BudgetDetail } from "@/lib/excel";
 
 const won = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString("ko-KR"));
 
@@ -33,6 +33,8 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
     data.budgetUsages.filter((u) => u.code === p.code && u.category === cat).reduce((s, u) => s + (u.amountKWon ?? 0), 0);
 
   const items = data.budgetItems.filter((b) => b.code === p.code);
+  const details = data.budgetDetails.filter((d) => d.code === p.code); // 비목 세부내역(산출근거)
+  const detailCats = Array.from(new Set(details.map((d) => d.category))); // 세부내역이 있는 비목
   const isInKind = (cat: string) => (cat ?? "").includes("현물");
   const tot = items.reduce(
     (a, b) => {
@@ -72,6 +74,22 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
     },
   ];
   const budgetRow = (b: BudgetItem) => ({ 과제코드: b.code, 비목: b.category, 최초계획금액: b.planKWon, 최종변경금액: b.finalKWon, 집행금액: b.execKWon, 비고: b.note });
+
+  // 비목 세부내역(산출근거) — 내역·단가·수량·금액
+  const BUDGET_DETAIL_COLS: Col<BudgetDetail>[] = [
+    { key: "item", label: "내역", span: true, view: (d) => <span className="font-medium">{d.item}</span> },
+    {
+      key: "unitKWon", label: "단가(원)", type: "money", align: "center", th: "단가", nowrap: true, placeholder: "단가", view: (d) => won(d.unitKWon),
+      derive: (v, r) => (v == null ? {} : { amountKWon: (Number(v) || 0) * (Number(r.qty) || 1) }),
+    },
+    {
+      key: "qty", label: "수량(회수)", type: "number", align: "center", th: "수량", nowrap: true, placeholder: "수량", view: (d) => won(d.qty),
+      derive: (v, r) => (v == null ? {} : { amountKWon: (Number(r.unitKWon) || 0) * (Number(v) || 0) }),
+    },
+    { key: "amountKWon", label: "금액(원) — 단가·수량 입력 시 자동", type: "money", align: "center", th: "금액", nowrap: true, placeholder: "금액", view: (d) => won(d.amountKWon) },
+    { key: "note", label: "비고", span: true },
+  ];
+  const detailRow = (d: BudgetDetail) => ({ 과제코드: d.code, 비목: d.category, 내역: d.item, 단가: d.unitKWon, 수량: d.qty, 금액: d.amountKWon, 비고: d.note });
 
   // 여비 등 부가세 없는 비목: 부가세 0, 총액=공급가
   const noVat = (cat?: string | null) => (cat ?? "").includes("여비");
@@ -151,6 +169,28 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
       {tot.inKind > 0 && (
         <p className="text-[11px] text-slate-400">※ 현물(비집행) {won(tot.inKind)}원은 현금 집행 대상이 아니므로 집행율 계산(현금 집행대상 {won(tot.cashFinal)}원)에서 제외됩니다.</p>
       )}
+
+      {/* 비목 세부내역(산출근거) — 세부내역이 등록된 비목에만 표시 */}
+      {detailCats.map((cat) => {
+        const rows = details.filter((d) => d.category === cat);
+        const sum = rows.reduce((a, d) => a + (d.amountKWon ?? 0), 0);
+        const item = items.find((b) => b.category === cat);
+        const mismatch = item?.finalKWon != null && item.finalKWon !== sum;
+        return (
+          <div key={cat} className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">
+            <p className="mb-3 text-sm font-semibold text-indigo-800">
+              📐 세부내역 (산출근거) — {cat} · 합계 {won(sum)}원
+              {mismatch && <span className="ml-2 text-xs font-normal text-red-600">(비목 최종변경 {won(item!.finalKWon)}원과 다름)</span>}
+            </p>
+            <EditableTable
+              rows={data.budgetDetails} rowFilter={(d) => d.code === p.code && d.category === cat} cols={BUDGET_DETAIL_COLS}
+              sheetName="사업비세부내역" toSheetRow={detailRow} blank={{ code: p.code, category: cat, item: "", unitKWon: null, qty: 1, amountKWon: null, note: null }}
+              requiredKey="item" addLabel={`${cat} 세부내역 추가`} entityLabel="세부내역"
+              emptyMessage="세부내역이 없습니다."
+            />
+          </div>
+        );
+      })}
 
       {/* 사용내역 — 비목별 입력 + 일자별 전체보기 */}
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
