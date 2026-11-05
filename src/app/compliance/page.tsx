@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { fmtKWon, participationTotals, laborCostByProject, type Data, type Participation } from "@/lib/excel";
+import { fmtKWon, participationTotals, laborCostByProject, projEnded, type Data, type Participation } from "@/lib/excel";
 import { Badge, Section } from "@/components/ui";
 import { WithData } from "@/components/FileGate";
 import { EditableTable, dateStr, type Col } from "@/components/EditableTable";
@@ -30,7 +30,7 @@ const partRow = (p: Participation) => ({
 });
 
 function ComplianceInner({ data }: { data: Data }) {
-  const active = data.projects.filter((p) => p.status === "진행중");
+  const active = data.projects.filter((p) => p.status === "진행중" && !projEnded(p));
   const [sel, setSel] = useState(0);
   const idx = Math.min(sel, Math.max(active.length - 1, 0));
   const p = active[idx];

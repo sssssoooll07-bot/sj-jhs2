@@ -348,7 +348,7 @@ export function laborCostByProject(data: Data): LaborCost[] {
 
 /** 연구원별 총 참여율(오늘 기준, 진행중 과제) */
 export function participationTotals(data: Data): { name: string; total: number; detail: string }[] {
-  const activeCodes = new Set(data.projects.filter((p) => p.status === "진행중").map((p) => p.code));
+  const activeCodes = new Set(data.projects.filter((p) => p.status === "진행중" && !projEnded(p)).map((p) => p.code));
   const titleOf = (code: string) => data.projects.find((p) => p.code === code)?.title ?? code;
   const now = new Date();
   const byName = new Map<string, { total: number; parts: string[] }>();
