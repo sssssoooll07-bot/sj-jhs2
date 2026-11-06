@@ -42,7 +42,7 @@ function cellText(v: unknown, type?: string): React.ReactNode {
 
 /** 시트 하나를 표로 보여주고, 행별 팝업 폼으로 편집·추가·삭제하는 공용 컴포넌트. */
 export function EditableTable<T extends Record<string, unknown>>({
-  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false, sort, toolbarLeft, collapsed = false,
+  rows, cols, sheetName, toSheetRow, blank, requiredKey, addLabel = "추가", entityLabel = "항목", emptyMessage, addOnly = false, readOnly = false, rowFilter, onRowClick, editColumn = false, sort, toolbarLeft, collapsed = false, sortable = false,
 }: {
   rows: T[];
   cols: Col<T>[];
@@ -69,12 +69,15 @@ export function EditableTable<T extends Record<string, unknown>>({
   toolbarLeft?: ReactNode;
   /** true면 표 본문을 접고 툴바(추가 버튼·toolbarLeft)만 표시 */
   collapsed?: boolean;
+  /** true면 표 머리글(열 제목) 클릭으로 그 열 기준 정렬(오름/내림 토글) */
+  sortable?: boolean;
 }) {
   const { saveSheet, error } = useDataCtx();
   const canEdit = useCanEditHere(); // 소유자 또는 이 섹션 수정권한이 있는 뷰어
   const ro = readOnly || !canEdit; // 권한 없으면 편집·추가·삭제 비활성(보기 전용)
   const [modal, setModal] = useState<{ r: T; isNew: boolean; index: number } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [sortBy, setSortBy] = useState<{ key: string; dir: 1 | -1 } | null>(null); // 머리글 클릭 정렬
 
   async function commit(list: T[]) {
     setSaving(true);
@@ -93,7 +96,22 @@ export function EditableTable<T extends Record<string, unknown>>({
   const tableCols = cols.filter((c) => !c.hide);
   const formCols = cols.filter((c) => c.editable !== false);
   const visible = rows.map((r, i) => ({ r, i })).filter(({ r }) => !rowFilter || rowFilter(r));
-  if (sort) visible.sort((a, b) => sort(a.r, b.r)); // 표시만 정렬(인덱스 i 유지)
+  if (sortBy) {
+    const { key, dir } = sortBy;
+    visible.sort((a, b) => {
+      const av = a.r[key], bv = b.r[key];
+      const an = av == null || av === "", bn = bv == null || bv === "";
+      if (an && bn) return 0;
+      if (an) return 1;  // 빈 값은 방향과 무관하게 항상 뒤로
+      if (bn) return -1;
+      let c: number;
+      if (av instanceof Date && bv instanceof Date) c = av.getTime() - bv.getTime();
+      else if (typeof av === "number" && typeof bv === "number") c = av - bv;
+      else if (typeof av === "boolean" && typeof bv === "boolean") c = (av ? 1 : 0) - (bv ? 1 : 0);
+      else c = String(av).localeCompare(String(bv), "ko");
+      return c * dir;
+    });
+  } else if (sort) visible.sort((a, b) => sort(a.r, b.r)); // 표시만 정렬(인덱스 i 유지)
   const showEditCol = (!!onRowClick || editColumn) && !addOnly && !ro; // ✎ 수정 열 표시 여부
   const rowClickEdits = !onRowClick && !editColumn && !addOnly && !ro; // 행 배경 클릭으로 수정 열림 여부
 
@@ -117,7 +135,17 @@ export function EditableTable<T extends Record<string, unknown>>({
           <table className="table-base">
             <thead>
               <tr>
-                {tableCols.map((c, ci) => <th key={ci} className={c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : ""}>{c.th ?? c.label}</th>)}
+                {tableCols.map((c, ci) => {
+                  const alignCls = c.align === "right" ? "text-right" : c.align === "center" ? "text-center" : "";
+                  if (!sortable) return <th key={ci} className={alignCls}>{c.th ?? c.label}</th>;
+                  const on = sortBy?.key === c.key;
+                  return (
+                    <th key={ci} className={`${alignCls} cursor-pointer select-none hover:text-blue-600`} title="클릭하여 정렬"
+                      onClick={() => setSortBy((s) => (s?.key === c.key ? { key: c.key, dir: s.dir === 1 ? -1 : 1 } : { key: c.key, dir: 1 }))}>
+                      <span className="inline-flex items-center gap-0.5">{c.th ?? c.label}<span className={`text-[10px] ${on ? "text-blue-600" : "text-slate-300"}`}>{on ? (sortBy!.dir === 1 ? "▲" : "▼") : "↕"}</span></span>
+                    </th>
+                  );
+                })}
                 {showEditCol && <th className="text-right">수정</th>}
               </tr>
             </thead>

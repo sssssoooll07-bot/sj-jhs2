@@ -244,7 +244,7 @@ export default function PatentsPage() {
                 )}
                 {error && <p className="mb-2 text-sm font-medium text-red-600">⚠ {error}</p>}
 
-                <EditableTable rows={data.patents} rowFilter={match} editColumn cols={cols} sheetName="특허" toSheetRow={toRow} blank={{ ...EMPTY, category: ipType }} requiredKey="title" addLabel="지식재산 추가" entityLabel="지식재산" />
+                <EditableTable rows={data.patents} rowFilter={match} editColumn sortable cols={cols} sheetName="특허" toSheetRow={toRow} blank={{ ...EMPTY, category: ipType }} requiredKey="title" addLabel="지식재산 추가" entityLabel="지식재산" />
               </>
             )}
           </Section>
