@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-11-05T03:20:21.774Z",
+ "fetchedAt": "2026-11-06T03:18:28.046Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -582,17 +582,6 @@
    "applyEnd": "2026-11-10",
    "announcedAt": "2026-10-01",
    "url": "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId=S02881&buclCd=S9121&dtlAncmSn=1&schdSe=MO5005&aplySn=1&searchCondition=&searchKeyword=&pageIndex=1"
-  },
-  {
-   "source": "JNTP",
-   "agency": "전남테크노파크",
-   "title": "2026년 전남 탄소중립 제조혁신 고도화 2단계 사업 추가모집 공고",
-   "category": "비R&D",
-   "summary": null,
-   "applyStart": "2026-11-03",
-   "applyEnd": "2026-11-13",
-   "announcedAt": "2026-11-03",
-   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000084"
   },
   {
    "source": "JNTP",
