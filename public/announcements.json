@@ -1,5 +1,5 @@
 {
- "fetchedAt": "2026-11-12T03:41:36.184Z",
+ "fetchedAt": "2026-11-13T03:19:06.095Z",
  "sources": [
   {
    "name": "전남테크노파크 (JNTP)",
@@ -582,6 +582,17 @@
    "applyEnd": "2026-11-20",
    "announcedAt": "2026-11-10",
    "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000085"
+  },
+  {
+   "source": "JNTP",
+   "agency": "전남테크노파크",
+   "title": "2026년 지능형 로봇·피지컬 AI 얼라이언스 모집 2차 공고",
+   "category": "비R&D",
+   "summary": null,
+   "applyStart": "2026-11-13",
+   "applyEnd": "2026-11-27",
+   "announcedAt": "2026-11-13",
+   "url": "https://pms.jntp.or.kr/ko/sub02/sub0202?mode=view&bisProjAnnceIdx=A2026-000086"
   },
   {
    "source": "JNTP",
