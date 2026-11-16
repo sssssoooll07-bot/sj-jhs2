@@ -54,6 +54,8 @@ export default function DashboardCalendar({ data }: { data: Data }) {
   const [modal, setModal] = useState<ModalState | null>(null);
   const [saving, setSaving] = useState(false);
   const [picker, setPicker] = useState(false);
+  const [highlight, setHighlight] = useState<string | null>(null); // 다가오는 일정 클릭 시 달력에서 강조할 날짜
+  const goToEvent = (ev: CalEvent) => { setCur({ y: ev.date.getUTCFullYear(), m: ev.date.getUTCMonth() }); setPicker(false); setHighlight(keyOf(ev.date)); };
 
   const events = data.events;
   // 사용자 일정 + 과제 마감일(자동) 통합
@@ -165,7 +167,7 @@ export default function DashboardCalendar({ data }: { data: Data }) {
               const list = byDay.get(k) ?? [];
               return (
                 <div key={i} onClick={() => setModal({ idx: -1, date: dateStr(d)!, title: "", note: "", done: false })}
-                  className="min-h-[72px] cursor-pointer bg-white p-1 transition-colors hover:bg-blue-50/50">
+                  className={`min-h-[72px] cursor-pointer p-1 transition-colors hover:bg-blue-50/50 ${k === highlight ? "bg-blue-50 ring-2 ring-inset ring-blue-500" : "bg-white"}`}>
                   <div className="flex items-center gap-1">
                     <span className={`inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-xs font-semibold ${isToday ? "bg-blue-600 text-white" : isRed ? "text-red-500" : wd === 6 ? "text-blue-500" : "text-slate-600"}`}>{day}</span>
                     {hol && <span className="truncate text-[10px] font-medium text-red-500">{hol}</span>}
@@ -204,7 +206,7 @@ export default function DashboardCalendar({ data }: { data: Data }) {
                   ) : (
                     <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-[11px]" title="과제 마감">🏁</span>
                   )}
-                  <button onClick={() => e.kind === "project" ? router.push(`/projects?p=${encodeURIComponent(e.code!)}`) : setModal({ idx: e.idx, date: dateStr(e.date)!, title: e.title, note: e.note ?? "", done: e.done })}
+                  <button onClick={() => goToEvent(e)} title="달력에서 이 날짜로 이동"
                     className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
                     <div className="flex items-center gap-2">
                       <Dday days={daysUntil(e.date)} />
