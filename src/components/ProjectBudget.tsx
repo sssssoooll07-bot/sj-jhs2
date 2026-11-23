@@ -56,7 +56,10 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
   const RESTORE_CAT = "부가세복원";
   const vatToRestore = data.budgetUsages.filter((u) => u.code === p.code && u.category !== RESTORE_CAT).reduce((s, u) => s + (u.vatKWon ?? 0), 0);
   const vatRestored = data.budgetUsages.filter((u) => u.code === p.code && u.category === RESTORE_CAT).reduce((s, u) => s + (u.amountKWon ?? 0), 0);
-  const vatOutstanding = vatToRestore - vatRestored;
+  // 과제 '부가세 입금' 완료(vatPaid)면 부가세 전액을 자동 복원 처리(미복원 0)
+  const vatAutoDone = !!p.vatPaid;
+  const vatRestoredEff = vatAutoDone ? Math.max(vatToRestore, vatRestored) : vatRestored;
+  const vatOutstanding = Math.max(0, vatToRestore - vatRestoredEff);
   const restoreCount = data.budgetUsages.filter((u) => u.code === p.code && u.category === RESTORE_CAT).length;
 
   const BUDGET_COLS: Col<BudgetItem>[] = [
@@ -265,7 +268,8 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
       <div className={`rounded-xl border px-4 py-3 ${vatOutstanding > 0 ? "border-red-200 bg-red-50/50" : "border-slate-200 bg-slate-50"}`}>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <span className="text-sm font-semibold text-slate-700">💳 부가세 복원</span>
-          <span className="text-xs text-slate-500">복원대상 <b className="text-slate-700">{won(vatToRestore)}원</b> · 복원완료 <b className="text-slate-700">{won(vatRestored)}원</b></span>
+          {vatAutoDone && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">부가세 입금 완료 → 자동 복원</span>}
+          <span className="text-xs text-slate-500">복원대상 <b className="text-slate-700">{won(vatToRestore)}원</b> · 복원완료 <b className="text-slate-700">{won(vatRestoredEff)}원</b>{vatAutoDone && vatRestoredEff > vatRestored && <span className="text-emerald-600"> (자동)</span>}</span>
           <button onClick={() => setShowRestore((v) => !v)} className="rounded-md border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50">
             {showRestore ? "접기 ▲" : `복원 내역 전체보기 (${restoreCount}건) ▼`}
           </button>
@@ -284,6 +288,7 @@ export function ProjectBudget({ data, p, showSummary = false }: { data: Data; p:
               emptyMessage="복원 내역이 없습니다. 부가세를 사업비 계좌로 복원하면 '복원 내역 추가'로 기록하세요."
             />
             <p className="mt-2 text-[11px] text-slate-400">※ 사용내역의 부가세 합계만큼 사업비 계좌로 복원해야 하며, 복원 내역을 입력하면 미복원 금액이 0원이 됩니다. (복원일 순 정렬)</p>
+            {vatAutoDone && <p className="mt-1 text-[11px] text-emerald-600">※ 이 과제는 &apos;부가세 입금&apos;이 완료 처리되어 부가세가 자동 복원(미복원 0)으로 집계됩니다. 입금 상태는 과제 목록에서 ✎로 변경.</p>}
           </div>
         )}
       </div>
