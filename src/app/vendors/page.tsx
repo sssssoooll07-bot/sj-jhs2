@@ -200,7 +200,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
       <p class="date">${dateK}</p>
       <p class="sign">㈜ 신 정 개 발</p>`;
   }
-  const DOC_CSS = `body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;color:#222;margin:0}
+  const DOC_CSS = `body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;color:#222;margin:0;padding:14mm}
     h1{font-size:26px;text-align:center;letter-spacing:10px;margin:0 0 16px}
     table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px}
     .kv,.box{table-layout:auto} .items{table-layout:fixed}
@@ -214,7 +214,7 @@ function PurchaseOrderModal({ vendor, onClose }: { vendor: Vendor; onClose: () =
     .items .sum td{background:#eef2f8;font-weight:bold;text-align:center} .items .sum td.r{text-align:right}
     .sec{font-weight:bold;margin:12px 0 4px} .note2{text-align:center;margin:22px 0 4px;font-size:13px}
     .date{text-align:center;font-size:14px;margin:6px 0} .sign{text-align:center;font-size:16px;font-weight:bold;letter-spacing:2px;margin:4px 0}
-    @page{size:A4;margin:14mm}`;
+    @page{size:A4;margin:0}`;
   function printPDF() {
     // PDF 저장 기본 파일명 = 상위 문서의 document.title (Chrome). 발주서명으로 바꿨다가 복원.
     const fileTitle = `발주서_${vendor.name}`;
