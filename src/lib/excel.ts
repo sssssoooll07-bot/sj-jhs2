@@ -383,7 +383,8 @@ export function budgetExecByProject(data: Data): BudgetExec[] {
       const finalTotal = items.reduce((s, b) => s + (b.finalKWon ?? 0), 0);
       const inKind = items.reduce((s, b) => s + (isInKind(b.category) ? (b.finalKWon ?? 0) : 0), 0);
       const finalCash = inKind > 0 ? finalTotal - inKind : finalTotal;
-      const exec = data.budgetUsages.filter((u) => u.code === p.code).reduce((s, u) => s + (u.amountKWon ?? 0), 0);
+      // 집행액은 공급가액(금액)만 — '부가세복원' 내역은 집행이 아니므로 제외
+      const exec = data.budgetUsages.filter((u) => u.code === p.code && u.category !== "부가세복원").reduce((s, u) => s + (u.amountKWon ?? 0), 0);
       const rate = finalCash > 0 ? (exec / finalCash) * 100 : 0;
       const end = p.endDate ?? null;
       const dday = end ? daysUntil(end, now) : null;
